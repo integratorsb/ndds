@@ -1,0 +1,3998 @@
+   1               		.file	"main.c"
+   2               	__SP_H__ = 0x3e
+   3               	__SP_L__ = 0x3d
+   4               	__SREG__ = 0x3f
+   5               	__tmp_reg__ = 0
+   6               	__zero_reg__ = 1
+   8               		.text
+   9               	.Ltext0:
+ 124               		.section	.text.pwm_start,"ax",@progbits
+ 128               	.global	pwm_start
+ 130               	pwm_start:
+   1:main.c        **** 
+   2:main.c        **** /*
+   3:main.c        ****  * main.c
+   4:main.c        ****  *
+   5:main.c        ****  * Created: 10.07.2017 1:17:10
+   6:main.c        ****  *  Author: integrator.sb@gmail.com
+   7:main.c        ****  */ 
+   8:main.c        **** 
+   9:main.c        **** #include "config.h"
+  10:main.c        **** //#include <stdio.h>
+  11:main.c        **** #include <stdlib.h>
+  12:main.c        **** #include <avr/io.h>
+  13:main.c        **** #include <avr/pgmspace.h>
+  14:main.c        **** #include <avr/eeprom.h>
+  15:main.c        **** #include <avr/interrupt.h>
+  16:main.c        **** #include <util/delay.h>
+  17:main.c        **** #include <inttypes.h>
+  18:main.c        **** #include "hd44780.h"
+  19:main.c        **** #include "menu.h"
+  20:main.c        **** #include "suart.h"
+  21:main.c        **** #include "dds_rout.h"
+  22:main.c        **** #include "TV_video_generator.h"
+  23:main.c        **** 
+  24:main.c        **** 
+  25:main.c        **** const gen_t PROGMEM def_setting = DEF_SETTING;
+  26:main.c        **** gen_t EEMEM setting = DEF_SETTING;
+  27:main.c        **** 
+  28:main.c        **** uint8_t __attribute__ ((section (".buffer"))) buf[256]; 
+  29:main.c        **** 
+  30:main.c        **** const uint8_t  sinewave[] PROGMEM= 
+  31:main.c        **** {
+  32:main.c        **** 	0x80,0x83,0x86,0x89,0x8c,0x8f,0x92,0x95,0x98,0x9c,0x9f,0xa2,0xa5,0xa8,0xab,0xae,
+  33:main.c        **** 	0xb0,0xb3,0xb6,0xb9,0xbc,0xbf,0xc1,0xc4,0xc7,0xc9,0xcc,0xce,0xd1,0xd3,0xd5,0xd8,
+  34:main.c        **** 	0xda,0xdc,0xde,0xe0,0xe2,0xe4,0xe6,0xe8,0xea,0xec,0xed,0xef,0xf0,0xf2,0xf3,0xf5,
+  35:main.c        **** 	0xf6,0xf7,0xf8,0xf9,0xfa,0xfb,0xfc,0xfc,0xfd,0xfe,0xfe,0xff,0xff,0xff,0xff,0xff,
+  36:main.c        **** 	0xff,0xff,0xff,0xff,0xff,0xff,0xfe,0xfe,0xfd,0xfc,0xfc,0xfb,0xfa,0xf9,0xf8,0xf7,
+  37:main.c        **** 	0xf6,0xf5,0xf3,0xf2,0xf0,0xef,0xed,0xec,0xea,0xe8,0xe6,0xe4,0xe2,0xe0,0xde,0xdc,
+  38:main.c        **** 	0xda,0xd8,0xd5,0xd3,0xd1,0xce,0xcc,0xc9,0xc7,0xc4,0xc1,0xbf,0xbc,0xb9,0xb6,0xb3,
+  39:main.c        **** 	0xb0,0xae,0xab,0xa8,0xa5,0xa2,0x9f,0x9c,0x98,0x95,0x92,0x8f,0x8c,0x89,0x86,0x83,
+  40:main.c        **** 	0x80,0x7c,0x79,0x76,0x73,0x70,0x6d,0x6a,0x67,0x63,0x60,0x5d,0x5a,0x57,0x54,0x51,
+  41:main.c        **** 	0x4f,0x4c,0x49,0x46,0x43,0x40,0x3e,0x3b,0x38,0x36,0x33,0x31,0x2e,0x2c,0x2a,0x27,
+  42:main.c        **** 	0x25,0x23,0x21,0x1f,0x1d,0x1b,0x19,0x17,0x15,0x13,0x12,0x10,0x0f,0x0d,0x0c,0x0a,
+  43:main.c        **** 	0x09,0x08,0x07,0x06,0x05,0x04,0x03,0x03,0x02,0x01,0x01,0x00,0x00,0x00,0x00,0x00,
+  44:main.c        **** 	0x00,0x00,0x00,0x00,0x00,0x00,0x01,0x01,0x02,0x03,0x03,0x04,0x05,0x06,0x07,0x08,
+  45:main.c        **** 	0x09,0x0a,0x0c,0x0d,0x0f,0x10,0x12,0x13,0x15,0x17,0x19,0x1b,0x1d,0x1f,0x21,0x23,
+  46:main.c        **** 	0x25,0x27,0x2a,0x2c,0x2e,0x31,0x33,0x36,0x38,0x3b,0x3e,0x40,0x43,0x46,0x49,0x4c,
+  47:main.c        **** 	0x4f,0x51,0x54,0x57,0x5a,0x5d,0x60,0x63,0x67,0x6a,0x6d,0x70,0x73,0x76,0x79,0x7c
+  48:main.c        **** };
+  49:main.c        **** 
+  50:main.c        **** const uint8_t sawtoothwave[] PROGMEM= 
+  51:main.c        **** {
+  52:main.c        **** 	0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f,
+  53:main.c        **** 	0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17,0x18,0x19,0x1a,0x1b,0x1c,0x1d,0x1e,0x1f,
+  54:main.c        **** 	0x20,0x21,0x22,0x23,0x24,0x25,0x26,0x27,0x28,0x29,0x2a,0x2b,0x2c,0x2d,0x2e,0x2f,
+  55:main.c        **** 	0x30,0x31,0x32,0x33,0x34,0x35,0x36,0x37,0x38,0x39,0x3a,0x3b,0x3c,0x3d,0x3e,0x3f,
+  56:main.c        **** 	0x40,0x41,0x42,0x43,0x44,0x45,0x46,0x47,0x48,0x49,0x4a,0x4b,0x4c,0x4d,0x4e,0x4f,
+  57:main.c        **** 	0x50,0x51,0x52,0x53,0x54,0x55,0x56,0x57,0x58,0x59,0x5a,0x5b,0x5c,0x5d,0x5e,0x5f,
+  58:main.c        **** 	0x60,0x61,0x62,0x63,0x64,0x65,0x66,0x67,0x68,0x69,0x6a,0x6b,0x6c,0x6d,0x6e,0x6f,
+  59:main.c        **** 	0x70,0x71,0x72,0x73,0x74,0x75,0x76,0x77,0x78,0x79,0x7a,0x7b,0x7c,0x7d,0x7e,0x7f,
+  60:main.c        **** 	0x80,0x81,0x82,0x83,0x84,0x85,0x86,0x87,0x88,0x89,0x8a,0x8b,0x8c,0x8d,0x8e,0x8f,
+  61:main.c        **** 	0x90,0x91,0x92,0x93,0x94,0x95,0x96,0x97,0x98,0x99,0x9a,0x9b,0x9c,0x9d,0x9e,0x9f,
+  62:main.c        **** 	0xa0,0xa1,0xa2,0xa3,0xa4,0xa5,0xa6,0xa7,0xa8,0xa9,0xaa,0xab,0xac,0xad,0xae,0xaf,
+  63:main.c        **** 	0xb0,0xb1,0xb2,0xb3,0xb4,0xb5,0xb6,0xb7,0xb8,0xb9,0xba,0xbb,0xbc,0xbd,0xbe,0xbf,
+  64:main.c        **** 	0xc0,0xc1,0xc2,0xc3,0xc4,0xc5,0xc6,0xc7,0xc8,0xc9,0xca,0xcb,0xcc,0xcd,0xce,0xcf,
+  65:main.c        **** 	0xd0,0xd1,0xd2,0xd3,0xd4,0xd5,0xd6,0xd7,0xd8,0xd9,0xda,0xdb,0xdc,0xdd,0xde,0xdf,
+  66:main.c        **** 	0xe0,0xe1,0xe2,0xe3,0xe4,0xe5,0xe6,0xe7,0xe8,0xe9,0xea,0xeb,0xec,0xed,0xee,0xef,
+  67:main.c        **** 	0xf0,0xf1,0xf2,0xf3,0xf4,0xf5,0xf6,0xf7,0xf8,0xf9,0xfa,0xfb,0xfc,0xfd,0xfe,0xff
+  68:main.c        **** };
+  69:main.c        **** const uint8_t rsawtoothwave[] PROGMEM= 
+  70:main.c        **** {
+  71:main.c        **** 	0xff,0xfe,0xfd,0xfc,0xfb,0xfa,0xf9,0xf8,0xf7,0xf6,0xf5,0xf4,0xf3,0xf2,0xf1,0xf0,
+  72:main.c        **** 	0xef,0xee,0xed,0xec,0xeb,0xea,0xe9,0xe8,0xe7,0xe6,0xe5,0xe4,0xe3,0xe2,0xe1,0xe0,
+  73:main.c        **** 	0xdf,0xde,0xdd,0xdc,0xdb,0xda,0xd9,0xd8,0xd7,0xd6,0xd5,0xd4,0xd3,0xd2,0xd1,0xd0,
+  74:main.c        **** 	0xcf,0xce,0xcd,0xcc,0xcb,0xca,0xc9,0xc8,0xc7,0xc6,0xc5,0xc4,0xc3,0xc2,0xc1,0xc0,
+  75:main.c        **** 	0xbf,0xbe,0xbd,0xbc,0xbb,0xba,0xb9,0xb8,0xb7,0xb6,0xb5,0xb4,0xb3,0xb2,0xb1,0xb0,
+  76:main.c        **** 	0xaf,0xae,0xad,0xac,0xab,0xaa,0xa9,0xa8,0xa7,0xa6,0xa5,0xa4,0xa3,0xa2,0xa1,0xa0,
+  77:main.c        **** 	0x9f,0x9e,0x9d,0x9c,0x9b,0x9a,0x99,0x98,0x97,0x96,0x95,0x94,0x93,0x92,0x91,0x90,
+  78:main.c        **** 	0x8f,0x8e,0x8d,0x8c,0x8b,0x8a,0x89,0x88,0x87,0x86,0x85,0x84,0x83,0x82,0x81,0x80,
+  79:main.c        **** 	0x7f,0x7e,0x7d,0x7c,0x7b,0x7a,0x79,0x78,0x77,0x76,0x75,0x74,0x73,0x72,0x71,0x70,
+  80:main.c        **** 	0x6f,0x6e,0x6d,0x6c,0x6b,0x6a,0x69,0x68,0x67,0x66,0x65,0x64,0x63,0x62,0x61,0x60,
+  81:main.c        **** 	0x5f,0x5e,0x5d,0x5c,0x5b,0x5a,0x59,0x58,0x57,0x56,0x55,0x54,0x53,0x52,0x51,0x50,
+  82:main.c        **** 	0x4f,0x4e,0x4d,0x4c,0x4b,0x4a,0x49,0x48,0x47,0x46,0x45,0x44,0x43,0x42,0x41,0x40,
+  83:main.c        **** 	0x3f,0x3e,0x3d,0x3c,0x3b,0x3a,0x39,0x38,0x37,0x36,0x35,0x34,0x33,0x32,0x31,0x30,
+  84:main.c        **** 	0x2f,0x2e,0x2d,0x2c,0x2b,0x2a,0x29,0x28,0x27,0x26,0x25,0x24,0x23,0x22,0x21,0x20,
+  85:main.c        **** 	0x1f,0x1e,0x1d,0x1c,0x1b,0x1a,0x19,0x18,0x17,0x16,0x15,0x14,0x13,0x12,0x11,0x10,
+  86:main.c        **** 	0x0f,0x0e,0x0d,0x0c,0x0b,0x0a,0x09,0x08,0x07,0x06,0x05,0x04,0x03,0x02,0x01,0x00,
+  87:main.c        **** };
+  88:main.c        **** 
+  89:main.c        **** const uint8_t trianglewave[] PROGMEM= 
+  90:main.c        **** {
+  91:main.c        **** 	0x00,0x02,0x04,0x06,0x08,0x0a,0x0c,0x0e,0x10,0x12,0x14,0x16,0x18,0x1a,0x1c,0x1e,
+  92:main.c        **** 	0x20,0x22,0x24,0x26,0x28,0x2a,0x2c,0x2e,0x30,0x32,0x34,0x36,0x38,0x3a,0x3c,0x3e,
+  93:main.c        **** 	0x40,0x42,0x44,0x46,0x48,0x4a,0x4c,0x4e,0x50,0x52,0x54,0x56,0x58,0x5a,0x5c,0x5e,
+  94:main.c        **** 	0x60,0x62,0x64,0x66,0x68,0x6a,0x6c,0x6e,0x70,0x72,0x74,0x76,0x78,0x7a,0x7c,0x7e,
+  95:main.c        **** 	0x80,0x82,0x84,0x86,0x88,0x8a,0x8c,0x8e,0x90,0x92,0x94,0x96,0x98,0x9a,0x9c,0x9e,
+  96:main.c        **** 	0xa0,0xa2,0xa4,0xa6,0xa8,0xaa,0xac,0xae,0xb0,0xb2,0xb4,0xb6,0xb8,0xba,0xbc,0xbe,
+  97:main.c        **** 	0xc0,0xc2,0xc4,0xc6,0xc8,0xca,0xcc,0xce,0xd0,0xd2,0xd4,0xd6,0xd8,0xda,0xdc,0xde,
+  98:main.c        **** 	0xe0,0xe2,0xe4,0xe6,0xe8,0xea,0xec,0xee,0xf0,0xf2,0xf4,0xf6,0xf8,0xfa,0xfc,0xfe,
+  99:main.c        **** 	0xff,0xfd,0xfb,0xf9,0xf7,0xf5,0xf3,0xf1,0xef,0xef,0xeb,0xe9,0xe7,0xe5,0xe3,0xe1,
+ 100:main.c        **** 	0xdf,0xdd,0xdb,0xd9,0xd7,0xd5,0xd3,0xd1,0xcf,0xcf,0xcb,0xc9,0xc7,0xc5,0xc3,0xc1,
+ 101:main.c        **** 	0xbf,0xbd,0xbb,0xb9,0xb7,0xb5,0xb3,0xb1,0xaf,0xaf,0xab,0xa9,0xa7,0xa5,0xa3,0xa1,
+ 102:main.c        **** 	0x9f,0x9d,0x9b,0x99,0x97,0x95,0x93,0x91,0x8f,0x8f,0x8b,0x89,0x87,0x85,0x83,0x81,
+ 103:main.c        **** 	0x7f,0x7d,0x7b,0x79,0x77,0x75,0x73,0x71,0x6f,0x6f,0x6b,0x69,0x67,0x65,0x63,0x61,
+ 104:main.c        **** 	0x5f,0x5d,0x5b,0x59,0x57,0x55,0x53,0x51,0x4f,0x4f,0x4b,0x49,0x47,0x45,0x43,0x41,
+ 105:main.c        **** 	0x3f,0x3d,0x3b,0x39,0x37,0x35,0x33,0x31,0x2f,0x2f,0x2b,0x29,0x27,0x25,0x23,0x21,
+ 106:main.c        **** 	0x1f,0x1d,0x1b,0x19,0x17,0x15,0x13,0x11,0x0f,0x0f,0x0b,0x09,0x07,0x05,0x03,0x01
+ 107:main.c        **** };
+ 108:main.c        **** const uint8_t ECG[] PROGMEM= 
+ 109:main.c        **** {
+ 110:main.c        **** 	73,74,75,75,74,73,73,73,73,72,71,69,68,67,67,67,
+ 111:main.c        **** 	68,68,67,65,62,61,59,57,56,55,55,54,54,54,55,55,
+ 112:main.c        **** 	55,55,55,55,54,53,51,50,49,49,52,61,77,101,132,
+ 113:main.c        **** 	169,207,238,255,254,234,198,154,109,68,37,17,5,
+ 114:main.c        **** 	0,1,6,13,20,28,36,45,52,57,61,64,65,66,67,68,68,
+ 115:main.c        **** 	69,70,71,71,71,71,71,71,71,71,72,72,72,73,73,74,
+ 116:main.c        **** 	75,75,76,77,78,79,80,81,82,83,84,86,88,91,93,96,
+ 117:main.c        **** 	98,100,102,104,107,109,112,115,118,121,123,125,
+ 118:main.c        **** 	126,127,127,127,127,127,126,125,124,121,119,116,
+ 119:main.c        **** 	113,109,105,102,98,95,92,89,87,84,81,79,77,76,75,
+ 120:main.c        **** 	74,73,72,70,69,68,67,67,67,68,68,68,69,69,69,69,
+ 121:main.c        **** 	69,69,69,70,71,72,73,73,74,74,75,75,75,75,75,75,
+ 122:main.c        **** 	74,74,73,73,73,73,72,72,72,71,71,71,71,71,71,71,
+ 123:main.c        **** 	70,70,70,69,69,69,69,69,70,70,70,69,68,68,67,67,
+ 124:main.c        **** 	67,67,66,66,66,65,65,65,65,65,65,65,65,64,64,63,
+ 125:main.c        **** 	63,64,64,65,65,65,65,65,65,65,64,64,64,64,64,64,
+ 126:main.c        **** 	64,64,65,65,65,66,67,68,69,71,72,73
+ 127:main.c        **** };
+ 128:main.c        **** /*
+ 129:main.c        **** const uint8_t PROGMEM fexp[] = {
+ 130:main.c        **** 	0, 4, 9, 14, 19, 23, 28, 32, 37, 41, 45, 49, 53, 57, 61, 65,
+ 131:main.c        **** 	68, 72, 75, 79, 82, 86, 89, 92, 95, 98, 101, 104, 107, 110, 113, 116,
+ 132:main.c        **** 	118, 121, 124, 126, 129, 131, 134, 136, 138, 141, 143, 145, 147, 149, 151, 153,
+ 133:main.c        **** 	155, 157, 159, 161, 163, 165, 166, 168, 170, 171, 173, 175, 176, 178, 179, 181,
+ 134:main.c        **** 	182, 184, 185, 186, 188, 189, 190, 192, 193, 194, 195, 196, 197, 199, 200, 201,
+ 135:main.c        **** 	202, 203, 204, 205, 206, 207, 208, 209, 210, 210, 211, 212, 213, 214, 215, 215,
+ 136:main.c        **** 	216, 217, 218, 218, 219, 220, 221, 221, 222, 223, 223, 224, 224, 225, 226, 226,
+ 137:main.c        **** 	227, 227, 228, 228, 229, 229, 230, 230, 231, 231, 232, 232, 233, 233, 234, 234,
+ 138:main.c        **** 	234, 235, 235, 236, 236, 236, 237, 237, 238, 238, 238, 239, 239, 239, 240, 240,
+ 139:main.c        **** 	240, 240, 241, 241, 241, 242, 242, 242, 242, 243, 243, 243, 243, 244, 244, 244,
+ 140:main.c        **** 	244, 244, 245, 245, 245, 245, 245, 246, 246, 246, 246, 246, 247, 247, 247, 247,
+ 141:main.c        **** 	247, 247, 248, 248, 248, 248, 248, 248, 248, 249, 249, 249, 249, 249, 249, 249,
+ 142:main.c        **** 	249, 250, 250, 250, 250, 250, 250, 250, 250, 250, 251, 251, 251, 251, 251, 251,
+ 143:main.c        **** 	251, 251, 251, 251, 251, 252, 252, 252, 252, 252, 252, 252, 252, 252, 252, 252,
+ 144:main.c        **** 	252, 252, 252, 252, 253, 253, 253, 253, 253, 253, 253, 253, 253, 253, 253, 253,
+ 145:main.c        **** 	253, 253, 253, 253, 253, 253, 253, 253, 253, 254, 254, 254, 254, 254, 254, 254
+ 146:main.c        **** };
+ 147:main.c        **** 
+ 148:main.c        **** const uint8_t PROGMEM fexp2[] = {
+ 149:main.c        **** 	9, 19, 28, 37, 45, 53, 61, 68, 75, 82, 89, 95, 101, 107, 113, 118,
+ 150:main.c        **** 	124, 129, 134, 138, 143, 147, 151, 155, 159, 163, 166, 170, 173, 176, 179, 182,
+ 151:main.c        **** 	185, 188, 190, 193, 195, 197, 200, 202, 204, 206, 208, 210, 211, 213, 215, 216,
+ 152:main.c        **** 	218, 219, 221, 222, 223, 224, 226, 227, 228, 229, 230, 231, 232, 233, 234, 234,
+ 153:main.c        **** 	235, 236, 237, 238, 238, 239, 240, 240, 241, 241, 242, 242, 243, 243, 244, 244,
+ 154:main.c        **** 	245, 245, 245, 246, 246, 247, 247, 247, 248, 248, 248, 248, 249, 249, 249, 249,
+ 155:main.c        **** 	250, 250, 250, 250, 251, 251, 251, 251, 251, 251, 252, 252, 252, 252, 252, 252,
+ 156:main.c        **** 	252, 253, 253, 253, 253, 253, 253, 253, 253, 253, 253, 253, 254, 254, 254, 254,
+ 157:main.c        **** 	247, 237, 228, 219, 211, 203, 195, 188, 181, 174, 167, 161, 155, 149, 143, 138,
+ 158:main.c        **** 	132, 127, 122, 118, 113, 109, 105, 101, 97, 93, 90, 86, 83, 80, 77, 74,
+ 159:main.c        **** 	71, 68, 66, 63, 61, 59, 56, 54, 52, 50, 48, 46, 45, 43, 41, 40,
+ 160:main.c        **** 	38, 37, 35, 34, 33, 32, 30, 29, 28, 27, 26, 25, 24, 23, 22, 22,
+ 161:main.c        **** 	21, 20, 19, 18, 18, 17, 16, 16, 15, 15, 14, 14, 13, 13, 12, 12,
+ 162:main.c        **** 	11, 11, 11, 10, 10, 9, 9, 9, 8, 8, 8, 8, 7, 7, 7, 7,
+ 163:main.c        **** 	6, 6, 6, 6, 5, 5, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4,
+ 164:main.c        **** 	4, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2
+ 165:main.c        **** };
+ 166:main.c        **** */
+ 167:main.c        **** inline void vgen_on()
+ 168:main.c        **** {
+ 169:main.c        **** 	DDRB |= 1<<PORTB3;
+ 170:main.c        **** 	OCR2 = F_CPU/8/2/VGEN_FREQ;
+ 171:main.c        **** 	TCCR2 =  (0<<WGM20)|(1<<WGM21)| (1<<COM20)|  (0<<CS22)|(1<<CS21)|(0<<CS20);
+ 172:main.c        **** }
+ 173:main.c        **** 
+ 174:main.c        **** #define vgen_off() (TCCR2 = 0)
+ 175:main.c        **** 
+ 176:main.c        **** 	
+ 177:main.c        **** /*
+ 178:main.c        **** inline void adc_init()
+ 179:main.c        **** {
+ 180:main.c        **** 	//x32 prescaler
+ 181:main.c        **** 	ADCSRA = (1<<ADEN) | (1<<ADPS2) | (1<<ADPS0);
+ 182:main.c        **** 	ADMUX = 1<<REFS0| 0<<REFS1|0<<ADLAR | EXT_PIN;	
+ 183:main.c        **** }
+ 184:main.c        **** */
+ 185:main.c        **** 
+ 186:main.c        **** inline void io_init()
+ 187:main.c        **** {
+ 188:main.c        **** 	DDRB =  1<<HSPORT | 0<<UART_RX | 1<<UART_TX| 1<<VGEN_PIN;
+ 189:main.c        **** 	PORTB = 0<<HSPORT | 1<<UART_RX | 1<<UART_TX| 0<<VGEN_PIN;
+ 190:main.c        **** 	DDRC =  0<<EXT_PIN;
+ 191:main.c        **** 	PORTC = BTN_MASK | 0<<EXT_PIN;
+ 192:main.c        **** 	R2RPORT = 0;
+ 193:main.c        **** 	R2RDDR = 0xff;
+ 194:main.c        **** }
+ 195:main.c        **** 
+ 196:main.c        **** inline void noise_start()
+ 197:main.c        **** {
+ 198:main.c        **** 	while(!btnCheck(BTN_START))
+ 199:main.c        **** 	{
+ 200:main.c        **** 		R2RPORT = rand();
+ 201:main.c        **** 	}
+ 202:main.c        **** }
+ 203:main.c        **** 
+ 204:main.c        **** inline void pwm_stop()
+ 205:main.c        **** {
+ 206:main.c        **** 	TCCR1A = 0;
+ 207:main.c        **** 	TCCR1B = 0;
+ 208:main.c        **** 	HSPORT &= ~(1<<HSPIN);
+ 209:main.c        **** 	HSDDR &= ~(1<<HSPIN);
+ 210:main.c        **** }
+ 211:main.c        **** 
+ 212:main.c        **** void pwm_start(uint32_t freq, uint8_t d)
+ 213:main.c        **** {
+ 132               	.LM0:
+ 133               	.LFBB1:
+ 134 0000 CF92      		push r12
+ 135 0002 DF92      		push r13
+ 136 0004 EF92      		push r14
+ 137 0006 FF92      		push r15
+ 138 0008 0F93      		push r16
+ 139 000a 1F93      		push r17
+ 140               	/* prologue: function */
+ 141               	/* frame size = 0 */
+ 142               	/* stack size = 6 */
+ 143               	.L__stack_usage = 6
+ 144 000c 8B01      		movw r16,r22
+ 145 000e 9C01      		movw r18,r24
+ 214:main.c        **** 	uint32_t period;
+ 215:main.c        **** 	
+ 216:main.c        **** 	HSPORT &= ~(1<<HSPIN);
+ 147               	.LM1:
+ 148 0010 C298      		cbi 0x18,2
+ 217:main.c        **** 	HSDDR |= 1<<HSPIN;
+ 150               	.LM2:
+ 151 0012 BA9A      		sbi 0x17,2
+ 218:main.c        **** 	
+ 219:main.c        **** 	TCCR1A = 1<<COM1B1;
+ 153               	.LM3:
+ 154 0014 80E2      		ldi r24,lo8(32)
+ 155 0016 8FBD      		out 0x2f,r24
+ 156 0018 C42E      		mov r12,r20
+ 157 001a D12C      		mov r13,__zero_reg__
+ 158 001c E12C      		mov r14,__zero_reg__
+ 159 001e F12C      		mov r15,__zero_reg__
+ 220:main.c        **** 	if(freq > 130)
+ 161               	.LM4:
+ 162 0020 0338      		cpi r16,-125
+ 163 0022 1105      		cpc r17,__zero_reg__
+ 164 0024 2105      		cpc r18,__zero_reg__
+ 165 0026 3105      		cpc r19,__zero_reg__
+ 166 0028 00F0      		brlo .L2
+ 167               	.LBB50:
+ 168               	.LBB51:
+ 221:main.c        **** 	{
+ 222:main.c        **** 		
+ 223:main.c        **** 		period = (F_CPU/2/freq)-1;	
+ 170               	.LM5:
+ 171 002a 60E0      		ldi r22,0
+ 172 002c 72E1      		ldi r23,lo8(18)
+ 173 002e 8AE7      		ldi r24,lo8(122)
+ 174 0030 90E0      		ldi r25,0
+ 175 0032 A901      		movw r20,r18
+ 176 0034 9801      		movw r18,r16
+ 177 0036 00D0      		rcall __udivmodsi4
+ 178 0038 2150      		subi r18,1
+ 179 003a 3109      		sbc r19,__zero_reg__
+ 180 003c 4109      		sbc r20,__zero_reg__
+ 181 003e 5109      		sbc r21,__zero_reg__
+ 224:main.c        **** 		ICR1 = (uint16_t)period;	
+ 183               	.LM6:
+ 184 0040 37BD      		out 0x26+1,r19
+ 185 0042 26BD      		out 0x26,r18
+ 225:main.c        **** 		OCR1B =  (uint16_t)(period * d / 100);			
+ 187               	.LM7:
+ 188 0044 C701      		movw r24,r14
+ 189 0046 B601      		movw r22,r12
+ 190 0048 00D0      		rcall __mulsi3
+ 191 004a 24E6      		ldi r18,lo8(100)
+ 192 004c 30E0      		ldi r19,0
+ 193 004e 40E0      		ldi r20,0
+ 194 0050 50E0      		ldi r21,0
+ 195 0052 00D0      		rcall __udivmodsi4
+ 196 0054 39BD      		out 0x28+1,r19
+ 197 0056 28BD      		out 0x28,r18
+ 226:main.c        **** 		TCCR1B =(1<<WGM13) | (1<<CS10);// без делителя
+ 199               	.LM8:
+ 200 0058 81E1      		ldi r24,lo8(17)
+ 201 005a 00C0      		rjmp .L4
+ 202               	.L2:
+ 203               	.LBE51:
+ 204               	.LBE50:
+ 227:main.c        **** 	}
+ 228:main.c        **** 	else
+ 229:main.c        **** 	{
+ 230:main.c        **** 		period = (F_CPU/2/256/freq)-1;
+ 206               	.LM9:
+ 207 005c 62E1      		ldi r22,lo8(18)
+ 208 005e 7AE7      		ldi r23,lo8(122)
+ 209 0060 80E0      		ldi r24,0
+ 210 0062 90E0      		ldi r25,0
+ 211 0064 A901      		movw r20,r18
+ 212 0066 9801      		movw r18,r16
+ 213 0068 00D0      		rcall __udivmodsi4
+ 214 006a 2150      		subi r18,1
+ 215 006c 3109      		sbc r19,__zero_reg__
+ 216 006e 4109      		sbc r20,__zero_reg__
+ 217 0070 5109      		sbc r21,__zero_reg__
+ 231:main.c        **** 		ICR1 = (uint16_t)period;	
+ 219               	.LM10:
+ 220 0072 37BD      		out 0x26+1,r19
+ 221 0074 26BD      		out 0x26,r18
+ 232:main.c        **** 		OCR1B =  (uint16_t)(period * d / 100);	
+ 223               	.LM11:
+ 224 0076 C701      		movw r24,r14
+ 225 0078 B601      		movw r22,r12
+ 226 007a 00D0      		rcall __mulsi3
+ 227 007c 24E6      		ldi r18,lo8(100)
+ 228 007e 30E0      		ldi r19,0
+ 229 0080 40E0      		ldi r20,0
+ 230 0082 50E0      		ldi r21,0
+ 231 0084 00D0      		rcall __udivmodsi4
+ 232 0086 39BD      		out 0x28+1,r19
+ 233 0088 28BD      		out 0x28,r18
+ 233:main.c        **** 		TCCR1B =(1<<WGM13) | (1<<CS12);// делитель 256
+ 235               	.LM12:
+ 236 008a 84E1      		ldi r24,lo8(20)
+ 237               	.L4:
+ 238 008c 8EBD      		out 0x2e,r24
+ 239               	/* epilogue start */
+ 234:main.c        **** 
+ 235:main.c        **** 	}	
+ 236:main.c        **** 	//pwm_stop();
+ 237:main.c        **** 	
+ 238:main.c        **** }
+ 241               	.LM13:
+ 242 008e 1F91      		pop r17
+ 243 0090 0F91      		pop r16
+ 244 0092 FF90      		pop r15
+ 245 0094 EF90      		pop r14
+ 246 0096 DF90      		pop r13
+ 247 0098 CF90      		pop r12
+ 248 009a 0895      		ret
+ 256               	.Lscope1:
+ 257               	.global	__udivdi3
+ 258               		.section	.text.dds_start,"ax",@progbits
+ 261               	.global	dds_start
+ 263               	dds_start:
+ 239:main.c        **** 
+ 240:main.c        **** void dds_start(uint16_t f)
+ 241:main.c        **** {
+ 265               	.LM14:
+ 266               	.LFBB2:
+ 267 0000 AF92      		push r10
+ 268 0002 BF92      		push r11
+ 269 0004 CF92      		push r12
+ 270 0006 DF92      		push r13
+ 271 0008 EF92      		push r14
+ 272 000a FF92      		push r15
+ 273 000c 0F93      		push r16
+ 274 000e 1F93      		push r17
+ 275 0010 CF93      		push r28
+ 276 0012 DF93      		push r29
+ 277               	/* prologue: function */
+ 278               	/* frame size = 0 */
+ 279               	/* stack size = 10 */
+ 280               	.L__stack_usage = 10
+ 242:main.c        **** 	uint32_t phase;
+ 243:main.c        **** 	
+ 244:main.c        **** 	//#define RES  ((16000000/9/0x1000000)*0x10000)
+ 245:main.c        **** 	#define RES (F_CPU/NUM_CYCLES/0x100)
+ 246:main.c        **** 	
+ 247:main.c        **** 	phase = ((uint64_t)f << 16) / RES;
+ 248:main.c        **** 	
+ 249:main.c        **** 
+ 250:main.c        **** 	R2RPORT = 0;
+ 282               	.LM15:
+ 283 0014 12BA      		out 0x12,__zero_reg__
+ 247:main.c        **** 	
+ 285               	.LM16:
+ 286 0016 9C01      		movw r18,r24
+ 287 0018 40E0      		ldi r20,0
+ 288 001a 50E0      		ldi r21,0
+ 289 001c 60E0      		ldi r22,0
+ 290 001e 70E0      		ldi r23,0
+ 291 0020 80E0      		ldi r24,0
+ 292 0022 90E0      		ldi r25,0
+ 293 0024 00E1      		ldi r16,lo8(16)
+ 294 0026 00D0      		rcall __ashldi3
+ 295 0028 E0E2      		ldi r30,lo8(32)
+ 296 002a AE2E      		mov r10,r30
+ 297 002c FBE1      		ldi r31,lo8(27)
+ 298 002e BF2E      		mov r11,r31
+ 299 0030 C12C      		mov r12,__zero_reg__
+ 300 0032 D12C      		mov r13,__zero_reg__
+ 301 0034 E12C      		mov r14,__zero_reg__
+ 302 0036 F12C      		mov r15,__zero_reg__
+ 303 0038 00E0      		ldi r16,0
+ 304 003a 10E0      		ldi r17,0
+ 305 003c 00D0      		rcall __udivdi3
+ 251:main.c        **** 	//R2RDDR = 0xFF;
+ 252:main.c        **** 	dds(phase);
+ 307               	.LM17:
+ 308 003e B901      		movw r22,r18
+ 309 0040 CA01      		movw r24,r20
+ 310 0042 00D0      		rcall dds
+ 253:main.c        **** 	R2RPORT = 0;
+ 312               	.LM18:
+ 313 0044 12BA      		out 0x12,__zero_reg__
+ 314               	/* epilogue start */
+ 254:main.c        **** 	//R2RDDR = 0xFF;
+ 255:main.c        **** 
+ 256:main.c        **** }
+ 316               	.LM19:
+ 317 0046 DF91      		pop r29
+ 318 0048 CF91      		pop r28
+ 319 004a 1F91      		pop r17
+ 320 004c 0F91      		pop r16
+ 321 004e FF90      		pop r15
+ 322 0050 EF90      		pop r14
+ 323 0052 DF90      		pop r13
+ 324 0054 CF90      		pop r12
+ 325 0056 BF90      		pop r11
+ 326 0058 AF90      		pop r10
+ 327 005a 0895      		ret
+ 329               	.Lscope2:
+ 330               		.section	.text.ddssq_start,"ax",@progbits
+ 333               	.global	ddssq_start
+ 335               	ddssq_start:
+ 257:main.c        **** 
+ 258:main.c        **** void ddssq_start(uint32_t f)
+ 259:main.c        **** {
+ 337               	.LM20:
+ 338               	.LFBB3:
+ 339 0000 AF92      		push r10
+ 340 0002 BF92      		push r11
+ 341 0004 CF92      		push r12
+ 342 0006 DF92      		push r13
+ 343 0008 EF92      		push r14
+ 344 000a FF92      		push r15
+ 345 000c 0F93      		push r16
+ 346 000e 1F93      		push r17
+ 347 0010 CF93      		push r28
+ 348 0012 DF93      		push r29
+ 349               	/* prologue: function */
+ 350               	/* frame size = 0 */
+ 351               	/* stack size = 10 */
+ 352               	.L__stack_usage = 10
+ 260:main.c        **** 	uint32_t phase;
+ 261:main.c        **** 	
+ 262:main.c        **** 	#define RES1 (F_CPU/NUM_CYCLES/2/0x100)
+ 263:main.c        **** 	
+ 264:main.c        **** 	phase = ((uint64_t)f << 16) / RES1;
+ 265:main.c        **** 	
+ 266:main.c        **** 	HSPORT &= ~(1<<HSPIN);
+ 354               	.LM21:
+ 355 0014 C298      		cbi 0x18,2
+ 267:main.c        **** 	HSDDR |= 1<<HSPIN;
+ 357               	.LM22:
+ 358 0016 BA9A      		sbi 0x17,2
+ 264:main.c        **** 	
+ 360               	.LM23:
+ 361 0018 DC01      		movw r26,r24
+ 362 001a CB01      		movw r24,r22
+ 363 001c 9C01      		movw r18,r24
+ 364 001e AD01      		movw r20,r26
+ 365 0020 60E0      		ldi r22,0
+ 366 0022 70E0      		ldi r23,0
+ 367 0024 80E0      		ldi r24,0
+ 368 0026 90E0      		ldi r25,0
+ 369 0028 00E1      		ldi r16,lo8(16)
+ 370 002a 00D0      		rcall __ashldi3
+ 371 002c E0E9      		ldi r30,lo8(-112)
+ 372 002e AE2E      		mov r10,r30
+ 373 0030 FDE0      		ldi r31,lo8(13)
+ 374 0032 BF2E      		mov r11,r31
+ 375 0034 C12C      		mov r12,__zero_reg__
+ 376 0036 D12C      		mov r13,__zero_reg__
+ 377 0038 E12C      		mov r14,__zero_reg__
+ 378 003a F12C      		mov r15,__zero_reg__
+ 379 003c 00E0      		ldi r16,0
+ 380 003e 10E0      		ldi r17,0
+ 381 0040 00D0      		rcall __udivdi3
+ 268:main.c        **** 	dds_sq(phase);
+ 383               	.LM24:
+ 384 0042 B901      		movw r22,r18
+ 385 0044 CA01      		movw r24,r20
+ 386 0046 00D0      		rcall dds_sq
+ 269:main.c        **** 	HSPORT &= ~(1<<HSPIN);
+ 388               	.LM25:
+ 389 0048 C298      		cbi 0x18,2
+ 270:main.c        **** 	HSDDR &= ~(1<<HSPIN);
+ 391               	.LM26:
+ 392 004a BA98      		cbi 0x17,2
+ 393               	/* epilogue start */
+ 271:main.c        **** 
+ 272:main.c        **** }
+ 395               	.LM27:
+ 396 004c DF91      		pop r29
+ 397 004e CF91      		pop r28
+ 398 0050 1F91      		pop r17
+ 399 0052 0F91      		pop r16
+ 400 0054 FF90      		pop r15
+ 401 0056 EF90      		pop r14
+ 402 0058 DF90      		pop r13
+ 403 005a CF90      		pop r12
+ 404 005c BF90      		pop r11
+ 405 005e AF90      		pop r10
+ 406 0060 0895      		ret
+ 408               	.Lscope3:
+ 409               		.section	.text.get_phase,"ax",@progbits
+ 412               	.global	get_phase
+ 414               	get_phase:
+ 273:main.c        **** 
+ 274:main.c        **** uint32_t get_phase(uint32_t T)
+ 275:main.c        **** {
+ 416               	.LM28:
+ 417               	.LFBB4:
+ 418 0000 AF92      		push r10
+ 419 0002 BF92      		push r11
+ 420 0004 CF92      		push r12
+ 421 0006 DF92      		push r13
+ 422 0008 EF92      		push r14
+ 423 000a FF92      		push r15
+ 424 000c 0F93      		push r16
+ 425 000e 1F93      		push r17
+ 426 0010 CF93      		push r28
+ 427 0012 DF93      		push r29
+ 428               	/* prologue: function */
+ 429               	/* frame size = 0 */
+ 430               	/* stack size = 10 */
+ 431               	.L__stack_usage = 10
+ 276:main.c        **** 	return 0x1000000/(((uint64_t)T<<16)/36864);
+ 433               	.LM29:
+ 434 0014 DC01      		movw r26,r24
+ 435 0016 CB01      		movw r24,r22
+ 436 0018 9C01      		movw r18,r24
+ 437 001a AD01      		movw r20,r26
+ 438 001c 60E0      		ldi r22,0
+ 439 001e 70E0      		ldi r23,0
+ 440 0020 80E0      		ldi r24,0
+ 441 0022 90E0      		ldi r25,0
+ 442 0024 00E1      		ldi r16,lo8(16)
+ 443 0026 00D0      		rcall __ashldi3
+ 444 0028 A12C      		mov r10,__zero_reg__
+ 445 002a E0E9      		ldi r30,lo8(-112)
+ 446 002c BE2E      		mov r11,r30
+ 447 002e C12C      		mov r12,__zero_reg__
+ 448 0030 D12C      		mov r13,__zero_reg__
+ 449 0032 E12C      		mov r14,__zero_reg__
+ 450 0034 F12C      		mov r15,__zero_reg__
+ 451 0036 00E0      		ldi r16,0
+ 452 0038 10E0      		ldi r17,0
+ 453 003a 00D0      		rcall __udivdi3
+ 454 003c 5901      		movw r10,r18
+ 455 003e 6A01      		movw r12,r20
+ 456 0040 7B01      		movw r14,r22
+ 457 0042 8C01      		movw r16,r24
+ 458 0044 20E0      		ldi r18,0
+ 459 0046 30E0      		ldi r19,0
+ 460 0048 40E0      		ldi r20,0
+ 461 004a 51E0      		ldi r21,lo8(1)
+ 462 004c 60E0      		ldi r22,0
+ 463 004e 70E0      		ldi r23,0
+ 464 0050 80E0      		ldi r24,0
+ 465 0052 90E0      		ldi r25,0
+ 466 0054 00D0      		rcall __udivdi3
+ 467 0056 B901      		movw r22,r18
+ 468 0058 CA01      		movw r24,r20
+ 469               	/* epilogue start */
+ 277:main.c        **** }
+ 471               	.LM30:
+ 472 005a DF91      		pop r29
+ 473 005c CF91      		pop r28
+ 474 005e 1F91      		pop r17
+ 475 0060 0F91      		pop r16
+ 476 0062 FF90      		pop r15
+ 477 0064 EF90      		pop r14
+ 478 0066 DF90      		pop r13
+ 479 0068 CF90      		pop r12
+ 480 006a BF90      		pop r11
+ 481 006c AF90      		pop r10
+ 482 006e 0895      		ret
+ 484               	.Lscope4:
+ 485               		.section	.text.dds_main,"ax",@progbits
+ 491               	.global	dds_main
+ 493               	dds_main:
+ 278:main.c        **** 
+ 279:main.c        **** inline void pulse_start()
+ 280:main.c        **** {
+ 281:main.c        **** 	pulse_t pulse_s;	
+ 282:main.c        **** 	
+ 283:main.c        **** 	pulse_s.t_rise = get_phase(generator.pulse_t_rise);
+ 284:main.c        **** 	pulse_s.t_on = get_phase(generator.pulse_t_on);
+ 285:main.c        **** 	pulse_s.t_fall = get_phase(generator.pulse_t_fall);
+ 286:main.c        **** 	pulse_s.t_off = get_phase(generator.pulse_t_off);
+ 287:main.c        **** 	pulse_s.n = generator.pulse_n;
+ 288:main.c        **** 	pulse(&pulse_s);
+ 289:main.c        **** }
+ 290:main.c        **** 
+ 291:main.c        **** inline uint8_t trig_wait_rise()
+ 292:main.c        **** {
+ 293:main.c        **** 	while((EXT_PINS & EXT_PIN_MSK) != 0)
+ 294:main.c        **** 	{
+ 295:main.c        **** 		if(btnCheck(BTN_START)) return 0;
+ 296:main.c        **** 	}
+ 297:main.c        **** 	while((EXT_PINS & EXT_PIN_MSK) == 0)
+ 298:main.c        **** 	{
+ 299:main.c        **** 		if(btnCheck(BTN_START)) return 0;
+ 300:main.c        **** 	}
+ 301:main.c        **** 	return 1;
+ 302:main.c        **** }
+ 303:main.c        **** 
+ 304:main.c        **** inline uint8_t trig_wait_fall()
+ 305:main.c        **** {
+ 306:main.c        **** 	while((EXT_PINS & EXT_PIN_MSK) == 0)
+ 307:main.c        **** 	{
+ 308:main.c        **** 		if(btnCheck(BTN_START)) return 0;
+ 309:main.c        **** 	}
+ 310:main.c        **** 	while((EXT_PINS & EXT_PIN_MSK) != 0)
+ 311:main.c        **** 	{
+ 312:main.c        **** 		if(btnCheck(BTN_START)) return 0;
+ 313:main.c        **** 	}
+ 314:main.c        **** 	return 1;
+ 315:main.c        **** }
+ 316:main.c        **** 
+ 317:main.c        **** 
+ 318:main.c        **** 
+ 319:main.c        **** void dds_main(const char* t, const uint8_t* raw, uint32_t* f, uint32_t* f_save)
+ 320:main.c        **** {
+ 495               	.LM31:
+ 496               	.LFBB5:
+ 497 0000 EF92      		push r14
+ 498 0002 FF92      		push r15
+ 499 0004 0F93      		push r16
+ 500 0006 1F93      		push r17
+ 501 0008 CF93      		push r28
+ 502 000a DF93      		push r29
+ 503               	/* prologue: function */
+ 504               	/* frame size = 0 */
+ 505               	/* stack size = 6 */
+ 506               	.L__stack_usage = 6
+ 507 000c 8B01      		movw r16,r22
+ 508 000e EA01      		movw r28,r20
+ 509 0010 7901      		movw r14,r18
+ 321:main.c        **** 	uint8_t btn;
+ 322:main.c        **** 	
+ 323:main.c        **** 	nnl_puts_P(t);
+ 511               	.LM32:
+ 512 0012 00D0      		rcall nnl_puts_P
+ 324:main.c        **** 	print_on_off(0);			
+ 514               	.LM33:
+ 515 0014 80E0      		ldi r24,0
+ 516 0016 00D0      		rcall print_on_off
+ 325:main.c        **** 	print_fq(*f);
+ 518               	.LM34:
+ 519 0018 6881      		ld r22,Y
+ 520 001a 7981      		ldd r23,Y+1
+ 521 001c 8A81      		ldd r24,Y+2
+ 522 001e 9B81      		ldd r25,Y+3
+ 523 0020 00D0      		rcall print_fq
+ 326:main.c        **** 	btn = btn_wait();
+ 525               	.LM35:
+ 526 0022 00D0      		rcall btn_wait
+ 327:main.c        **** 	if(btn == BTN_START)
+ 528               	.LM36:
+ 529 0024 8031      		cpi r24,lo8(16)
+ 530 0026 01F4      		brne .L10
+ 531               	.LBB54:
+ 532               	.LBB55:
+ 328:main.c        **** 	{
+ 329:main.c        **** 		btn_wait_up(BTN_START);
+ 534               	.LM37:
+ 535 0028 00D0      		rcall btn_wait_up
+ 330:main.c        **** 		eeprom_update_dword(f_save, *f);
+ 537               	.LM38:
+ 538 002a 4881      		ld r20,Y
+ 539 002c 5981      		ldd r21,Y+1
+ 540 002e 6A81      		ldd r22,Y+2
+ 541 0030 7B81      		ldd r23,Y+3
+ 542 0032 C701      		movw r24,r14
+ 543 0034 00D0      		rcall eeprom_update_dword
+ 331:main.c        **** 		eeprom_update_byte(&setting.m, generator.m);
+ 545               	.LM39:
+ 546 0036 6091 0000 		lds r22,generator
+ 547 003a 80E0      		ldi r24,lo8(setting)
+ 548 003c 90E0      		ldi r25,hi8(setting)
+ 549 003e 00D0      		rcall eeprom_update_byte
+ 332:main.c        **** 		print_on_off(1);
+ 551               	.LM40:
+ 552 0040 81E0      		ldi r24,lo8(1)
+ 553 0042 00D0      		rcall print_on_off
+ 333:main.c        **** 		memcpy_P(&buf, raw, sizeof(buf));
+ 555               	.LM41:
+ 556 0044 40E0      		ldi r20,0
+ 557 0046 51E0      		ldi r21,lo8(1)
+ 558 0048 B801      		movw r22,r16
+ 559 004a 80E0      		ldi r24,lo8(buf)
+ 560 004c 90E0      		ldi r25,hi8(buf)
+ 561 004e 00D0      		rcall memcpy_P
+ 334:main.c        **** 		dds_start(*f);
+ 563               	.LM42:
+ 564 0050 8881      		ld r24,Y
+ 565 0052 9981      		ldd r25,Y+1
+ 566 0054 00D0      		rcall dds_start
+ 335:main.c        **** 		btn_wait_up(BTN_START);
+ 568               	.LM43:
+ 569 0056 80E1      		ldi r24,lo8(16)
+ 570               	/* epilogue start */
+ 571               	.LBE55:
+ 572               	.LBE54:
+ 336:main.c        **** 	}
+ 337:main.c        **** 	else if(btn == BTN_MODE)
+ 338:main.c        **** 	{
+ 339:main.c        **** 		generator.m++;
+ 340:main.c        **** 	}
+ 341:main.c        **** 	else if(btn == BTN_SET)
+ 342:main.c        **** 	{
+ 343:main.c        **** 		input_fd(f);
+ 344:main.c        **** 	}
+ 345:main.c        **** 
+ 346:main.c        **** }
+ 574               	.LM44:
+ 575 0058 DF91      		pop r29
+ 576 005a CF91      		pop r28
+ 577 005c 1F91      		pop r17
+ 578 005e 0F91      		pop r16
+ 579 0060 FF90      		pop r15
+ 580 0062 EF90      		pop r14
+ 581               	.LBB57:
+ 582               	.LBB56:
+ 335:main.c        **** 		btn_wait_up(BTN_START);
+ 584               	.LM45:
+ 585 0064 00C0      		rjmp btn_wait_up
+ 586               	.L10:
+ 587               	.LBE56:
+ 588               	.LBE57:
+ 337:main.c        **** 	{
+ 590               	.LM46:
+ 591 0066 8830      		cpi r24,lo8(8)
+ 592 0068 01F4      		brne .L11
+ 339:main.c        **** 	}
+ 594               	.LM47:
+ 595 006a 8091 0000 		lds r24,generator
+ 596 006e 8F5F      		subi r24,lo8(-(1))
+ 597 0070 8093 0000 		sts generator,r24
+ 598 0074 00C0      		rjmp .L9
+ 599               	.L11:
+ 341:main.c        **** 	{
+ 601               	.LM48:
+ 602 0076 8430      		cpi r24,lo8(4)
+ 603 0078 01F4      		brne .L9
+ 343:main.c        **** 	}
+ 605               	.LM49:
+ 606 007a CE01      		movw r24,r28
+ 607               	/* epilogue start */
+ 609               	.LM50:
+ 610 007c DF91      		pop r29
+ 611 007e CF91      		pop r28
+ 612 0080 1F91      		pop r17
+ 613 0082 0F91      		pop r16
+ 614 0084 FF90      		pop r15
+ 615 0086 EF90      		pop r14
+ 343:main.c        **** 	}
+ 617               	.LM51:
+ 618 0088 00C0      		rjmp input_fd
+ 619               	.L9:
+ 620               	/* epilogue start */
+ 622               	.LM52:
+ 623 008a DF91      		pop r29
+ 624 008c CF91      		pop r28
+ 625 008e 1F91      		pop r17
+ 626 0090 0F91      		pop r16
+ 627 0092 FF90      		pop r15
+ 628 0094 EF90      		pop r14
+ 629 0096 0895      		ret
+ 634               	.Lscope5:
+ 635               		.section	.text.startup.main,"ax",@progbits
+ 637               	.global	main
+ 639               	main:
+ 347:main.c        **** 
+ 348:main.c        **** void main()
+ 349:main.c        **** {
+ 641               	.LM53:
+ 642               	.LFBB6:
+ 643 0000 CF93      		push r28
+ 644 0002 DF93      		push r29
+ 645 0004 CDB7      		in r28,__SP_L__
+ 646 0006 DEB7      		in r29,__SP_H__
+ 647 0008 6297      		sbiw r28,18
+ 648 000a 0FB6      		in __tmp_reg__,__SREG__
+ 649 000c F894      		cli
+ 650 000e DEBF      		out __SP_H__,r29
+ 651 0010 0FBE      		out __SREG__,__tmp_reg__
+ 652 0012 CDBF      		out __SP_L__,r28
+ 653               	/* prologue: function */
+ 654               	/* frame size = 18 */
+ 655               	/* stack size = 20 */
+ 656               	.L__stack_usage = 20
+ 657               	.LBB112:
+ 658               	.LBB113:
+ 188:main.c        **** 	PORTB = 0<<HSPORT | 1<<UART_RX | 1<<UART_TX| 0<<VGEN_PIN;
+ 660               	.LM54:
+ 661 0014 28B3      		in r18,0x18
+ 662 0016 81E0      		ldi r24,lo8(1)
+ 663 0018 90E0      		ldi r25,0
+ 664 001a 00C0      		rjmp 2f
+ 665               		1:
+ 666 001c 880F      		lsl r24
+ 667               		2:
+ 668 001e 2A95      		dec r18
+ 669 0020 02F4      		brpl 1b
+ 670 0022 8861      		ori r24,lo8(24)
+ 671 0024 87BB      		out 0x17,r24
+ 189:main.c        **** 	DDRC =  0<<EXT_PIN;
+ 673               	.LM55:
+ 674 0026 88B3      		in r24,0x18
+ 675 0028 80E3      		ldi r24,lo8(48)
+ 676 002a 88BB      		out 0x18,r24
+ 190:main.c        **** 	PORTC = BTN_MASK | 0<<EXT_PIN;
+ 678               	.LM56:
+ 679 002c 14BA      		out 0x14,__zero_reg__
+ 191:main.c        **** 	R2RPORT = 0;
+ 681               	.LM57:
+ 682 002e 8FE1      		ldi r24,lo8(31)
+ 683 0030 85BB      		out 0x15,r24
+ 192:main.c        **** 	R2RDDR = 0xff;
+ 685               	.LM58:
+ 686 0032 12BA      		out 0x12,__zero_reg__
+ 193:main.c        **** }
+ 688               	.LM59:
+ 689 0034 8FEF      		ldi r24,lo8(-1)
+ 690 0036 81BB      		out 0x11,r24
+ 691               	.LBE113:
+ 692               	.LBE112:
+ 693               	.LBB114:
+ 694               	.LBB115:
+ 696               	.Ltext1:
+   1:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** /* Copyright (c) 2002, Marek Michalkiewicz
+   2:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    Copyright (c) 2004,2005,2007 Joerg Wunsch
+   3:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    Copyright (c) 2007  Florin-Viorel Petrov
+   4:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    All rights reserved.
+   5:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+   6:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    Redistribution and use in source and binary forms, with or without
+   7:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    modification, are permitted provided that the following conditions are met:
+   8:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+   9:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    * Redistributions of source code must retain the above copyright
+  10:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****      notice, this list of conditions and the following disclaimer.
+  11:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+  12:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    * Redistributions in binary form must reproduce the above copyright
+  13:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****      notice, this list of conditions and the following disclaimer in
+  14:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****      the documentation and/or other materials provided with the
+  15:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****      distribution.
+  16:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+  17:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    * Neither the name of the copyright holders nor the names of
+  18:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****      contributors may be used to endorse or promote products derived
+  19:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****      from this software without specific prior written permission.
+  20:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+  21:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  22:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****   AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  23:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****   IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  24:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****   ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+  25:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****   LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+  26:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****   CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+  27:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****   SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+  28:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****   INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+  29:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  30:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+  31:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****   POSSIBILITY OF SUCH DAMAGE. */
+  32:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+  33:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** /* $Id$ */
+  34:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+  35:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** #ifndef _UTIL_DELAY_H_
+  36:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** #define _UTIL_DELAY_H_ 1
+  37:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+  38:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** #ifndef __HAS_DELAY_CYCLES
+  39:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** #define __HAS_DELAY_CYCLES 1
+  40:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** #endif
+  41:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+  42:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** #include <inttypes.h>
+  43:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** #include <util/delay_basic.h>
+  44:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** #include <math.h>
+  45:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+  46:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** /** \file */
+  47:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** /** \defgroup util_delay <util/delay.h>: Convenience functions for busy-wait delay loops
+  48:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     \code
+  49:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     #define F_CPU 1000000UL  // 1 MHz
+  50:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     //#define F_CPU 14.7456E6
+  51:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     #include <util/delay.h>
+  52:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     \endcode
+  53:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+  54:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     \note As an alternative method, it is possible to pass the
+  55:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     F_CPU macro down to the compiler from the Makefile.
+  56:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     Obviously, in that case, no \c \#define statement should be
+  57:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     used.
+  58:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+  59:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     The functions in this header file are wrappers around the basic
+  60:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     busy-wait functions from <util/delay_basic.h>.  They are meant as
+  61:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     convenience functions where actual time values can be specified
+  62:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     rather than a number of cycles to wait for.  The idea behind is
+  63:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     that compile-time constant expressions will be eliminated by
+  64:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     compiler optimization so floating-point expressions can be used
+  65:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     to calculate the number of delay cycles needed based on the CPU
+  66:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     frequency passed by the macro F_CPU.
+  67:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+  68:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     \note In order for these functions to work as intended, compiler
+  69:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     optimizations <em>must</em> be enabled, and the delay time
+  70:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     <em>must</em> be an expression that is a known constant at
+  71:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     compile-time.  If these requirements are not met, the resulting
+  72:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     delay will be much longer (and basically unpredictable), and
+  73:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     applications that otherwise do not use floating-point calculations
+  74:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     will experience severe code bloat by the floating-point library
+  75:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     routines linked into the application.
+  76:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+  77:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     The functions available allow the specification of microsecond, and
+  78:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     millisecond delays directly, using the application-supplied macro
+  79:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     F_CPU as the CPU clock frequency (in Hertz).
+  80:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+  81:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** */
+  82:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+  83:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** #if !defined(__DOXYGEN__)
+  84:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** static inline void _delay_us(double __us) __attribute__((always_inline));
+  85:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** static inline void _delay_ms(double __ms) __attribute__((always_inline));
+  86:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** #endif
+  87:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+  88:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** #ifndef F_CPU
+  89:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** /* prevent compiler error by supplying a default */
+  90:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** # warning "F_CPU not defined for <util/delay.h>"
+  91:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** # define F_CPU 1000000UL
+  92:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** #endif
+  93:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+  94:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** #ifndef __OPTIMIZE__
+  95:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** # warning "Compiler optimizations disabled; functions from <util/delay.h> won't work as designed"
+  96:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** #endif
+  97:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+  98:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** #if __HAS_DELAY_CYCLES && defined(__OPTIMIZE__) && \
+  99:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****   !defined(__DELAY_BACKWARD_COMPATIBLE__) &&	   \
+ 100:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****   __STDC_HOSTED__
+ 101:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** #  include <math.h>
+ 102:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** #endif
+ 103:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+ 104:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** /**
+ 105:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    \ingroup util_delay
+ 106:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+ 107:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    Perform a delay of \c __ms milliseconds, using _delay_loop_2().
+ 108:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+ 109:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    The macro F_CPU is supposed to be defined to a
+ 110:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    constant defining the CPU clock frequency (in Hertz).
+ 111:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+ 112:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    The maximal possible delay is 262.14 ms / F_CPU in MHz.
+ 113:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+ 114:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    When the user request delay which exceed the maximum possible one,
+ 115:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    _delay_ms() provides a decreased resolution functionality. In this
+ 116:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    mode _delay_ms() will work with a resolution of 1/10 ms, providing
+ 117:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    delays up to 6.5535 seconds (independent from CPU frequency).  The
+ 118:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    user will not be informed about decreased resolution.
+ 119:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+ 120:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    If the avr-gcc toolchain has __builtin_avr_delay_cycles(unsigned long)
+ 121:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    support, maximal possible delay is 4294967.295 ms/ F_CPU in MHz. For
+ 122:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    values greater than the maximal possible delay, overflows results in
+ 123:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    no delay i.e., 0ms.
+ 124:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+ 125:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    Conversion of __us into clock cycles may not always result in integer.
+ 126:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    By default, the clock cycles rounded up to next integer. This ensures that
+ 127:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    the user gets atleast __us microseconds of delay.
+ 128:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+ 129:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    Alternatively, user can define __DELAY_ROUND_DOWN__ and __DELAY_ROUND_CLOSEST__
+ 130:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    to round down and round to closest integer.
+ 131:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+ 132:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    Note: The new implementation of _delay_ms(double __ms) with 
+ 133:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     __builtin_avr_delay_cycles(unsigned long) support is not backward compatible. 
+ 134:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    User can define __DELAY_BACKWARD_COMPATIBLE__ to get a backward compatible delay.
+ 135:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    Also, the backward compatible
+ 136:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    algorithm will be chosen if the code is compiled in a <em>freestanding
+ 137:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    environment</em> (GCC option \c -ffreestanding), as the math functions
+ 138:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    required for rounding are not available to the compiler then.
+ 139:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+ 140:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****  */
+ 141:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** void
+ 142:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** _delay_ms(double __ms)
+ 143:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** {
+ 144:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 	double __tmp ; 
+ 145:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** #if __HAS_DELAY_CYCLES && defined(__OPTIMIZE__) && \
+ 146:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****   !defined(__DELAY_BACKWARD_COMPATIBLE__) &&	   \
+ 147:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****   __STDC_HOSTED__
+ 148:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 	uint32_t __ticks_dc;
+ 149:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 	extern void __builtin_avr_delay_cycles(unsigned long);
+ 150:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 	__tmp = ((F_CPU) / 1e3) * __ms;
+ 151:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+ 152:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 	#if defined(__DELAY_ROUND_DOWN__)
+ 153:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 		__ticks_dc = (uint32_t)fabs(__tmp);
+ 154:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+ 155:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 	#elif defined(__DELAY_ROUND_CLOSEST__)
+ 156:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 		__ticks_dc = (uint32_t)(fabs(__tmp)+0.5);
+ 157:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+ 158:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 	#else
+ 159:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 		//round up by default
+ 160:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
+ 161:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 	#endif
+ 162:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+ 163:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 	__builtin_avr_delay_cycles(__ticks_dc);
+ 698               	.LM60:
+ 699 0038 0FEF      		ldi r16,lo8(63999)
+ 700 003a 19EF      		ldi r17,hi8(63999)
+ 701 003c 20E0      		ldi r18,hlo8(63999)
+ 702 003e 0150      	1:	subi r16,1
+ 703 0040 1040      		sbci r17,0
+ 704 0042 2040      		sbci r18,0
+ 705 0044 01F4      		brne 1b
+ 706 0046 00C0      		rjmp .
+ 707 0048 0000      		nop
+ 708               	.LBE115:
+ 709               	.LBE114:
+ 711               	.Ltext2:
+ 350:main.c        **** 	uint8_t btn; 	
+ 351:main.c        **** 	
+ 352:main.c        **** 	io_init();	
+ 353:main.c        **** 
+ 354:main.c        **** 	_delay_ms(20);
+ 355:main.c        **** 
+ 356:main.c        **** 	if(btnCheck(BTN_SET))// сброс настроек при включении с зажатой кнопкой BTN_SET
+ 713               	.LM61:
+ 714 004a 9A99      		sbic 0x13,2
+ 715 004c 00C0      		rjmp .L15
+ 716               	.LBB116:
+ 717               	.LBB117:
+ 719               	.Ltext3:
+ 721               	.LM62:
+ 722 004e 3FEF      		ldi r19,lo8(15999999)
+ 723 0050 83E2      		ldi r24,hi8(15999999)
+ 724 0052 94EF      		ldi r25,hlo8(15999999)
+ 725 0054 3150      	1:	subi r19,1
+ 726 0056 8040      		sbci r24,0
+ 727 0058 9040      		sbci r25,0
+ 728 005a 01F4      		brne 1b
+ 729 005c 00C0      		rjmp .
+ 730 005e 0000      		nop
+ 731               	.LBE117:
+ 732               	.LBE116:
+ 734               	.Ltext4:
+ 357:main.c        **** 	{
+ 358:main.c        **** 		//db_puts("reset to default");
+ 359:main.c        **** 		_delay_ms(5000);
+ 360:main.c        **** 		if(btnCheck(BTN_SET))
+ 736               	.LM63:
+ 737 0060 9A99      		sbic 0x13,2
+ 738 0062 00C0      		rjmp .L15
+ 361:main.c        **** 		{
+ 362:main.c        **** 			btn_wait_up(BTN_SET);
+ 740               	.LM64:
+ 741 0064 84E0      		ldi r24,lo8(4)
+ 742 0066 00D0      		rcall btn_wait_up
+ 363:main.c        **** 			memcpy_P(&generator, &def_setting, sizeof(generator));
+ 744               	.LM65:
+ 745 0068 46E3      		ldi r20,lo8(54)
+ 746 006a 50E0      		ldi r21,0
+ 747 006c 60E0      		ldi r22,lo8(def_setting)
+ 748 006e 70E0      		ldi r23,hi8(def_setting)
+ 749 0070 80E0      		ldi r24,lo8(generator)
+ 750 0072 90E0      		ldi r25,hi8(generator)
+ 751 0074 00D0      		rcall memcpy_P
+ 364:main.c        **** 			eeprom_update_block(&generator, &setting, sizeof(generator));
+ 753               	.LM66:
+ 754 0076 46E3      		ldi r20,lo8(54)
+ 755 0078 50E0      		ldi r21,0
+ 756 007a 60E0      		ldi r22,lo8(setting)
+ 757 007c 70E0      		ldi r23,hi8(setting)
+ 758 007e 80E0      		ldi r24,lo8(generator)
+ 759 0080 90E0      		ldi r25,hi8(generator)
+ 760 0082 00D0      		rcall eeprom_update_block
+ 761               	.L15:
+ 762               	.LBB118:
+ 763               	.LBB119:
+ 169:main.c        **** 	OCR2 = F_CPU/8/2/VGEN_FREQ;
+ 765               	.LM67:
+ 766 0084 BB9A      		sbi 0x17,3
+ 170:main.c        **** 	TCCR2 =  (0<<WGM20)|(1<<WGM21)| (1<<COM20)|  (0<<CS22)|(1<<CS21)|(0<<CS20);
+ 768               	.LM68:
+ 769 0086 82E3      		ldi r24,lo8(50)
+ 770 0088 83BD      		out 0x23,r24
+ 171:main.c        **** }
+ 772               	.LM69:
+ 773 008a 8AE1      		ldi r24,lo8(26)
+ 774 008c 85BD      		out 0x25,r24
+ 775               	.LBE119:
+ 776               	.LBE118:
+ 777               	.LBB120:
+ 778               	.LBB121:
+ 780               	.Ltext5:
+ 782               	.LM70:
+ 783 008e 0FEF      		ldi r16,lo8(319999)
+ 784 0090 11EE      		ldi r17,hi8(319999)
+ 785 0092 24E0      		ldi r18,hlo8(319999)
+ 786 0094 0150      	1:	subi r16,1
+ 787 0096 1040      		sbci r17,0
+ 788 0098 2040      		sbci r18,0
+ 789 009a 01F4      		brne 1b
+ 790 009c 00C0      		rjmp .
+ 791 009e 0000      		nop
+ 792               	.LBE121:
+ 793               	.LBE120:
+ 795               	.Ltext6:
+ 365:main.c        **** 		}
+ 366:main.c        **** 	}
+ 367:main.c        **** 
+ 368:main.c        **** 	#ifdef VGEN_ENABLE
+ 369:main.c        **** 		vgen_on();
+ 370:main.c        **** 		_delay_ms(100);
+ 371:main.c        **** 	#endif
+ 372:main.c        **** 	lcd_init();
+ 797               	.LM71:
+ 798 00a0 00D0      		rcall lcd_init
+ 373:main.c        **** 	lcd_clrscr();
+ 800               	.LM72:
+ 801 00a2 00D0      		rcall lcd_clrscr
+ 374:main.c        **** 	eeprom_read_block(&generator, &setting, sizeof(generator));
+ 803               	.LM73:
+ 804 00a4 46E3      		ldi r20,lo8(54)
+ 805 00a6 50E0      		ldi r21,0
+ 806 00a8 60E0      		ldi r22,lo8(setting)
+ 807 00aa 70E0      		ldi r23,hi8(setting)
+ 808 00ac 80E0      		ldi r24,lo8(generator)
+ 809 00ae 90E0      		ldi r25,hi8(generator)
+ 810 00b0 00D0      		rcall eeprom_read_block
+ 375:main.c        **** 
+ 376:main.c        **** 	while(1)
+ 377:main.c        **** 	{
+ 378:main.c        **** 		switch(generator.m)
+ 379:main.c        **** 		{
+ 380:main.c        **** 			case M_SINW:
+ 381:main.c        **** 				dds_main(PSTR("\rSINE "),sinewave,&generator.f_sine, &setting.f_sine);
+ 382:main.c        **** 				break;
+ 383:main.c        **** 				
+ 384:main.c        **** 			case M_STW:
+ 385:main.c        **** 
+ 386:main.c        **** 				dds_main(PSTR("\rSAWTOTH "),sawtoothwave,&generator.f_stw, &setting.f_stw);
+ 387:main.c        **** 				break;
+ 388:main.c        **** 				
+ 389:main.c        **** 			case M_RSTW:
+ 390:main.c        **** 				dds_main(PSTR("\rRSAWTOTH "),rsawtoothwave,&generator.f_rstw, &setting.f_rstw);
+ 391:main.c        **** 				break;
+ 392:main.c        **** 				
+ 393:main.c        **** 			case M_TRW:
+ 394:main.c        **** 				dds_main(PSTR("\rTRIANGLE "),trianglewave,&generator.f_trw, &setting.f_trw);
+ 395:main.c        **** 				break;
+ 396:main.c        **** 				
+ 397:main.c        **** 			case M_ECG:
+ 398:main.c        **** 				dds_main(PSTR("\rECG "),ECG,&generator.f_ecg, &setting.f_ecg);
+ 399:main.c        **** 				eeprom_update_dword(&setting.f_ecg, generator.f_ecg);
+ 400:main.c        **** 				break;
+ 401:main.c        **** 				
+ 402:main.c        **** 			case M_NOISE:
+ 403:main.c        **** 				{
+ 404:main.c        **** 					nnl_puts_P(PSTR("\rNOISE "));
+ 405:main.c        **** 					print_on_off(0);
+ 406:main.c        **** 				
+ 407:main.c        **** 					btn = btn_wait();
+ 408:main.c        **** 					if(btn == BTN_START)
+ 409:main.c        **** 					{
+ 410:main.c        **** 						btn_wait_up(BTN_START);
+ 411:main.c        **** 						eeprom_update_byte(&setting.m, generator.m);
+ 412:main.c        **** 						print_on_off(1);
+ 413:main.c        **** 						noise_start();
+ 414:main.c        **** 						btn_wait_up(BTN_START);
+ 415:main.c        **** 					}
+ 416:main.c        **** 					else if(btn == BTN_MODE)
+ 417:main.c        **** 					{
+ 418:main.c        **** 						generator.m = M_SQW;
+ 419:main.c        **** 					}
+ 420:main.c        **** 					break;
+ 421:main.c        **** 					
+ 422:main.c        **** 				}
+ 423:main.c        **** 			case M_SQW:
+ 424:main.c        **** 				{
+ 425:main.c        **** 					
+ 426:main.c        **** 					nnl_puts_P(PSTR("\rSQUARE WAVE "));
+ 427:main.c        **** 					print_on_off(0);
+ 428:main.c        **** 					print_fq(generator.f_sqw);
+ 429:main.c        **** 					
+ 430:main.c        **** 					btn = btn_wait();
+ 431:main.c        **** 					if(btn == BTN_START)
+ 432:main.c        **** 					{
+ 433:main.c        **** 						btn_wait_up(BTN_START);
+ 434:main.c        **** 						eeprom_update_byte(&setting.m, generator.m);
+ 435:main.c        **** 						eeprom_update_dword(&setting.f_sqw, generator.f_sqw);
+ 436:main.c        **** 
+ 437:main.c        **** 						print_on_off(1);
+ 438:main.c        **** 						ddssq_start(generator.f_sqw);
+ 439:main.c        **** 						btn_wait_up(BTN_START);
+ 440:main.c        **** 					}
+ 441:main.c        **** 					else if(btn == BTN_MODE)
+ 442:main.c        **** 					{
+ 443:main.c        **** 						
+ 444:main.c        **** 						generator.m= M_SQPWM;
+ 445:main.c        **** 					}
+ 446:main.c        **** 					else if(btn == BTN_SET)
+ 447:main.c        **** 					{
+ 448:main.c        **** 						input_fd(&generator.f_sqw);
+ 449:main.c        **** 					}
+ 450:main.c        **** 					break;
+ 451:main.c        **** 				}
+ 452:main.c        **** 				
+ 453:main.c        **** 			case M_SQPWM:	
+ 454:main.c        **** 				{
+ 455:main.c        **** 					nnl_puts_P(PSTR("\rPWM "));
+ 456:main.c        **** 					print_on_off(0);
+ 457:main.c        **** 					print_fq(generator.pwm_f);
+ 458:main.c        **** 					nnl_puts_P(PSTR(" D="));
+ 459:main.c        **** 					print_u(generator.pwm_d,0);
+ 460:main.c        **** 					
+ 461:main.c        **** 					if(generator.pwm_sync == EXT_HIGHT)
+ 462:main.c        **** 						nnl_puts_P(PSTR(" E=H"));
+ 463:main.c        **** 					else if(generator.pwm_sync == EXT_LOW)
+ 464:main.c        **** 						nnl_puts_P(PSTR(" E=L"));
+ 465:main.c        **** 						
+ 466:main.c        **** 					btn = btn_wait();
+ 467:main.c        **** 					if(btn == BTN_START)
+ 468:main.c        **** 					{
+ 469:main.c        **** 						btn_wait_up(BTN_START);
+ 470:main.c        **** 
+ 471:main.c        **** 						eeprom_update_byte(&setting.m, generator.m);
+ 472:main.c        **** 						eeprom_update_block(&generator.pwm_f,&setting.pwm_f, 1+4+1);
+ 473:main.c        **** 
+ 474:main.c        **** 						print_on_off(1);
+ 475:main.c        **** 						pwm_start(generator.pwm_f, generator.pwm_d);
+ 476:main.c        **** 						while(!btnCheck(BTN_START))
+ 477:main.c        **** 						{
+ 478:main.c        **** 							if(generator.pwm_sync == EXT_HIGHT)
+ 479:main.c        **** 							{
+ 480:main.c        **** 								if((EXT_PINS & EXT_PIN_MSK) != 0)
+ 481:main.c        **** 									TCCR1A |= 1<<COM1B1;
+ 482:main.c        **** 								else
+ 483:main.c        **** 									TCCR1A &= ~(1<<COM1B1);
+ 484:main.c        **** 							}
+ 485:main.c        **** 							else if(generator.pwm_sync == EXT_LOW)
+ 486:main.c        **** 							{
+ 487:main.c        **** 								if((EXT_PINS & EXT_PIN_MSK) == 0)
+ 488:main.c        **** 									TCCR1A |= 1<<COM1B1;
+ 489:main.c        **** 								else
+ 490:main.c        **** 									TCCR1A &= ~(1<<COM1B1);
+ 491:main.c        **** 							}
+ 492:main.c        **** 						}
+ 493:main.c        **** 						pwm_stop();
+ 494:main.c        **** 						btn_wait_up(BTN_START);
+ 495:main.c        **** 					}
+ 496:main.c        **** 					else if(btn == BTN_MODE)
+ 497:main.c        **** 					{
+ 498:main.c        **** 						generator.m= M_HSSQW;
+ 499:main.c        **** 					}
+ 500:main.c        **** 					else if(btn == BTN_SET)
+ 501:main.c        **** 					{
+ 502:main.c        **** 						input_fd(&generator.pwm_f);
+ 503:main.c        **** 						generator.pwm_d = input_dc(generator.pwm_d);
+ 504:main.c        **** 						generator.pwm_sync = input_ext_sync();
+ 505:main.c        **** 					}
+ 506:main.c        **** 					break;
+ 507:main.c        **** 				
+ 508:main.c        **** 				}
+ 509:main.c        **** 			case M_HSSQW:
+ 510:main.c        **** 			{
+ 511:main.c        **** 				nnl_puts_P(PSTR("\rHIGH SPEED "));
+ 512:main.c        **** 				print_on_off(0);
+ 513:main.c        **** 				print_fq(generator.hs_f);
+ 514:main.c        **** 				btn = btn_wait();
+ 515:main.c        **** 				if(btn == BTN_START)
+ 516:main.c        **** 				{
+ 517:main.c        **** 					btn_wait_up(BTN_START);
+ 518:main.c        **** 					eeprom_update_byte(&setting.m, generator.m);
+ 519:main.c        **** 					eeprom_update_dword(&setting.hs_f, generator.hs_f);
+ 520:main.c        **** 					print_on_off(1);
+ 521:main.c        **** 					pwm_start(generator.hs_f, 50);
+ 522:main.c        **** 					while(!btnCheck(BTN_START)){};
+ 523:main.c        **** 					pwm_stop();
+ 524:main.c        **** 					btn_wait_up(BTN_START);
+ 525:main.c        **** 				}
+ 526:main.c        **** 				else if(btn == BTN_MODE)
+ 527:main.c        **** 				{
+ 528:main.c        **** 					
+ 529:main.c        **** 					generator.m= M_PULSE;
+ 530:main.c        **** 				}
+ 531:main.c        **** 				else if(btn == BTN_SET)
+ 532:main.c        **** 				{
+ 533:main.c        **** 					input_hs(&generator.hs_f);
+ 534:main.c        **** 				}
+ 535:main.c        **** 				break;
+ 536:main.c        **** 			}
+ 537:main.c        **** 				
+ 538:main.c        **** 			case M_PULSE:
+ 539:main.c        **** 				{
+ 540:main.c        **** 
+ 541:main.c        **** 					nnl_puts_P(PSTR("\rPULSE "));
+ 542:main.c        **** 					print_on_off(0);
+ 543:main.c        **** 					nnl_puts_P(PSTR("T="));
+ 544:main.c        **** 					print_u((generator.pulse_t_rise + generator.pulse_t_fall + generator.pulse_t_on + generator.pu
+ 545:main.c        **** 					nnl_puts_P(PSTR("us TR:"));
+ 546:main.c        **** 					if(generator.pulse_trig == TR_RISE)
+ 547:main.c        **** 						n_putchar('R');
+ 548:main.c        **** 					else if(generator.pulse_trig == TR_FALL)
+ 549:main.c        **** 						n_putchar('F');
+ 550:main.c        **** 					else
+ 551:main.c        **** 						nnl_puts_P(PSTR("NO"));
+ 552:main.c        **** 
+ 553:main.c        **** 
+ 554:main.c        **** 					btn = btn_wait();
+ 555:main.c        **** 					if(btn == BTN_START)
+ 556:main.c        **** 					{
+ 557:main.c        **** 						btn_wait_up(BTN_START);
+ 558:main.c        **** 						eeprom_update_byte(&setting.m, generator.m);
+ 559:main.c        **** 						eeprom_update_block(&generator.pulse_t_rise, &setting.pulse_t_rise,
+ 560:main.c        **** 						4 * sizeof(generator.pulse_t_rise) + sizeof(generator.pulse_n) + sizeof(generator.pulse_trig)
+ 561:main.c        **** 						
+ 562:main.c        **** 
+ 563:main.c        **** 						lcd_goto(13);
+ 564:main.c        **** 						if(generator.pulse_trig == TR_RISE)
+ 565:main.c        **** 						{
+ 566:main.c        **** 							nnl_puts_P(PSTR("W:R"));
+ 567:main.c        **** 							if(trig_wait_rise() == 0)
+ 568:main.c        **** 								goto p_cancel;
+ 569:main.c        **** 								//break;
+ 570:main.c        **** 						}
+ 571:main.c        **** 						else if(generator.pulse_trig == TR_FALL)
+ 572:main.c        **** 						{
+ 573:main.c        **** 							nnl_puts_P(PSTR("W:F"));
+ 574:main.c        **** 							if(trig_wait_fall() == 0)
+ 575:main.c        **** 								goto p_cancel;
+ 576:main.c        **** 								//break;
+ 577:main.c        **** 						}
+ 578:main.c        **** 						print_on_off(1);
+ 579:main.c        **** 						pulse_start();
+ 580:main.c        **** 						p_cancel:
+ 581:main.c        **** 						btn_wait_up(BTN_START);
+ 582:main.c        **** 					}
+ 583:main.c        **** 					else if(btn == BTN_MODE)
+ 584:main.c        **** 					{
+ 585:main.c        **** 						generator.m= M_TV;
+ 586:main.c        **** 					}
+ 587:main.c        **** 					else if(btn == BTN_SET)
+ 588:main.c        **** 					{
+ 589:main.c        **** 						input_t(&generator.pulse_t_rise,PSTR("\rTrise="));
+ 590:main.c        **** 						input_t(&generator.pulse_t_on,PSTR("\rTon="));
+ 591:main.c        **** 						input_t(&generator.pulse_t_fall,PSTR("\rTfall="));
+ 592:main.c        **** 						input_t(&generator.pulse_t_off,PSTR("\rToff="));
+ 593:main.c        **** 						input_n();
+ 594:main.c        **** 						generator.pulse_trig = input_trig();
+ 595:main.c        **** 					}
+ 596:main.c        **** 					break;
+ 597:main.c        **** 					
+ 598:main.c        **** 				}
+ 599:main.c        **** 			case M_TV:
+ 600:main.c        **** 				{
+ 601:main.c        **** 					nnl_puts_P(PSTR("\rTV VIDEO "));
+ 602:main.c        **** 					print_on_off(0);
+ 603:main.c        **** 					btn = btn_wait();
+ 604:main.c        **** 					if(btn == BTN_START)
+ 605:main.c        **** 					{
+ 606:main.c        **** 						btn_wait_up(BTN_START);
+ 607:main.c        **** 						print_on_off(1);
+ 608:main.c        **** 						tv_gen(&tv_vbars);
+ 609:main.c        **** 						btn_wait_up(BTN_START);
+ 610:main.c        **** 					}
+ 611:main.c        **** 					else if(btn == BTN_MODE)
+ 612:main.c        **** 					{
+ 613:main.c        **** 						generator.m= M_VER;
+ 614:main.c        **** 					}
+ 615:main.c        **** 					break;
+ 616:main.c        **** 				
+ 617:main.c        **** 				}
+ 618:main.c        **** 			case M_VER:
+ 619:main.c        **** 				nnl_puts_P(PSTR("\rNDDS VER"FW_VER"\nSIGNAL GENERATOR"));
+ 620:main.c        **** 				btn_wait();
+ 621:main.c        **** 				generator.m= M_SINW;
+ 622:main.c        **** 
+ 623:main.c        **** 				break;
+ 624:main.c        **** 			default:
+ 625:main.c        **** 				generator.m = M_SINW;
+ 812               	.LM74:
+ 813 00b2 9924      		clr r9
+ 814 00b4 9394      		inc r9
+ 585:main.c        **** 					}
+ 816               	.LM75:
+ 817 00b6 17E0      		ldi r17,lo8(7)
+ 818 00b8 812E      		mov r8,r17
+ 529:main.c        **** 				}
+ 820               	.LM76:
+ 821 00ba 0BE0      		ldi r16,lo8(11)
+ 822 00bc 702E      		mov r7,r16
+ 498:main.c        **** 					}
+ 824               	.LM77:
+ 825 00be 8AE0      		ldi r24,lo8(10)
+ 826 00c0 682E      		mov r6,r24
+ 444:main.c        **** 					}
+ 828               	.LM78:
+ 829 00c2 99E0      		ldi r25,lo8(9)
+ 830 00c4 592E      		mov r5,r25
+ 831               	.L17:
+ 378:main.c        **** 		{
+ 833               	.LM79:
+ 834 00c6 E091 0000 		lds r30,generator
+ 835 00ca 8E2F      		mov r24,r30
+ 836 00cc 90E0      		ldi r25,0
+ 837 00ce 8C30      		cpi r24,12
+ 838 00d0 9105      		cpc r25,__zero_reg__
+ 839 00d2 00F0      		brlo .+2
+ 840 00d4 00C0      		rjmp .L18
+ 841 00d6 FC01      		movw r30,r24
+ 842 00d8 E050      		subi r30,lo8(-(gs(.L20)))
+ 843 00da F040      		sbci r31,hi8(-(gs(.L20)))
+ 844 00dc 0994      		ijmp
+ 845               		.section	.progmem.gcc_sw_table.main,"ax",@progbits
+ 846               		.p2align	1
+ 847               	.L20:
+ 848 0000 00C0      		rjmp .L19
+ 849 0002 00C0      		rjmp .L21
+ 850 0004 00C0      		rjmp .L22
+ 851 0006 00C0      		rjmp .L23
+ 852 0008 00C0      		rjmp .L24
+ 853 000a 00C0      		rjmp .L25
+ 854 000c 00C0      		rjmp .L26
+ 855 000e 00C0      		rjmp .L27
+ 856 0010 00C0      		rjmp .L28
+ 857 0012 00C0      		rjmp .L29
+ 858 0014 00C0      		rjmp .L30
+ 859 0016 00C0      		rjmp .L31
+ 860               		.section	.text.startup.main
+ 861               	.L21:
+ 381:main.c        **** 				break;
+ 863               	.LM80:
+ 864 00de 20E0      		ldi r18,lo8(setting+1)
+ 865 00e0 30E0      		ldi r19,hi8(setting+1)
+ 866 00e2 40E0      		ldi r20,lo8(generator+1)
+ 867 00e4 50E0      		ldi r21,hi8(generator+1)
+ 868 00e6 60E0      		ldi r22,lo8(sinewave)
+ 869 00e8 70E0      		ldi r23,hi8(sinewave)
+ 870 00ea 80E0      		ldi r24,lo8(__c.2135)
+ 871 00ec 90E0      		ldi r25,hi8(__c.2135)
+ 872 00ee 00C0      		rjmp .L81
+ 873               	.L22:
+ 386:main.c        **** 				break;
+ 875               	.LM81:
+ 876 00f0 20E0      		ldi r18,lo8(setting+5)
+ 877 00f2 30E0      		ldi r19,hi8(setting+5)
+ 878 00f4 40E0      		ldi r20,lo8(generator+5)
+ 879 00f6 50E0      		ldi r21,hi8(generator+5)
+ 880 00f8 60E0      		ldi r22,lo8(sawtoothwave)
+ 881 00fa 70E0      		ldi r23,hi8(sawtoothwave)
+ 882 00fc 80E0      		ldi r24,lo8(__c.2139)
+ 883 00fe 90E0      		ldi r25,hi8(__c.2139)
+ 884               	.L81:
+ 885 0100 00D0      		rcall dds_main
+ 387:main.c        **** 				
+ 887               	.LM82:
+ 888 0102 00C0      		rjmp .L17
+ 889               	.L23:
+ 390:main.c        **** 				break;
+ 891               	.LM83:
+ 892 0104 20E0      		ldi r18,lo8(setting+9)
+ 893 0106 30E0      		ldi r19,hi8(setting+9)
+ 894 0108 40E0      		ldi r20,lo8(generator+9)
+ 895 010a 50E0      		ldi r21,hi8(generator+9)
+ 896 010c 60E0      		ldi r22,lo8(rsawtoothwave)
+ 897 010e 70E0      		ldi r23,hi8(rsawtoothwave)
+ 898 0110 80E0      		ldi r24,lo8(__c.2142)
+ 899 0112 90E0      		ldi r25,hi8(__c.2142)
+ 900 0114 00C0      		rjmp .L81
+ 901               	.L24:
+ 394:main.c        **** 				break;
+ 903               	.LM84:
+ 904 0116 20E0      		ldi r18,lo8(setting+13)
+ 905 0118 30E0      		ldi r19,hi8(setting+13)
+ 906 011a 40E0      		ldi r20,lo8(generator+13)
+ 907 011c 50E0      		ldi r21,hi8(generator+13)
+ 908 011e 60E0      		ldi r22,lo8(trianglewave)
+ 909 0120 70E0      		ldi r23,hi8(trianglewave)
+ 910 0122 80E0      		ldi r24,lo8(__c.2145)
+ 911 0124 90E0      		ldi r25,hi8(__c.2145)
+ 912 0126 00C0      		rjmp .L81
+ 913               	.L25:
+ 398:main.c        **** 				eeprom_update_dword(&setting.f_ecg, generator.f_ecg);
+ 915               	.LM85:
+ 916 0128 20E0      		ldi r18,lo8(setting+17)
+ 917 012a 30E0      		ldi r19,hi8(setting+17)
+ 918 012c 40E0      		ldi r20,lo8(generator+17)
+ 919 012e 50E0      		ldi r21,hi8(generator+17)
+ 920 0130 60E0      		ldi r22,lo8(ECG)
+ 921 0132 70E0      		ldi r23,hi8(ECG)
+ 922 0134 80E0      		ldi r24,lo8(__c.2148)
+ 923 0136 90E0      		ldi r25,hi8(__c.2148)
+ 924 0138 00D0      		rcall dds_main
+ 399:main.c        **** 				break;
+ 926               	.LM86:
+ 927 013a 4091 0000 		lds r20,generator+17
+ 928 013e 5091 0000 		lds r21,generator+17+1
+ 929 0142 6091 0000 		lds r22,generator+17+2
+ 930 0146 7091 0000 		lds r23,generator+17+3
+ 931 014a 80E0      		ldi r24,lo8(setting+17)
+ 932 014c 90E0      		ldi r25,hi8(setting+17)
+ 933 014e 00D0      		rcall eeprom_update_dword
+ 400:main.c        **** 				
+ 935               	.LM87:
+ 936 0150 00C0      		rjmp .L17
+ 937               	.L26:
+ 404:main.c        **** 					print_on_off(0);
+ 939               	.LM88:
+ 940 0152 80E0      		ldi r24,lo8(__c.2151)
+ 941 0154 90E0      		ldi r25,hi8(__c.2151)
+ 942 0156 00D0      		rcall nnl_puts_P
+ 405:main.c        **** 				
+ 944               	.LM89:
+ 945 0158 80E0      		ldi r24,0
+ 946 015a 00D0      		rcall print_on_off
+ 407:main.c        **** 					if(btn == BTN_START)
+ 948               	.LM90:
+ 949 015c 00D0      		rcall btn_wait
+ 408:main.c        **** 					{
+ 951               	.LM91:
+ 952 015e 8031      		cpi r24,lo8(16)
+ 953 0160 01F4      		brne .L33
+ 410:main.c        **** 						eeprom_update_byte(&setting.m, generator.m);
+ 955               	.LM92:
+ 956 0162 00D0      		rcall btn_wait_up
+ 411:main.c        **** 						print_on_off(1);
+ 958               	.LM93:
+ 959 0164 6091 0000 		lds r22,generator
+ 960 0168 80E0      		ldi r24,lo8(setting)
+ 961 016a 90E0      		ldi r25,hi8(setting)
+ 962 016c 00D0      		rcall eeprom_update_byte
+ 412:main.c        **** 						noise_start();
+ 964               	.LM94:
+ 965 016e 81E0      		ldi r24,lo8(1)
+ 966 0170 00D0      		rcall print_on_off
+ 967               	.L34:
+ 968               	.LBB122:
+ 969               	.LBB123:
+ 198:main.c        **** 	{
+ 971               	.LM95:
+ 972 0172 9C9B      		sbis 0x13,4
+ 973 0174 00C0      		rjmp .L82
+ 200:main.c        **** 	}
+ 975               	.LM96:
+ 976 0176 00D0      		rcall rand
+ 977 0178 82BB      		out 0x12,r24
+ 978 017a 00C0      		rjmp .L34
+ 979               	.L33:
+ 980               	.LBE123:
+ 981               	.LBE122:
+ 416:main.c        **** 					{
+ 983               	.LM97:
+ 984 017c 8830      		cpi r24,lo8(8)
+ 985 017e 01F0      		breq .+2
+ 986 0180 00C0      		rjmp .L17
+ 418:main.c        **** 					}
+ 988               	.LM98:
+ 989 0182 8093 0000 		sts generator,r24
+ 990 0186 00C0      		rjmp .L17
+ 991               	.L28:
+ 426:main.c        **** 					print_on_off(0);
+ 993               	.LM99:
+ 994 0188 80E0      		ldi r24,lo8(__c.2154)
+ 995 018a 90E0      		ldi r25,hi8(__c.2154)
+ 996 018c 00D0      		rcall nnl_puts_P
+ 427:main.c        **** 					print_fq(generator.f_sqw);
+ 998               	.LM100:
+ 999 018e 80E0      		ldi r24,0
+ 1000 0190 00D0      		rcall print_on_off
+ 428:main.c        **** 					
+ 1002               	.LM101:
+ 1003 0192 6091 0000 		lds r22,generator+21
+ 1004 0196 7091 0000 		lds r23,generator+21+1
+ 1005 019a 8091 0000 		lds r24,generator+21+2
+ 1006 019e 9091 0000 		lds r25,generator+21+3
+ 1007 01a2 00D0      		rcall print_fq
+ 430:main.c        **** 					if(btn == BTN_START)
+ 1009               	.LM102:
+ 1010 01a4 00D0      		rcall btn_wait
+ 431:main.c        **** 					{
+ 1012               	.LM103:
+ 1013 01a6 8031      		cpi r24,lo8(16)
+ 1014 01a8 01F4      		brne .L37
+ 433:main.c        **** 						eeprom_update_byte(&setting.m, generator.m);
+ 1016               	.LM104:
+ 1017 01aa 00D0      		rcall btn_wait_up
+ 434:main.c        **** 						eeprom_update_dword(&setting.f_sqw, generator.f_sqw);
+ 1019               	.LM105:
+ 1020 01ac 6091 0000 		lds r22,generator
+ 1021 01b0 80E0      		ldi r24,lo8(setting)
+ 1022 01b2 90E0      		ldi r25,hi8(setting)
+ 1023 01b4 00D0      		rcall eeprom_update_byte
+ 435:main.c        **** 
+ 1025               	.LM106:
+ 1026 01b6 4091 0000 		lds r20,generator+21
+ 1027 01ba 5091 0000 		lds r21,generator+21+1
+ 1028 01be 6091 0000 		lds r22,generator+21+2
+ 1029 01c2 7091 0000 		lds r23,generator+21+3
+ 1030 01c6 80E0      		ldi r24,lo8(setting+21)
+ 1031 01c8 90E0      		ldi r25,hi8(setting+21)
+ 1032 01ca 00D0      		rcall eeprom_update_dword
+ 437:main.c        **** 						ddssq_start(generator.f_sqw);
+ 1034               	.LM107:
+ 1035 01cc 81E0      		ldi r24,lo8(1)
+ 1036 01ce 00D0      		rcall print_on_off
+ 438:main.c        **** 						btn_wait_up(BTN_START);
+ 1038               	.LM108:
+ 1039 01d0 6091 0000 		lds r22,generator+21
+ 1040 01d4 7091 0000 		lds r23,generator+21+1
+ 1041 01d8 8091 0000 		lds r24,generator+21+2
+ 1042 01dc 9091 0000 		lds r25,generator+21+3
+ 1043 01e0 00D0      		rcall ddssq_start
+ 1044 01e2 00C0      		rjmp .L82
+ 1045               	.L37:
+ 441:main.c        **** 					{
+ 1047               	.LM109:
+ 1048 01e4 8830      		cpi r24,lo8(8)
+ 1049 01e6 01F4      		brne .L38
+ 444:main.c        **** 					}
+ 1051               	.LM110:
+ 1052 01e8 5092 0000 		sts generator,r5
+ 1053 01ec 00C0      		rjmp .L17
+ 1054               	.L38:
+ 446:main.c        **** 					{
+ 1056               	.LM111:
+ 1057 01ee 8430      		cpi r24,lo8(4)
+ 1058 01f0 01F0      		breq .+2
+ 1059 01f2 00C0      		rjmp .L17
+ 448:main.c        **** 					}
+ 1061               	.LM112:
+ 1062 01f4 80E0      		ldi r24,lo8(generator+21)
+ 1063 01f6 90E0      		ldi r25,hi8(generator+21)
+ 1064 01f8 00D0      		rcall input_fd
+ 1065 01fa 00C0      		rjmp .L17
+ 1066               	.L29:
+ 455:main.c        **** 					print_on_off(0);
+ 1068               	.LM113:
+ 1069 01fc 80E0      		ldi r24,lo8(__c.2157)
+ 1070 01fe 90E0      		ldi r25,hi8(__c.2157)
+ 1071 0200 00D0      		rcall nnl_puts_P
+ 456:main.c        **** 					print_fq(generator.pwm_f);
+ 1073               	.LM114:
+ 1074 0202 80E0      		ldi r24,0
+ 1075 0204 00D0      		rcall print_on_off
+ 457:main.c        **** 					nnl_puts_P(PSTR(" D="));
+ 1077               	.LM115:
+ 1078 0206 6091 0000 		lds r22,generator+25
+ 1079 020a 7091 0000 		lds r23,generator+25+1
+ 1080 020e 8091 0000 		lds r24,generator+25+2
+ 1081 0212 9091 0000 		lds r25,generator+25+3
+ 1082 0216 00D0      		rcall print_fq
+ 458:main.c        **** 					print_u(generator.pwm_d,0);
+ 1084               	.LM116:
+ 1085 0218 80E0      		ldi r24,lo8(__c.2159)
+ 1086 021a 90E0      		ldi r25,hi8(__c.2159)
+ 1087 021c 00D0      		rcall nnl_puts_P
+ 459:main.c        **** 					
+ 1089               	.LM117:
+ 1090 021e 6091 0000 		lds r22,generator+29
+ 1091 0222 70E0      		ldi r23,0
+ 1092 0224 80E0      		ldi r24,0
+ 1093 0226 90E0      		ldi r25,0
+ 1094 0228 40E0      		ldi r20,0
+ 1095 022a 00D0      		rcall print_u
+ 461:main.c        **** 						nnl_puts_P(PSTR(" E=H"));
+ 1097               	.LM118:
+ 1098 022c 8091 0000 		lds r24,generator+30
+ 1099 0230 8130      		cpi r24,lo8(1)
+ 1100 0232 01F4      		brne .L39
+ 462:main.c        **** 					else if(generator.pwm_sync == EXT_LOW)
+ 1102               	.LM119:
+ 1103 0234 80E0      		ldi r24,lo8(__c.2161)
+ 1104 0236 90E0      		ldi r25,hi8(__c.2161)
+ 1105 0238 00C0      		rjmp .L83
+ 1106               	.L39:
+ 463:main.c        **** 						nnl_puts_P(PSTR(" E=L"));
+ 1108               	.LM120:
+ 1109 023a 8230      		cpi r24,lo8(2)
+ 1110 023c 01F4      		brne .L40
+ 464:main.c        **** 						
+ 1112               	.LM121:
+ 1113 023e 80E0      		ldi r24,lo8(__c.2163)
+ 1114 0240 90E0      		ldi r25,hi8(__c.2163)
+ 1115               	.L83:
+ 1116 0242 00D0      		rcall nnl_puts_P
+ 1117               	.L40:
+ 466:main.c        **** 					if(btn == BTN_START)
+ 1119               	.LM122:
+ 1120 0244 00D0      		rcall btn_wait
+ 467:main.c        **** 					{
+ 1122               	.LM123:
+ 1123 0246 8031      		cpi r24,lo8(16)
+ 1124 0248 01F4      		brne .L41
+ 469:main.c        **** 
+ 1126               	.LM124:
+ 1127 024a 00D0      		rcall btn_wait_up
+ 471:main.c        **** 						eeprom_update_block(&generator.pwm_f,&setting.pwm_f, 1+4+1);
+ 1129               	.LM125:
+ 1130 024c 6091 0000 		lds r22,generator
+ 1131 0250 80E0      		ldi r24,lo8(setting)
+ 1132 0252 90E0      		ldi r25,hi8(setting)
+ 1133 0254 00D0      		rcall eeprom_update_byte
+ 472:main.c        **** 
+ 1135               	.LM126:
+ 1136 0256 46E0      		ldi r20,lo8(6)
+ 1137 0258 50E0      		ldi r21,0
+ 1138 025a 60E0      		ldi r22,lo8(setting+25)
+ 1139 025c 70E0      		ldi r23,hi8(setting+25)
+ 1140 025e 80E0      		ldi r24,lo8(generator+25)
+ 1141 0260 90E0      		ldi r25,hi8(generator+25)
+ 1142 0262 00D0      		rcall eeprom_update_block
+ 474:main.c        **** 						pwm_start(generator.pwm_f, generator.pwm_d);
+ 1144               	.LM127:
+ 1145 0264 81E0      		ldi r24,lo8(1)
+ 1146 0266 00D0      		rcall print_on_off
+ 475:main.c        **** 						while(!btnCheck(BTN_START))
+ 1148               	.LM128:
+ 1149 0268 6091 0000 		lds r22,generator+25
+ 1150 026c 7091 0000 		lds r23,generator+25+1
+ 1151 0270 8091 0000 		lds r24,generator+25+2
+ 1152 0274 9091 0000 		lds r25,generator+25+3
+ 1153 0278 4091 0000 		lds r20,generator+29
+ 1154 027c 00D0      		rcall pwm_start
+ 1155               	.L42:
+ 476:main.c        **** 						{
+ 1157               	.LM129:
+ 1158 027e 9C9B      		sbis 0x13,4
+ 1159 0280 00C0      		rjmp .L86
+ 478:main.c        **** 							{
+ 1161               	.LM130:
+ 1162 0282 8091 0000 		lds r24,generator+30
+ 1163 0286 8130      		cpi r24,lo8(1)
+ 1164 0288 01F4      		brne .L43
+ 480:main.c        **** 									TCCR1A |= 1<<COM1B1;
+ 1166               	.LM131:
+ 1167 028a 9D9B      		sbis 0x13,5
+ 1168 028c 00C0      		rjmp .L46
+ 1169 028e 00C0      		rjmp .L87
+ 1170               	.L43:
+ 485:main.c        **** 							{
+ 1172               	.LM132:
+ 1173 0290 8230      		cpi r24,lo8(2)
+ 1174 0292 01F4      		brne .L42
+ 487:main.c        **** 									TCCR1A |= 1<<COM1B1;
+ 1176               	.LM133:
+ 1177 0294 9D99      		sbic 0x13,5
+ 1178 0296 00C0      		rjmp .L46
+ 1179               	.L87:
+ 488:main.c        **** 								else
+ 1181               	.LM134:
+ 1182 0298 8FB5      		in r24,0x2f
+ 1183 029a 8062      		ori r24,lo8(32)
+ 1184 029c 00C0      		rjmp .L84
+ 1185               	.L46:
+ 490:main.c        **** 							}
+ 1187               	.LM135:
+ 1188 029e 8FB5      		in r24,0x2f
+ 1189 02a0 8F7D      		andi r24,lo8(-33)
+ 1190               	.L84:
+ 1191 02a2 8FBD      		out 0x2f,r24
+ 1192 02a4 00C0      		rjmp .L42
+ 1193               	.L41:
+ 496:main.c        **** 					{
+ 1195               	.LM136:
+ 1196 02a6 8830      		cpi r24,lo8(8)
+ 1197 02a8 01F4      		brne .L48
+ 498:main.c        **** 					}
+ 1199               	.LM137:
+ 1200 02aa 6092 0000 		sts generator,r6
+ 1201 02ae 00C0      		rjmp .L17
+ 1202               	.L48:
+ 500:main.c        **** 					{
+ 1204               	.LM138:
+ 1205 02b0 8430      		cpi r24,lo8(4)
+ 1206 02b2 01F0      		breq .+2
+ 1207 02b4 00C0      		rjmp .L17
+ 502:main.c        **** 						generator.pwm_d = input_dc(generator.pwm_d);
+ 1209               	.LM139:
+ 1210 02b6 80E0      		ldi r24,lo8(generator+25)
+ 1211 02b8 90E0      		ldi r25,hi8(generator+25)
+ 1212 02ba 00D0      		rcall input_fd
+ 503:main.c        **** 						generator.pwm_sync = input_ext_sync();
+ 1214               	.LM140:
+ 1215 02bc 8091 0000 		lds r24,generator+29
+ 1216 02c0 00D0      		rcall input_dc
+ 1217 02c2 8093 0000 		sts generator+29,r24
+ 504:main.c        **** 					}
+ 1219               	.LM141:
+ 1220 02c6 00D0      		rcall input_ext_sync
+ 1221 02c8 8093 0000 		sts generator+30,r24
+ 1222 02cc 00C0      		rjmp .L17
+ 1223               	.L30:
+ 511:main.c        **** 				print_on_off(0);
+ 1225               	.LM142:
+ 1226 02ce 80E0      		ldi r24,lo8(__c.2169)
+ 1227 02d0 90E0      		ldi r25,hi8(__c.2169)
+ 1228 02d2 00D0      		rcall nnl_puts_P
+ 512:main.c        **** 				print_fq(generator.hs_f);
+ 1230               	.LM143:
+ 1231 02d4 80E0      		ldi r24,0
+ 1232 02d6 00D0      		rcall print_on_off
+ 513:main.c        **** 				btn = btn_wait();
+ 1234               	.LM144:
+ 1235 02d8 6091 0000 		lds r22,generator+31
+ 1236 02dc 7091 0000 		lds r23,generator+31+1
+ 1237 02e0 8091 0000 		lds r24,generator+31+2
+ 1238 02e4 9091 0000 		lds r25,generator+31+3
+ 1239 02e8 00D0      		rcall print_fq
+ 514:main.c        **** 				if(btn == BTN_START)
+ 1241               	.LM145:
+ 1242 02ea 00D0      		rcall btn_wait
+ 515:main.c        **** 				{
+ 1244               	.LM146:
+ 1245 02ec 8031      		cpi r24,lo8(16)
+ 1246 02ee 01F4      		brne .L49
+ 517:main.c        **** 					eeprom_update_byte(&setting.m, generator.m);
+ 1248               	.LM147:
+ 1249 02f0 00D0      		rcall btn_wait_up
+ 518:main.c        **** 					eeprom_update_dword(&setting.hs_f, generator.hs_f);
+ 1251               	.LM148:
+ 1252 02f2 6091 0000 		lds r22,generator
+ 1253 02f6 80E0      		ldi r24,lo8(setting)
+ 1254 02f8 90E0      		ldi r25,hi8(setting)
+ 1255 02fa 00D0      		rcall eeprom_update_byte
+ 519:main.c        **** 					print_on_off(1);
+ 1257               	.LM149:
+ 1258 02fc 4091 0000 		lds r20,generator+31
+ 1259 0300 5091 0000 		lds r21,generator+31+1
+ 1260 0304 6091 0000 		lds r22,generator+31+2
+ 1261 0308 7091 0000 		lds r23,generator+31+3
+ 1262 030c 80E0      		ldi r24,lo8(setting+31)
+ 1263 030e 90E0      		ldi r25,hi8(setting+31)
+ 1264 0310 00D0      		rcall eeprom_update_dword
+ 520:main.c        **** 					pwm_start(generator.hs_f, 50);
+ 1266               	.LM150:
+ 1267 0312 81E0      		ldi r24,lo8(1)
+ 1268 0314 00D0      		rcall print_on_off
+ 521:main.c        **** 					while(!btnCheck(BTN_START)){};
+ 1270               	.LM151:
+ 1271 0316 6091 0000 		lds r22,generator+31
+ 1272 031a 7091 0000 		lds r23,generator+31+1
+ 1273 031e 8091 0000 		lds r24,generator+31+2
+ 1274 0322 9091 0000 		lds r25,generator+31+3
+ 1275 0326 42E3      		ldi r20,lo8(50)
+ 1276 0328 00D0      		rcall pwm_start
+ 1277               	.L50:
+ 522:main.c        **** 					pwm_stop();
+ 1279               	.LM152:
+ 1280 032a 9C99      		sbic 0x13,4
+ 1281 032c 00C0      		rjmp .L50
+ 1282               	.L86:
+ 1283               	.LBB124:
+ 1284               	.LBB125:
+ 206:main.c        **** 	TCCR1B = 0;
+ 1286               	.LM153:
+ 1287 032e 1FBC      		out 0x2f,__zero_reg__
+ 207:main.c        **** 	HSPORT &= ~(1<<HSPIN);
+ 1289               	.LM154:
+ 1290 0330 1EBC      		out 0x2e,__zero_reg__
+ 208:main.c        **** 	HSDDR &= ~(1<<HSPIN);
+ 1292               	.LM155:
+ 1293 0332 C298      		cbi 0x18,2
+ 209:main.c        **** }
+ 1295               	.LM156:
+ 1296 0334 BA98      		cbi 0x17,2
+ 1297 0336 00C0      		rjmp .L82
+ 1298               	.L49:
+ 1299               	.LBE125:
+ 1300               	.LBE124:
+ 526:main.c        **** 				{
+ 1302               	.LM157:
+ 1303 0338 8830      		cpi r24,lo8(8)
+ 1304 033a 01F4      		brne .L51
+ 529:main.c        **** 				}
+ 1306               	.LM158:
+ 1307 033c 7092 0000 		sts generator,r7
+ 1308 0340 00C0      		rjmp .L17
+ 1309               	.L51:
+ 531:main.c        **** 				{
+ 1311               	.LM159:
+ 1312 0342 8430      		cpi r24,lo8(4)
+ 1313 0344 01F0      		breq .+2
+ 1314 0346 00C0      		rjmp .L17
+ 533:main.c        **** 				}
+ 1316               	.LM160:
+ 1317 0348 80E0      		ldi r24,lo8(generator+31)
+ 1318 034a 90E0      		ldi r25,hi8(generator+31)
+ 1319 034c 00D0      		rcall input_hs
+ 1320 034e 00C0      		rjmp .L17
+ 1321               	.L31:
+ 541:main.c        **** 					print_on_off(0);
+ 1323               	.LM161:
+ 1324 0350 80E0      		ldi r24,lo8(__c.2175)
+ 1325 0352 90E0      		ldi r25,hi8(__c.2175)
+ 1326 0354 00D0      		rcall nnl_puts_P
+ 542:main.c        **** 					nnl_puts_P(PSTR("T="));
+ 1328               	.LM162:
+ 1329 0356 80E0      		ldi r24,0
+ 1330 0358 00D0      		rcall print_on_off
+ 543:main.c        **** 					print_u((generator.pulse_t_rise + generator.pulse_t_fall + generator.pulse_t_on + generator.pu
+ 1332               	.LM163:
+ 1333 035a 80E0      		ldi r24,lo8(__c.2177)
+ 1334 035c 90E0      		ldi r25,hi8(__c.2177)
+ 1335 035e 00D0      		rcall nnl_puts_P
+ 544:main.c        **** 					nnl_puts_P(PSTR("us TR:"));
+ 1337               	.LM164:
+ 1338 0360 4091 0000 		lds r20,generator+43
+ 1339 0364 5091 0000 		lds r21,generator+43+1
+ 1340 0368 6091 0000 		lds r22,generator+43+2
+ 1341 036c 7091 0000 		lds r23,generator+43+3
+ 1342 0370 8091 0000 		lds r24,generator+35
+ 1343 0374 9091 0000 		lds r25,generator+35+1
+ 1344 0378 A091 0000 		lds r26,generator+35+2
+ 1345 037c B091 0000 		lds r27,generator+35+3
+ 1346 0380 480F      		add r20,r24
+ 1347 0382 591F      		adc r21,r25
+ 1348 0384 6A1F      		adc r22,r26
+ 1349 0386 7B1F      		adc r23,r27
+ 1350 0388 8091 0000 		lds r24,generator+39
+ 1351 038c 9091 0000 		lds r25,generator+39+1
+ 1352 0390 A091 0000 		lds r26,generator+39+2
+ 1353 0394 B091 0000 		lds r27,generator+39+3
+ 1354 0398 480F      		add r20,r24
+ 1355 039a 591F      		adc r21,r25
+ 1356 039c 6A1F      		adc r22,r26
+ 1357 039e 7B1F      		adc r23,r27
+ 1358 03a0 8091 0000 		lds r24,generator+47
+ 1359 03a4 9091 0000 		lds r25,generator+47+1
+ 1360 03a8 A091 0000 		lds r26,generator+47+2
+ 1361 03ac B091 0000 		lds r27,generator+47+3
+ 1362 03b0 8A01      		movw r16,r20
+ 1363 03b2 9B01      		movw r18,r22
+ 1364 03b4 080F      		add r16,r24
+ 1365 03b6 191F      		adc r17,r25
+ 1366 03b8 2A1F      		adc r18,r26
+ 1367 03ba 3B1F      		adc r19,r27
+ 1368 03bc C901      		movw r24,r18
+ 1369 03be B801      		movw r22,r16
+ 1370 03c0 40E0      		ldi r20,0
+ 1371 03c2 00D0      		rcall print_u
+ 545:main.c        **** 					if(generator.pulse_trig == TR_RISE)
+ 1373               	.LM165:
+ 1374 03c4 80E0      		ldi r24,lo8(__c.2179)
+ 1375 03c6 90E0      		ldi r25,hi8(__c.2179)
+ 1376 03c8 00D0      		rcall nnl_puts_P
+ 546:main.c        **** 						n_putchar('R');
+ 1378               	.LM166:
+ 1379 03ca 8091 0000 		lds r24,generator+53
+ 1380 03ce 8130      		cpi r24,lo8(1)
+ 1381 03d0 01F4      		brne .L52
+ 547:main.c        **** 					else if(generator.pulse_trig == TR_FALL)
+ 1383               	.LM167:
+ 1384 03d2 82E5      		ldi r24,lo8(82)
+ 1385 03d4 00C0      		rjmp .L85
+ 1386               	.L52:
+ 548:main.c        **** 						n_putchar('F');
+ 1388               	.LM168:
+ 1389 03d6 8230      		cpi r24,lo8(2)
+ 1390 03d8 01F4      		brne .L54
+ 549:main.c        **** 					else
+ 1392               	.LM169:
+ 1393 03da 86E4      		ldi r24,lo8(70)
+ 1394               	.L85:
+ 1395 03dc 00D0      		rcall n_putchar
+ 1396 03de 00C0      		rjmp .L53
+ 1397               	.L54:
+ 551:main.c        **** 
+ 1399               	.LM170:
+ 1400 03e0 80E0      		ldi r24,lo8(__c.2181)
+ 1401 03e2 90E0      		ldi r25,hi8(__c.2181)
+ 1402 03e4 00D0      		rcall nnl_puts_P
+ 1403               	.L53:
+ 554:main.c        **** 					if(btn == BTN_START)
+ 1405               	.LM171:
+ 1406 03e6 00D0      		rcall btn_wait
+ 555:main.c        **** 					{
+ 1408               	.LM172:
+ 1409 03e8 8031      		cpi r24,lo8(16)
+ 1410 03ea 01F0      		breq .+2
+ 1411 03ec 00C0      		rjmp .L55
+ 557:main.c        **** 						eeprom_update_byte(&setting.m, generator.m);
+ 1413               	.LM173:
+ 1414 03ee 00D0      		rcall btn_wait_up
+ 558:main.c        **** 						eeprom_update_block(&generator.pulse_t_rise, &setting.pulse_t_rise,
+ 1416               	.LM174:
+ 1417 03f0 6091 0000 		lds r22,generator
+ 1418 03f4 80E0      		ldi r24,lo8(setting)
+ 1419 03f6 90E0      		ldi r25,hi8(setting)
+ 1420 03f8 00D0      		rcall eeprom_update_byte
+ 559:main.c        **** 						4 * sizeof(generator.pulse_t_rise) + sizeof(generator.pulse_n) + sizeof(generator.pulse_trig)
+ 1422               	.LM175:
+ 1423 03fa 43E1      		ldi r20,lo8(19)
+ 1424 03fc 50E0      		ldi r21,0
+ 1425 03fe 60E0      		ldi r22,lo8(setting+35)
+ 1426 0400 70E0      		ldi r23,hi8(setting+35)
+ 1427 0402 80E0      		ldi r24,lo8(generator+35)
+ 1428 0404 90E0      		ldi r25,hi8(generator+35)
+ 1429 0406 00D0      		rcall eeprom_update_block
+ 563:main.c        **** 						if(generator.pulse_trig == TR_RISE)
+ 1431               	.LM176:
+ 1432 0408 8DE0      		ldi r24,lo8(13)
+ 1433 040a 00D0      		rcall lcd_goto
+ 564:main.c        **** 						{
+ 1435               	.LM177:
+ 1436 040c 8091 0000 		lds r24,generator+53
+ 1437 0410 8130      		cpi r24,lo8(1)
+ 1438 0412 01F4      		brne .L56
+ 566:main.c        **** 							if(trig_wait_rise() == 0)
+ 1440               	.LM178:
+ 1441 0414 80E0      		ldi r24,lo8(__c.2183)
+ 1442 0416 90E0      		ldi r25,hi8(__c.2183)
+ 1443 0418 00D0      		rcall nnl_puts_P
+ 1444               	.L57:
+ 1445               	.LBB126:
+ 1446               	.LBB127:
+ 293:main.c        **** 	{
+ 1448               	.LM179:
+ 1449 041a 9D9B      		sbis 0x13,5
+ 1450 041c 00C0      		rjmp .L60
+ 295:main.c        **** 	}
+ 1452               	.LM180:
+ 1453 041e 9C99      		sbic 0x13,4
+ 1454 0420 00C0      		rjmp .L57
+ 1455 0422 00C0      		rjmp .L82
+ 1456               	.L62:
+ 299:main.c        **** 	}
+ 1458               	.LM181:
+ 1459 0424 9C9B      		sbis 0x13,4
+ 1460 0426 00C0      		rjmp .L82
+ 1461               	.L60:
+ 297:main.c        **** 	{
+ 1463               	.LM182:
+ 1464 0428 9D9B      		sbis 0x13,5
+ 1465 042a 00C0      		rjmp .L62
+ 1466 042c 00C0      		rjmp .L63
+ 1467               	.L56:
+ 1468               	.LBE127:
+ 1469               	.LBE126:
+ 571:main.c        **** 						{
+ 1471               	.LM183:
+ 1472 042e 8230      		cpi r24,lo8(2)
+ 1473 0430 01F4      		brne .L63
+ 573:main.c        **** 							if(trig_wait_fall() == 0)
+ 1475               	.LM184:
+ 1476 0432 80E0      		ldi r24,lo8(__c.2186)
+ 1477 0434 90E0      		ldi r25,hi8(__c.2186)
+ 1478 0436 00D0      		rcall nnl_puts_P
+ 1479               	.L64:
+ 1480               	.LBB128:
+ 1481               	.LBB129:
+ 306:main.c        **** 	{
+ 1483               	.LM185:
+ 1484 0438 9D9B      		sbis 0x13,5
+ 1485 043a 00C0      		rjmp .L65
+ 1486               	.L66:
+ 310:main.c        **** 	{
+ 1488               	.LM186:
+ 1489 043c 9D99      		sbic 0x13,5
+ 1490 043e 00C0      		rjmp .L67
+ 1491               	.L63:
+ 1492               	.LBE129:
+ 1493               	.LBE128:
+ 578:main.c        **** 						pulse_start();
+ 1495               	.LM187:
+ 1496 0440 81E0      		ldi r24,lo8(1)
+ 1497 0442 00D0      		rcall print_on_off
+ 1498               	.LBB131:
+ 1499               	.LBB132:
+ 1500               	.LBB133:
+ 1501               	.LBB134:
+ 276:main.c        **** }
+ 1503               	.LM188:
+ 1504 0444 8091 0000 		lds r24,generator+35
+ 1505 0448 9091 0000 		lds r25,generator+35+1
+ 1506 044c A091 0000 		lds r26,generator+35+2
+ 1507 0450 B091 0000 		lds r27,generator+35+3
+ 1508 0454 5C01      		movw r10,r24
+ 1509 0456 6D01      		movw r12,r26
+ 1510 0458 9C01      		movw r18,r24
+ 1511 045a A601      		movw r20,r12
+ 1512 045c 60E0      		ldi r22,0
+ 1513 045e 70E0      		ldi r23,0
+ 1514 0460 80E0      		ldi r24,0
+ 1515 0462 90E0      		ldi r25,0
+ 1516 0464 00E1      		ldi r16,lo8(16)
+ 1517 0466 00D0      		rcall __ashldi3
+ 1518 0468 A12C      		mov r10,__zero_reg__
+ 1519 046a E0E9      		ldi r30,lo8(-112)
+ 1520 046c BE2E      		mov r11,r30
+ 1521 046e C12C      		mov r12,__zero_reg__
+ 1522 0470 D12C      		mov r13,__zero_reg__
+ 1523 0472 E12C      		mov r14,__zero_reg__
+ 1524 0474 F12C      		mov r15,__zero_reg__
+ 1525 0476 00E0      		ldi r16,0
+ 1526 0478 10E0      		ldi r17,0
+ 1527 047a 00D0      		rcall __udivdi3
+ 1528 047c 5901      		movw r10,r18
+ 1529 047e 6A01      		movw r12,r20
+ 1530 0480 7B01      		movw r14,r22
+ 1531 0482 8C01      		movw r16,r24
+ 1532 0484 20E0      		ldi r18,0
+ 1533 0486 30E0      		ldi r19,0
+ 1534 0488 40E0      		ldi r20,0
+ 1535 048a 51E0      		ldi r21,lo8(1)
+ 1536 048c 60E0      		ldi r22,0
+ 1537 048e 70E0      		ldi r23,0
+ 1538 0490 80E0      		ldi r24,0
+ 1539 0492 90E0      		ldi r25,0
+ 1540 0494 00D0      		rcall __udivdi3
+ 1541 0496 2983      		std Y+1,r18
+ 1542 0498 3A83      		std Y+2,r19
+ 1543 049a 4B83      		std Y+3,r20
+ 1544 049c 5C83      		std Y+4,r21
+ 1545               	.LBE134:
+ 1546               	.LBE133:
+ 1547               	.LBB135:
+ 1548               	.LBB136:
+ 1549 049e 8091 0000 		lds r24,generator+39
+ 1550 04a2 9091 0000 		lds r25,generator+39+1
+ 1551 04a6 A091 0000 		lds r26,generator+39+2
+ 1552 04aa B091 0000 		lds r27,generator+39+3
+ 1553 04ae 5C01      		movw r10,r24
+ 1554 04b0 6D01      		movw r12,r26
+ 1555 04b2 9C01      		movw r18,r24
+ 1556 04b4 A601      		movw r20,r12
+ 1557 04b6 60E0      		ldi r22,0
+ 1558 04b8 70E0      		ldi r23,0
+ 1559 04ba 80E0      		ldi r24,0
+ 1560 04bc 90E0      		ldi r25,0
+ 1561 04be 00E1      		ldi r16,lo8(16)
+ 1562 04c0 00D0      		rcall __ashldi3
+ 1563 04c2 A12C      		mov r10,__zero_reg__
+ 1564 04c4 F0E9      		ldi r31,lo8(-112)
+ 1565 04c6 BF2E      		mov r11,r31
+ 1566 04c8 C12C      		mov r12,__zero_reg__
+ 1567 04ca D12C      		mov r13,__zero_reg__
+ 1568 04cc E12C      		mov r14,__zero_reg__
+ 1569 04ce F12C      		mov r15,__zero_reg__
+ 1570 04d0 00E0      		ldi r16,0
+ 1571 04d2 10E0      		ldi r17,0
+ 1572 04d4 00D0      		rcall __udivdi3
+ 1573 04d6 5901      		movw r10,r18
+ 1574 04d8 6A01      		movw r12,r20
+ 1575 04da 7B01      		movw r14,r22
+ 1576 04dc 8C01      		movw r16,r24
+ 1577 04de 20E0      		ldi r18,0
+ 1578 04e0 30E0      		ldi r19,0
+ 1579 04e2 40E0      		ldi r20,0
+ 1580 04e4 51E0      		ldi r21,lo8(1)
+ 1581 04e6 60E0      		ldi r22,0
+ 1582 04e8 70E0      		ldi r23,0
+ 1583 04ea 80E0      		ldi r24,0
+ 1584 04ec 90E0      		ldi r25,0
+ 1585 04ee 00D0      		rcall __udivdi3
+ 1586 04f0 2D83      		std Y+5,r18
+ 1587 04f2 3E83      		std Y+6,r19
+ 1588 04f4 4F83      		std Y+7,r20
+ 1589 04f6 5887      		std Y+8,r21
+ 1590               	.LBE136:
+ 1591               	.LBE135:
+ 1592               	.LBB137:
+ 1593               	.LBB138:
+ 1594 04f8 8091 0000 		lds r24,generator+43
+ 1595 04fc 9091 0000 		lds r25,generator+43+1
+ 1596 0500 A091 0000 		lds r26,generator+43+2
+ 1597 0504 B091 0000 		lds r27,generator+43+3
+ 1598 0508 5C01      		movw r10,r24
+ 1599 050a 6D01      		movw r12,r26
+ 1600 050c 9C01      		movw r18,r24
+ 1601 050e A601      		movw r20,r12
+ 1602 0510 60E0      		ldi r22,0
+ 1603 0512 70E0      		ldi r23,0
+ 1604 0514 80E0      		ldi r24,0
+ 1605 0516 90E0      		ldi r25,0
+ 1606 0518 00E1      		ldi r16,lo8(16)
+ 1607 051a 00D0      		rcall __ashldi3
+ 1608 051c A12C      		mov r10,__zero_reg__
+ 1609 051e A0E9      		ldi r26,lo8(-112)
+ 1610 0520 BA2E      		mov r11,r26
+ 1611 0522 C12C      		mov r12,__zero_reg__
+ 1612 0524 D12C      		mov r13,__zero_reg__
+ 1613 0526 E12C      		mov r14,__zero_reg__
+ 1614 0528 F12C      		mov r15,__zero_reg__
+ 1615 052a 00E0      		ldi r16,0
+ 1616 052c 10E0      		ldi r17,0
+ 1617 052e 00D0      		rcall __udivdi3
+ 1618 0530 5901      		movw r10,r18
+ 1619 0532 6A01      		movw r12,r20
+ 1620 0534 7B01      		movw r14,r22
+ 1621 0536 8C01      		movw r16,r24
+ 1622 0538 20E0      		ldi r18,0
+ 1623 053a 30E0      		ldi r19,0
+ 1624 053c 40E0      		ldi r20,0
+ 1625 053e 51E0      		ldi r21,lo8(1)
+ 1626 0540 60E0      		ldi r22,0
+ 1627 0542 70E0      		ldi r23,0
+ 1628 0544 80E0      		ldi r24,0
+ 1629 0546 90E0      		ldi r25,0
+ 1630 0548 00D0      		rcall __udivdi3
+ 1631 054a 2987      		std Y+9,r18
+ 1632 054c 3A87      		std Y+10,r19
+ 1633 054e 4B87      		std Y+11,r20
+ 1634 0550 5C87      		std Y+12,r21
+ 1635               	.LBE138:
+ 1636               	.LBE137:
+ 1637               	.LBB139:
+ 1638               	.LBB140:
+ 1639 0552 8091 0000 		lds r24,generator+47
+ 1640 0556 9091 0000 		lds r25,generator+47+1
+ 1641 055a A091 0000 		lds r26,generator+47+2
+ 1642 055e B091 0000 		lds r27,generator+47+3
+ 1643 0562 5C01      		movw r10,r24
+ 1644 0564 6D01      		movw r12,r26
+ 1645 0566 9C01      		movw r18,r24
+ 1646 0568 A601      		movw r20,r12
+ 1647 056a 60E0      		ldi r22,0
+ 1648 056c 70E0      		ldi r23,0
+ 1649 056e 80E0      		ldi r24,0
+ 1650 0570 90E0      		ldi r25,0
+ 1651 0572 00E1      		ldi r16,lo8(16)
+ 1652 0574 00D0      		rcall __ashldi3
+ 1653 0576 A12C      		mov r10,__zero_reg__
+ 1654 0578 B0E9      		ldi r27,lo8(-112)
+ 1655 057a BB2E      		mov r11,r27
+ 1656 057c C12C      		mov r12,__zero_reg__
+ 1657 057e D12C      		mov r13,__zero_reg__
+ 1658 0580 E12C      		mov r14,__zero_reg__
+ 1659 0582 F12C      		mov r15,__zero_reg__
+ 1660 0584 00E0      		ldi r16,0
+ 1661 0586 10E0      		ldi r17,0
+ 1662 0588 00D0      		rcall __udivdi3
+ 1663 058a 5901      		movw r10,r18
+ 1664 058c 6A01      		movw r12,r20
+ 1665 058e 7B01      		movw r14,r22
+ 1666 0590 8C01      		movw r16,r24
+ 1667 0592 20E0      		ldi r18,0
+ 1668 0594 30E0      		ldi r19,0
+ 1669 0596 40E0      		ldi r20,0
+ 1670 0598 51E0      		ldi r21,lo8(1)
+ 1671 059a 60E0      		ldi r22,0
+ 1672 059c 70E0      		ldi r23,0
+ 1673 059e 80E0      		ldi r24,0
+ 1674 05a0 90E0      		ldi r25,0
+ 1675 05a2 00D0      		rcall __udivdi3
+ 1676 05a4 2D87      		std Y+13,r18
+ 1677 05a6 3E87      		std Y+14,r19
+ 1678 05a8 4F87      		std Y+15,r20
+ 1679 05aa 588B      		std Y+16,r21
+ 1680               	.LBE140:
+ 1681               	.LBE139:
+ 287:main.c        **** 	pulse(&pulse_s);
+ 1683               	.LM189:
+ 1684 05ac 8091 0000 		lds r24,generator+51
+ 1685 05b0 9091 0000 		lds r25,generator+51+1
+ 1686 05b4 9A8B      		std Y+18,r25
+ 1687 05b6 898B      		std Y+17,r24
+ 288:main.c        **** }
+ 1689               	.LM190:
+ 1690 05b8 CE01      		movw r24,r28
+ 1691 05ba 0196      		adiw r24,1
+ 1692 05bc 00D0      		rcall pulse
+ 1693 05be 00C0      		rjmp .L82
+ 1694               	.L65:
+ 1695               	.LBE132:
+ 1696               	.LBE131:
+ 1697               	.LBB141:
+ 1698               	.LBB130:
+ 308:main.c        **** 	}
+ 1700               	.LM191:
+ 1701 05c0 9C99      		sbic 0x13,4
+ 1702 05c2 00C0      		rjmp .L64
+ 1703 05c4 00C0      		rjmp .L82
+ 1704               	.L67:
+ 312:main.c        **** 	}
+ 1706               	.LM192:
+ 1707 05c6 9C99      		sbic 0x13,4
+ 1708 05c8 00C0      		rjmp .L66
+ 1709 05ca 00C0      		rjmp .L82
+ 1710               	.L58:
+ 1711               	.L55:
+ 1712               	.LBE130:
+ 1713               	.LBE141:
+ 583:main.c        **** 					{
+ 1715               	.LM193:
+ 1716 05cc 8830      		cpi r24,lo8(8)
+ 1717 05ce 01F4      		brne .L68
+ 585:main.c        **** 					}
+ 1719               	.LM194:
+ 1720 05d0 8092 0000 		sts generator,r8
+ 1721 05d4 00C0      		rjmp .L17
+ 1722               	.L68:
+ 587:main.c        **** 					{
+ 1724               	.LM195:
+ 1725 05d6 8430      		cpi r24,lo8(4)
+ 1726 05d8 01F0      		breq .+2
+ 1727 05da 00C0      		rjmp .L17
+ 589:main.c        **** 						input_t(&generator.pulse_t_on,PSTR("\rTon="));
+ 1729               	.LM196:
+ 1730 05dc 60E0      		ldi r22,lo8(__c.2188)
+ 1731 05de 70E0      		ldi r23,hi8(__c.2188)
+ 1732 05e0 80E0      		ldi r24,lo8(generator+35)
+ 1733 05e2 90E0      		ldi r25,hi8(generator+35)
+ 1734 05e4 00D0      		rcall input_t
+ 590:main.c        **** 						input_t(&generator.pulse_t_fall,PSTR("\rTfall="));
+ 1736               	.LM197:
+ 1737 05e6 60E0      		ldi r22,lo8(__c.2190)
+ 1738 05e8 70E0      		ldi r23,hi8(__c.2190)
+ 1739 05ea 80E0      		ldi r24,lo8(generator+39)
+ 1740 05ec 90E0      		ldi r25,hi8(generator+39)
+ 1741 05ee 00D0      		rcall input_t
+ 591:main.c        **** 						input_t(&generator.pulse_t_off,PSTR("\rToff="));
+ 1743               	.LM198:
+ 1744 05f0 60E0      		ldi r22,lo8(__c.2192)
+ 1745 05f2 70E0      		ldi r23,hi8(__c.2192)
+ 1746 05f4 80E0      		ldi r24,lo8(generator+43)
+ 1747 05f6 90E0      		ldi r25,hi8(generator+43)
+ 1748 05f8 00D0      		rcall input_t
+ 592:main.c        **** 						input_n();
+ 1750               	.LM199:
+ 1751 05fa 60E0      		ldi r22,lo8(__c.2194)
+ 1752 05fc 70E0      		ldi r23,hi8(__c.2194)
+ 1753 05fe 80E0      		ldi r24,lo8(generator+47)
+ 1754 0600 90E0      		ldi r25,hi8(generator+47)
+ 1755 0602 00D0      		rcall input_t
+ 593:main.c        **** 						generator.pulse_trig = input_trig();
+ 1757               	.LM200:
+ 1758 0604 00D0      		rcall input_n
+ 594:main.c        **** 					}
+ 1760               	.LM201:
+ 1761 0606 00D0      		rcall input_trig
+ 1762 0608 8093 0000 		sts generator+53,r24
+ 1763 060c 00C0      		rjmp .L17
+ 1764               	.L27:
+ 601:main.c        **** 					print_on_off(0);
+ 1766               	.LM202:
+ 1767 060e 80E0      		ldi r24,lo8(__c.2197)
+ 1768 0610 90E0      		ldi r25,hi8(__c.2197)
+ 1769 0612 00D0      		rcall nnl_puts_P
+ 602:main.c        **** 					btn = btn_wait();
+ 1771               	.LM203:
+ 1772 0614 80E0      		ldi r24,0
+ 1773 0616 00D0      		rcall print_on_off
+ 603:main.c        **** 					if(btn == BTN_START)
+ 1775               	.LM204:
+ 1776 0618 00D0      		rcall btn_wait
+ 604:main.c        **** 					{
+ 1778               	.LM205:
+ 1779 061a 8031      		cpi r24,lo8(16)
+ 1780 061c 01F4      		brne .L69
+ 606:main.c        **** 						print_on_off(1);
+ 1782               	.LM206:
+ 1783 061e 00D0      		rcall btn_wait_up
+ 607:main.c        **** 						tv_gen(&tv_vbars);
+ 1785               	.LM207:
+ 1786 0620 81E0      		ldi r24,lo8(1)
+ 1787 0622 00D0      		rcall print_on_off
+ 608:main.c        **** 						btn_wait_up(BTN_START);
+ 1789               	.LM208:
+ 1790 0624 80E0      		ldi r24,lo8(gs(tv_vbars))
+ 1791 0626 90E0      		ldi r25,hi8(gs(tv_vbars))
+ 1792 0628 00D0      		rcall tv_gen
+ 1793               	.L82:
+ 609:main.c        **** 					}
+ 1795               	.LM209:
+ 1796 062a 80E1      		ldi r24,lo8(16)
+ 1797 062c 00D0      		rcall btn_wait_up
+ 1798 062e 00C0      		rjmp .L17
+ 1799               	.L69:
+ 611:main.c        **** 					{
+ 1801               	.LM210:
+ 1802 0630 8830      		cpi r24,lo8(8)
+ 1803 0632 01F0      		breq .+2
+ 1804 0634 00C0      		rjmp .L17
+ 613:main.c        **** 					}
+ 1806               	.LM211:
+ 1807 0636 1092 0000 		sts generator,__zero_reg__
+ 1808 063a 00C0      		rjmp .L17
+ 1809               	.L19:
+ 619:main.c        **** 				btn_wait();
+ 1811               	.LM212:
+ 1812 063c 80E0      		ldi r24,lo8(__c.2200)
+ 1813 063e 90E0      		ldi r25,hi8(__c.2200)
+ 1814 0640 00D0      		rcall nnl_puts_P
+ 620:main.c        **** 				generator.m= M_SINW;
+ 1816               	.LM213:
+ 1817 0642 00D0      		rcall btn_wait
+ 1818               	.L18:
+ 1820               	.LM214:
+ 1821 0644 9092 0000 		sts generator,r9
+ 626:main.c        **** 				break;
+ 1823               	.LM215:
+ 1824 0648 00C0      		rjmp .L17
+ 1829               	.Lscope6:
+ 1830               		.section	.progmem.data.__c.2200,"a",@progbits
+ 1833               	__c.2200:
+ 1834 0000 0D4E 4444 		.string	"\rNDDS VER0.11\nSIGNAL GENERATOR"
+ 1834      5320 5645 
+ 1834      5230 2E31 
+ 1834      310A 5349 
+ 1834      474E 414C 
+ 1835               		.section	.progmem.data.__c.2197,"a",@progbits
+ 1838               	__c.2197:
+ 1839 0000 0D54 5620 		.string	"\rTV VIDEO "
+ 1839      5649 4445 
+ 1839      4F20 00
+ 1840               		.section	.progmem.data.__c.2194,"a",@progbits
+ 1843               	__c.2194:
+ 1844 0000 0D54 6F66 		.string	"\rToff="
+ 1844      663D 00
+ 1845               		.section	.progmem.data.__c.2192,"a",@progbits
+ 1848               	__c.2192:
+ 1849 0000 0D54 6661 		.string	"\rTfall="
+ 1849      6C6C 3D00 
+ 1850               		.section	.progmem.data.__c.2190,"a",@progbits
+ 1853               	__c.2190:
+ 1854 0000 0D54 6F6E 		.string	"\rTon="
+ 1854      3D00 
+ 1855               		.section	.progmem.data.__c.2188,"a",@progbits
+ 1858               	__c.2188:
+ 1859 0000 0D54 7269 		.string	"\rTrise="
+ 1859      7365 3D00 
+ 1860               		.section	.progmem.data.__c.2186,"a",@progbits
+ 1863               	__c.2186:
+ 1864 0000 573A 4600 		.string	"W:F"
+ 1865               		.section	.progmem.data.__c.2183,"a",@progbits
+ 1868               	__c.2183:
+ 1869 0000 573A 5200 		.string	"W:R"
+ 1870               		.section	.progmem.data.__c.2181,"a",@progbits
+ 1873               	__c.2181:
+ 1874 0000 4E4F 00   		.string	"NO"
+ 1875               		.section	.progmem.data.__c.2179,"a",@progbits
+ 1878               	__c.2179:
+ 1879 0000 7573 2054 		.string	"us TR:"
+ 1879      523A 00
+ 1880               		.section	.progmem.data.__c.2177,"a",@progbits
+ 1883               	__c.2177:
+ 1884 0000 543D 00   		.string	"T="
+ 1885               		.section	.progmem.data.__c.2175,"a",@progbits
+ 1888               	__c.2175:
+ 1889 0000 0D50 554C 		.string	"\rPULSE "
+ 1889      5345 2000 
+ 1890               		.section	.progmem.data.__c.2169,"a",@progbits
+ 1893               	__c.2169:
+ 1894 0000 0D48 4947 		.string	"\rHIGH SPEED "
+ 1894      4820 5350 
+ 1894      4545 4420 
+ 1894      00
+ 1895               		.section	.progmem.data.__c.2163,"a",@progbits
+ 1898               	__c.2163:
+ 1899 0000 2045 3D4C 		.string	" E=L"
+ 1899      00
+ 1900               		.section	.progmem.data.__c.2161,"a",@progbits
+ 1903               	__c.2161:
+ 1904 0000 2045 3D48 		.string	" E=H"
+ 1904      00
+ 1905               		.section	.progmem.data.__c.2159,"a",@progbits
+ 1908               	__c.2159:
+ 1909 0000 2044 3D00 		.string	" D="
+ 1910               		.section	.progmem.data.__c.2157,"a",@progbits
+ 1913               	__c.2157:
+ 1914 0000 0D50 574D 		.string	"\rPWM "
+ 1914      2000 
+ 1915               		.section	.progmem.data.__c.2154,"a",@progbits
+ 1918               	__c.2154:
+ 1919 0000 0D53 5155 		.string	"\rSQUARE WAVE "
+ 1919      4152 4520 
+ 1919      5741 5645 
+ 1919      2000 
+ 1920               		.section	.progmem.data.__c.2151,"a",@progbits
+ 1923               	__c.2151:
+ 1924 0000 0D4E 4F49 		.string	"\rNOISE "
+ 1924      5345 2000 
+ 1925               		.section	.progmem.data.__c.2148,"a",@progbits
+ 1928               	__c.2148:
+ 1929 0000 0D45 4347 		.string	"\rECG "
+ 1929      2000 
+ 1930               		.section	.progmem.data.__c.2145,"a",@progbits
+ 1933               	__c.2145:
+ 1934 0000 0D54 5249 		.string	"\rTRIANGLE "
+ 1934      414E 474C 
+ 1934      4520 00
+ 1935               		.section	.progmem.data.__c.2142,"a",@progbits
+ 1938               	__c.2142:
+ 1939 0000 0D52 5341 		.string	"\rRSAWTOTH "
+ 1939      5754 4F54 
+ 1939      4820 00
+ 1940               		.section	.progmem.data.__c.2139,"a",@progbits
+ 1943               	__c.2139:
+ 1944 0000 0D53 4157 		.string	"\rSAWTOTH "
+ 1944      544F 5448 
+ 1944      2000 
+ 1945               		.section	.progmem.data.__c.2135,"a",@progbits
+ 1948               	__c.2135:
+ 1949 0000 0D53 494E 		.string	"\rSINE "
+ 1949      4520 00
+ 1950               	.global	ECG
+ 1951               		.section	.progmem.data.ECG,"a",@progbits
+ 1954               	ECG:
+ 1955 0000 49        		.byte	73
+ 1956 0001 4A        		.byte	74
+ 1957 0002 4B        		.byte	75
+ 1958 0003 4B        		.byte	75
+ 1959 0004 4A        		.byte	74
+ 1960 0005 49        		.byte	73
+ 1961 0006 49        		.byte	73
+ 1962 0007 49        		.byte	73
+ 1963 0008 49        		.byte	73
+ 1964 0009 48        		.byte	72
+ 1965 000a 47        		.byte	71
+ 1966 000b 45        		.byte	69
+ 1967 000c 44        		.byte	68
+ 1968 000d 43        		.byte	67
+ 1969 000e 43        		.byte	67
+ 1970 000f 43        		.byte	67
+ 1971 0010 44        		.byte	68
+ 1972 0011 44        		.byte	68
+ 1973 0012 43        		.byte	67
+ 1974 0013 41        		.byte	65
+ 1975 0014 3E        		.byte	62
+ 1976 0015 3D        		.byte	61
+ 1977 0016 3B        		.byte	59
+ 1978 0017 39        		.byte	57
+ 1979 0018 38        		.byte	56
+ 1980 0019 37        		.byte	55
+ 1981 001a 37        		.byte	55
+ 1982 001b 36        		.byte	54
+ 1983 001c 36        		.byte	54
+ 1984 001d 36        		.byte	54
+ 1985 001e 37        		.byte	55
+ 1986 001f 37        		.byte	55
+ 1987 0020 37        		.byte	55
+ 1988 0021 37        		.byte	55
+ 1989 0022 37        		.byte	55
+ 1990 0023 37        		.byte	55
+ 1991 0024 36        		.byte	54
+ 1992 0025 35        		.byte	53
+ 1993 0026 33        		.byte	51
+ 1994 0027 32        		.byte	50
+ 1995 0028 31        		.byte	49
+ 1996 0029 31        		.byte	49
+ 1997 002a 34        		.byte	52
+ 1998 002b 3D        		.byte	61
+ 1999 002c 4D        		.byte	77
+ 2000 002d 65        		.byte	101
+ 2001 002e 84        		.byte	-124
+ 2002 002f A9        		.byte	-87
+ 2003 0030 CF        		.byte	-49
+ 2004 0031 EE        		.byte	-18
+ 2005 0032 FF        		.byte	-1
+ 2006 0033 FE        		.byte	-2
+ 2007 0034 EA        		.byte	-22
+ 2008 0035 C6        		.byte	-58
+ 2009 0036 9A        		.byte	-102
+ 2010 0037 6D        		.byte	109
+ 2011 0038 44        		.byte	68
+ 2012 0039 25        		.byte	37
+ 2013 003a 11        		.byte	17
+ 2014 003b 05        		.byte	5
+ 2015 003c 00        		.byte	0
+ 2016 003d 01        		.byte	1
+ 2017 003e 06        		.byte	6
+ 2018 003f 0D        		.byte	13
+ 2019 0040 14        		.byte	20
+ 2020 0041 1C        		.byte	28
+ 2021 0042 24        		.byte	36
+ 2022 0043 2D        		.byte	45
+ 2023 0044 34        		.byte	52
+ 2024 0045 39        		.byte	57
+ 2025 0046 3D        		.byte	61
+ 2026 0047 40        		.byte	64
+ 2027 0048 41        		.byte	65
+ 2028 0049 42        		.byte	66
+ 2029 004a 43        		.byte	67
+ 2030 004b 44        		.byte	68
+ 2031 004c 44        		.byte	68
+ 2032 004d 45        		.byte	69
+ 2033 004e 46        		.byte	70
+ 2034 004f 47        		.byte	71
+ 2035 0050 47        		.byte	71
+ 2036 0051 47        		.byte	71
+ 2037 0052 47        		.byte	71
+ 2038 0053 47        		.byte	71
+ 2039 0054 47        		.byte	71
+ 2040 0055 47        		.byte	71
+ 2041 0056 47        		.byte	71
+ 2042 0057 48        		.byte	72
+ 2043 0058 48        		.byte	72
+ 2044 0059 48        		.byte	72
+ 2045 005a 49        		.byte	73
+ 2046 005b 49        		.byte	73
+ 2047 005c 4A        		.byte	74
+ 2048 005d 4B        		.byte	75
+ 2049 005e 4B        		.byte	75
+ 2050 005f 4C        		.byte	76
+ 2051 0060 4D        		.byte	77
+ 2052 0061 4E        		.byte	78
+ 2053 0062 4F        		.byte	79
+ 2054 0063 50        		.byte	80
+ 2055 0064 51        		.byte	81
+ 2056 0065 52        		.byte	82
+ 2057 0066 53        		.byte	83
+ 2058 0067 54        		.byte	84
+ 2059 0068 56        		.byte	86
+ 2060 0069 58        		.byte	88
+ 2061 006a 5B        		.byte	91
+ 2062 006b 5D        		.byte	93
+ 2063 006c 60        		.byte	96
+ 2064 006d 62        		.byte	98
+ 2065 006e 64        		.byte	100
+ 2066 006f 66        		.byte	102
+ 2067 0070 68        		.byte	104
+ 2068 0071 6B        		.byte	107
+ 2069 0072 6D        		.byte	109
+ 2070 0073 70        		.byte	112
+ 2071 0074 73        		.byte	115
+ 2072 0075 76        		.byte	118
+ 2073 0076 79        		.byte	121
+ 2074 0077 7B        		.byte	123
+ 2075 0078 7D        		.byte	125
+ 2076 0079 7E        		.byte	126
+ 2077 007a 7F        		.byte	127
+ 2078 007b 7F        		.byte	127
+ 2079 007c 7F        		.byte	127
+ 2080 007d 7F        		.byte	127
+ 2081 007e 7F        		.byte	127
+ 2082 007f 7E        		.byte	126
+ 2083 0080 7D        		.byte	125
+ 2084 0081 7C        		.byte	124
+ 2085 0082 79        		.byte	121
+ 2086 0083 77        		.byte	119
+ 2087 0084 74        		.byte	116
+ 2088 0085 71        		.byte	113
+ 2089 0086 6D        		.byte	109
+ 2090 0087 69        		.byte	105
+ 2091 0088 66        		.byte	102
+ 2092 0089 62        		.byte	98
+ 2093 008a 5F        		.byte	95
+ 2094 008b 5C        		.byte	92
+ 2095 008c 59        		.byte	89
+ 2096 008d 57        		.byte	87
+ 2097 008e 54        		.byte	84
+ 2098 008f 51        		.byte	81
+ 2099 0090 4F        		.byte	79
+ 2100 0091 4D        		.byte	77
+ 2101 0092 4C        		.byte	76
+ 2102 0093 4B        		.byte	75
+ 2103 0094 4A        		.byte	74
+ 2104 0095 49        		.byte	73
+ 2105 0096 48        		.byte	72
+ 2106 0097 46        		.byte	70
+ 2107 0098 45        		.byte	69
+ 2108 0099 44        		.byte	68
+ 2109 009a 43        		.byte	67
+ 2110 009b 43        		.byte	67
+ 2111 009c 43        		.byte	67
+ 2112 009d 44        		.byte	68
+ 2113 009e 44        		.byte	68
+ 2114 009f 44        		.byte	68
+ 2115 00a0 45        		.byte	69
+ 2116 00a1 45        		.byte	69
+ 2117 00a2 45        		.byte	69
+ 2118 00a3 45        		.byte	69
+ 2119 00a4 45        		.byte	69
+ 2120 00a5 45        		.byte	69
+ 2121 00a6 45        		.byte	69
+ 2122 00a7 46        		.byte	70
+ 2123 00a8 47        		.byte	71
+ 2124 00a9 48        		.byte	72
+ 2125 00aa 49        		.byte	73
+ 2126 00ab 49        		.byte	73
+ 2127 00ac 4A        		.byte	74
+ 2128 00ad 4A        		.byte	74
+ 2129 00ae 4B        		.byte	75
+ 2130 00af 4B        		.byte	75
+ 2131 00b0 4B        		.byte	75
+ 2132 00b1 4B        		.byte	75
+ 2133 00b2 4B        		.byte	75
+ 2134 00b3 4B        		.byte	75
+ 2135 00b4 4A        		.byte	74
+ 2136 00b5 4A        		.byte	74
+ 2137 00b6 49        		.byte	73
+ 2138 00b7 49        		.byte	73
+ 2139 00b8 49        		.byte	73
+ 2140 00b9 49        		.byte	73
+ 2141 00ba 48        		.byte	72
+ 2142 00bb 48        		.byte	72
+ 2143 00bc 48        		.byte	72
+ 2144 00bd 47        		.byte	71
+ 2145 00be 47        		.byte	71
+ 2146 00bf 47        		.byte	71
+ 2147 00c0 47        		.byte	71
+ 2148 00c1 47        		.byte	71
+ 2149 00c2 47        		.byte	71
+ 2150 00c3 47        		.byte	71
+ 2151 00c4 46        		.byte	70
+ 2152 00c5 46        		.byte	70
+ 2153 00c6 46        		.byte	70
+ 2154 00c7 45        		.byte	69
+ 2155 00c8 45        		.byte	69
+ 2156 00c9 45        		.byte	69
+ 2157 00ca 45        		.byte	69
+ 2158 00cb 45        		.byte	69
+ 2159 00cc 46        		.byte	70
+ 2160 00cd 46        		.byte	70
+ 2161 00ce 46        		.byte	70
+ 2162 00cf 45        		.byte	69
+ 2163 00d0 44        		.byte	68
+ 2164 00d1 44        		.byte	68
+ 2165 00d2 43        		.byte	67
+ 2166 00d3 43        		.byte	67
+ 2167 00d4 43        		.byte	67
+ 2168 00d5 43        		.byte	67
+ 2169 00d6 42        		.byte	66
+ 2170 00d7 42        		.byte	66
+ 2171 00d8 42        		.byte	66
+ 2172 00d9 41        		.byte	65
+ 2173 00da 41        		.byte	65
+ 2174 00db 41        		.byte	65
+ 2175 00dc 41        		.byte	65
+ 2176 00dd 41        		.byte	65
+ 2177 00de 41        		.byte	65
+ 2178 00df 41        		.byte	65
+ 2179 00e0 41        		.byte	65
+ 2180 00e1 40        		.byte	64
+ 2181 00e2 40        		.byte	64
+ 2182 00e3 3F        		.byte	63
+ 2183 00e4 3F        		.byte	63
+ 2184 00e5 40        		.byte	64
+ 2185 00e6 40        		.byte	64
+ 2186 00e7 41        		.byte	65
+ 2187 00e8 41        		.byte	65
+ 2188 00e9 41        		.byte	65
+ 2189 00ea 41        		.byte	65
+ 2190 00eb 41        		.byte	65
+ 2191 00ec 41        		.byte	65
+ 2192 00ed 41        		.byte	65
+ 2193 00ee 40        		.byte	64
+ 2194 00ef 40        		.byte	64
+ 2195 00f0 40        		.byte	64
+ 2196 00f1 40        		.byte	64
+ 2197 00f2 40        		.byte	64
+ 2198 00f3 40        		.byte	64
+ 2199 00f4 40        		.byte	64
+ 2200 00f5 40        		.byte	64
+ 2201 00f6 41        		.byte	65
+ 2202 00f7 41        		.byte	65
+ 2203 00f8 41        		.byte	65
+ 2204 00f9 42        		.byte	66
+ 2205 00fa 43        		.byte	67
+ 2206 00fb 44        		.byte	68
+ 2207 00fc 45        		.byte	69
+ 2208 00fd 47        		.byte	71
+ 2209 00fe 48        		.byte	72
+ 2210 00ff 49        		.byte	73
+ 2211               	.global	trianglewave
+ 2212               		.section	.progmem.data.trianglewave,"a",@progbits
+ 2215               	trianglewave:
+ 2216 0000 00        		.byte	0
+ 2217 0001 02        		.byte	2
+ 2218 0002 04        		.byte	4
+ 2219 0003 06        		.byte	6
+ 2220 0004 08        		.byte	8
+ 2221 0005 0A        		.byte	10
+ 2222 0006 0C        		.byte	12
+ 2223 0007 0E        		.byte	14
+ 2224 0008 10        		.byte	16
+ 2225 0009 12        		.byte	18
+ 2226 000a 14        		.byte	20
+ 2227 000b 16        		.byte	22
+ 2228 000c 18        		.byte	24
+ 2229 000d 1A        		.byte	26
+ 2230 000e 1C        		.byte	28
+ 2231 000f 1E        		.byte	30
+ 2232 0010 20        		.byte	32
+ 2233 0011 22        		.byte	34
+ 2234 0012 24        		.byte	36
+ 2235 0013 26        		.byte	38
+ 2236 0014 28        		.byte	40
+ 2237 0015 2A        		.byte	42
+ 2238 0016 2C        		.byte	44
+ 2239 0017 2E        		.byte	46
+ 2240 0018 30        		.byte	48
+ 2241 0019 32        		.byte	50
+ 2242 001a 34        		.byte	52
+ 2243 001b 36        		.byte	54
+ 2244 001c 38        		.byte	56
+ 2245 001d 3A        		.byte	58
+ 2246 001e 3C        		.byte	60
+ 2247 001f 3E        		.byte	62
+ 2248 0020 40        		.byte	64
+ 2249 0021 42        		.byte	66
+ 2250 0022 44        		.byte	68
+ 2251 0023 46        		.byte	70
+ 2252 0024 48        		.byte	72
+ 2253 0025 4A        		.byte	74
+ 2254 0026 4C        		.byte	76
+ 2255 0027 4E        		.byte	78
+ 2256 0028 50        		.byte	80
+ 2257 0029 52        		.byte	82
+ 2258 002a 54        		.byte	84
+ 2259 002b 56        		.byte	86
+ 2260 002c 58        		.byte	88
+ 2261 002d 5A        		.byte	90
+ 2262 002e 5C        		.byte	92
+ 2263 002f 5E        		.byte	94
+ 2264 0030 60        		.byte	96
+ 2265 0031 62        		.byte	98
+ 2266 0032 64        		.byte	100
+ 2267 0033 66        		.byte	102
+ 2268 0034 68        		.byte	104
+ 2269 0035 6A        		.byte	106
+ 2270 0036 6C        		.byte	108
+ 2271 0037 6E        		.byte	110
+ 2272 0038 70        		.byte	112
+ 2273 0039 72        		.byte	114
+ 2274 003a 74        		.byte	116
+ 2275 003b 76        		.byte	118
+ 2276 003c 78        		.byte	120
+ 2277 003d 7A        		.byte	122
+ 2278 003e 7C        		.byte	124
+ 2279 003f 7E        		.byte	126
+ 2280 0040 80        		.byte	-128
+ 2281 0041 82        		.byte	-126
+ 2282 0042 84        		.byte	-124
+ 2283 0043 86        		.byte	-122
+ 2284 0044 88        		.byte	-120
+ 2285 0045 8A        		.byte	-118
+ 2286 0046 8C        		.byte	-116
+ 2287 0047 8E        		.byte	-114
+ 2288 0048 90        		.byte	-112
+ 2289 0049 92        		.byte	-110
+ 2290 004a 94        		.byte	-108
+ 2291 004b 96        		.byte	-106
+ 2292 004c 98        		.byte	-104
+ 2293 004d 9A        		.byte	-102
+ 2294 004e 9C        		.byte	-100
+ 2295 004f 9E        		.byte	-98
+ 2296 0050 A0        		.byte	-96
+ 2297 0051 A2        		.byte	-94
+ 2298 0052 A4        		.byte	-92
+ 2299 0053 A6        		.byte	-90
+ 2300 0054 A8        		.byte	-88
+ 2301 0055 AA        		.byte	-86
+ 2302 0056 AC        		.byte	-84
+ 2303 0057 AE        		.byte	-82
+ 2304 0058 B0        		.byte	-80
+ 2305 0059 B2        		.byte	-78
+ 2306 005a B4        		.byte	-76
+ 2307 005b B6        		.byte	-74
+ 2308 005c B8        		.byte	-72
+ 2309 005d BA        		.byte	-70
+ 2310 005e BC        		.byte	-68
+ 2311 005f BE        		.byte	-66
+ 2312 0060 C0        		.byte	-64
+ 2313 0061 C2        		.byte	-62
+ 2314 0062 C4        		.byte	-60
+ 2315 0063 C6        		.byte	-58
+ 2316 0064 C8        		.byte	-56
+ 2317 0065 CA        		.byte	-54
+ 2318 0066 CC        		.byte	-52
+ 2319 0067 CE        		.byte	-50
+ 2320 0068 D0        		.byte	-48
+ 2321 0069 D2        		.byte	-46
+ 2322 006a D4        		.byte	-44
+ 2323 006b D6        		.byte	-42
+ 2324 006c D8        		.byte	-40
+ 2325 006d DA        		.byte	-38
+ 2326 006e DC        		.byte	-36
+ 2327 006f DE        		.byte	-34
+ 2328 0070 E0        		.byte	-32
+ 2329 0071 E2        		.byte	-30
+ 2330 0072 E4        		.byte	-28
+ 2331 0073 E6        		.byte	-26
+ 2332 0074 E8        		.byte	-24
+ 2333 0075 EA        		.byte	-22
+ 2334 0076 EC        		.byte	-20
+ 2335 0077 EE        		.byte	-18
+ 2336 0078 F0        		.byte	-16
+ 2337 0079 F2        		.byte	-14
+ 2338 007a F4        		.byte	-12
+ 2339 007b F6        		.byte	-10
+ 2340 007c F8        		.byte	-8
+ 2341 007d FA        		.byte	-6
+ 2342 007e FC        		.byte	-4
+ 2343 007f FE        		.byte	-2
+ 2344 0080 FF        		.byte	-1
+ 2345 0081 FD        		.byte	-3
+ 2346 0082 FB        		.byte	-5
+ 2347 0083 F9        		.byte	-7
+ 2348 0084 F7        		.byte	-9
+ 2349 0085 F5        		.byte	-11
+ 2350 0086 F3        		.byte	-13
+ 2351 0087 F1        		.byte	-15
+ 2352 0088 EF        		.byte	-17
+ 2353 0089 EF        		.byte	-17
+ 2354 008a EB        		.byte	-21
+ 2355 008b E9        		.byte	-23
+ 2356 008c E7        		.byte	-25
+ 2357 008d E5        		.byte	-27
+ 2358 008e E3        		.byte	-29
+ 2359 008f E1        		.byte	-31
+ 2360 0090 DF        		.byte	-33
+ 2361 0091 DD        		.byte	-35
+ 2362 0092 DB        		.byte	-37
+ 2363 0093 D9        		.byte	-39
+ 2364 0094 D7        		.byte	-41
+ 2365 0095 D5        		.byte	-43
+ 2366 0096 D3        		.byte	-45
+ 2367 0097 D1        		.byte	-47
+ 2368 0098 CF        		.byte	-49
+ 2369 0099 CF        		.byte	-49
+ 2370 009a CB        		.byte	-53
+ 2371 009b C9        		.byte	-55
+ 2372 009c C7        		.byte	-57
+ 2373 009d C5        		.byte	-59
+ 2374 009e C3        		.byte	-61
+ 2375 009f C1        		.byte	-63
+ 2376 00a0 BF        		.byte	-65
+ 2377 00a1 BD        		.byte	-67
+ 2378 00a2 BB        		.byte	-69
+ 2379 00a3 B9        		.byte	-71
+ 2380 00a4 B7        		.byte	-73
+ 2381 00a5 B5        		.byte	-75
+ 2382 00a6 B3        		.byte	-77
+ 2383 00a7 B1        		.byte	-79
+ 2384 00a8 AF        		.byte	-81
+ 2385 00a9 AF        		.byte	-81
+ 2386 00aa AB        		.byte	-85
+ 2387 00ab A9        		.byte	-87
+ 2388 00ac A7        		.byte	-89
+ 2389 00ad A5        		.byte	-91
+ 2390 00ae A3        		.byte	-93
+ 2391 00af A1        		.byte	-95
+ 2392 00b0 9F        		.byte	-97
+ 2393 00b1 9D        		.byte	-99
+ 2394 00b2 9B        		.byte	-101
+ 2395 00b3 99        		.byte	-103
+ 2396 00b4 97        		.byte	-105
+ 2397 00b5 95        		.byte	-107
+ 2398 00b6 93        		.byte	-109
+ 2399 00b7 91        		.byte	-111
+ 2400 00b8 8F        		.byte	-113
+ 2401 00b9 8F        		.byte	-113
+ 2402 00ba 8B        		.byte	-117
+ 2403 00bb 89        		.byte	-119
+ 2404 00bc 87        		.byte	-121
+ 2405 00bd 85        		.byte	-123
+ 2406 00be 83        		.byte	-125
+ 2407 00bf 81        		.byte	-127
+ 2408 00c0 7F        		.byte	127
+ 2409 00c1 7D        		.byte	125
+ 2410 00c2 7B        		.byte	123
+ 2411 00c3 79        		.byte	121
+ 2412 00c4 77        		.byte	119
+ 2413 00c5 75        		.byte	117
+ 2414 00c6 73        		.byte	115
+ 2415 00c7 71        		.byte	113
+ 2416 00c8 6F        		.byte	111
+ 2417 00c9 6F        		.byte	111
+ 2418 00ca 6B        		.byte	107
+ 2419 00cb 69        		.byte	105
+ 2420 00cc 67        		.byte	103
+ 2421 00cd 65        		.byte	101
+ 2422 00ce 63        		.byte	99
+ 2423 00cf 61        		.byte	97
+ 2424 00d0 5F        		.byte	95
+ 2425 00d1 5D        		.byte	93
+ 2426 00d2 5B        		.byte	91
+ 2427 00d3 59        		.byte	89
+ 2428 00d4 57        		.byte	87
+ 2429 00d5 55        		.byte	85
+ 2430 00d6 53        		.byte	83
+ 2431 00d7 51        		.byte	81
+ 2432 00d8 4F        		.byte	79
+ 2433 00d9 4F        		.byte	79
+ 2434 00da 4B        		.byte	75
+ 2435 00db 49        		.byte	73
+ 2436 00dc 47        		.byte	71
+ 2437 00dd 45        		.byte	69
+ 2438 00de 43        		.byte	67
+ 2439 00df 41        		.byte	65
+ 2440 00e0 3F        		.byte	63
+ 2441 00e1 3D        		.byte	61
+ 2442 00e2 3B        		.byte	59
+ 2443 00e3 39        		.byte	57
+ 2444 00e4 37        		.byte	55
+ 2445 00e5 35        		.byte	53
+ 2446 00e6 33        		.byte	51
+ 2447 00e7 31        		.byte	49
+ 2448 00e8 2F        		.byte	47
+ 2449 00e9 2F        		.byte	47
+ 2450 00ea 2B        		.byte	43
+ 2451 00eb 29        		.byte	41
+ 2452 00ec 27        		.byte	39
+ 2453 00ed 25        		.byte	37
+ 2454 00ee 23        		.byte	35
+ 2455 00ef 21        		.byte	33
+ 2456 00f0 1F        		.byte	31
+ 2457 00f1 1D        		.byte	29
+ 2458 00f2 1B        		.byte	27
+ 2459 00f3 19        		.byte	25
+ 2460 00f4 17        		.byte	23
+ 2461 00f5 15        		.byte	21
+ 2462 00f6 13        		.byte	19
+ 2463 00f7 11        		.byte	17
+ 2464 00f8 0F        		.byte	15
+ 2465 00f9 0F        		.byte	15
+ 2466 00fa 0B        		.byte	11
+ 2467 00fb 09        		.byte	9
+ 2468 00fc 07        		.byte	7
+ 2469 00fd 05        		.byte	5
+ 2470 00fe 03        		.byte	3
+ 2471 00ff 01        		.byte	1
+ 2472               	.global	rsawtoothwave
+ 2473               		.section	.progmem.data.rsawtoothwave,"a",@progbits
+ 2476               	rsawtoothwave:
+ 2477 0000 FF        		.byte	-1
+ 2478 0001 FE        		.byte	-2
+ 2479 0002 FD        		.byte	-3
+ 2480 0003 FC        		.byte	-4
+ 2481 0004 FB        		.byte	-5
+ 2482 0005 FA        		.byte	-6
+ 2483 0006 F9        		.byte	-7
+ 2484 0007 F8        		.byte	-8
+ 2485 0008 F7        		.byte	-9
+ 2486 0009 F6        		.byte	-10
+ 2487 000a F5        		.byte	-11
+ 2488 000b F4        		.byte	-12
+ 2489 000c F3        		.byte	-13
+ 2490 000d F2        		.byte	-14
+ 2491 000e F1        		.byte	-15
+ 2492 000f F0        		.byte	-16
+ 2493 0010 EF        		.byte	-17
+ 2494 0011 EE        		.byte	-18
+ 2495 0012 ED        		.byte	-19
+ 2496 0013 EC        		.byte	-20
+ 2497 0014 EB        		.byte	-21
+ 2498 0015 EA        		.byte	-22
+ 2499 0016 E9        		.byte	-23
+ 2500 0017 E8        		.byte	-24
+ 2501 0018 E7        		.byte	-25
+ 2502 0019 E6        		.byte	-26
+ 2503 001a E5        		.byte	-27
+ 2504 001b E4        		.byte	-28
+ 2505 001c E3        		.byte	-29
+ 2506 001d E2        		.byte	-30
+ 2507 001e E1        		.byte	-31
+ 2508 001f E0        		.byte	-32
+ 2509 0020 DF        		.byte	-33
+ 2510 0021 DE        		.byte	-34
+ 2511 0022 DD        		.byte	-35
+ 2512 0023 DC        		.byte	-36
+ 2513 0024 DB        		.byte	-37
+ 2514 0025 DA        		.byte	-38
+ 2515 0026 D9        		.byte	-39
+ 2516 0027 D8        		.byte	-40
+ 2517 0028 D7        		.byte	-41
+ 2518 0029 D6        		.byte	-42
+ 2519 002a D5        		.byte	-43
+ 2520 002b D4        		.byte	-44
+ 2521 002c D3        		.byte	-45
+ 2522 002d D2        		.byte	-46
+ 2523 002e D1        		.byte	-47
+ 2524 002f D0        		.byte	-48
+ 2525 0030 CF        		.byte	-49
+ 2526 0031 CE        		.byte	-50
+ 2527 0032 CD        		.byte	-51
+ 2528 0033 CC        		.byte	-52
+ 2529 0034 CB        		.byte	-53
+ 2530 0035 CA        		.byte	-54
+ 2531 0036 C9        		.byte	-55
+ 2532 0037 C8        		.byte	-56
+ 2533 0038 C7        		.byte	-57
+ 2534 0039 C6        		.byte	-58
+ 2535 003a C5        		.byte	-59
+ 2536 003b C4        		.byte	-60
+ 2537 003c C3        		.byte	-61
+ 2538 003d C2        		.byte	-62
+ 2539 003e C1        		.byte	-63
+ 2540 003f C0        		.byte	-64
+ 2541 0040 BF        		.byte	-65
+ 2542 0041 BE        		.byte	-66
+ 2543 0042 BD        		.byte	-67
+ 2544 0043 BC        		.byte	-68
+ 2545 0044 BB        		.byte	-69
+ 2546 0045 BA        		.byte	-70
+ 2547 0046 B9        		.byte	-71
+ 2548 0047 B8        		.byte	-72
+ 2549 0048 B7        		.byte	-73
+ 2550 0049 B6        		.byte	-74
+ 2551 004a B5        		.byte	-75
+ 2552 004b B4        		.byte	-76
+ 2553 004c B3        		.byte	-77
+ 2554 004d B2        		.byte	-78
+ 2555 004e B1        		.byte	-79
+ 2556 004f B0        		.byte	-80
+ 2557 0050 AF        		.byte	-81
+ 2558 0051 AE        		.byte	-82
+ 2559 0052 AD        		.byte	-83
+ 2560 0053 AC        		.byte	-84
+ 2561 0054 AB        		.byte	-85
+ 2562 0055 AA        		.byte	-86
+ 2563 0056 A9        		.byte	-87
+ 2564 0057 A8        		.byte	-88
+ 2565 0058 A7        		.byte	-89
+ 2566 0059 A6        		.byte	-90
+ 2567 005a A5        		.byte	-91
+ 2568 005b A4        		.byte	-92
+ 2569 005c A3        		.byte	-93
+ 2570 005d A2        		.byte	-94
+ 2571 005e A1        		.byte	-95
+ 2572 005f A0        		.byte	-96
+ 2573 0060 9F        		.byte	-97
+ 2574 0061 9E        		.byte	-98
+ 2575 0062 9D        		.byte	-99
+ 2576 0063 9C        		.byte	-100
+ 2577 0064 9B        		.byte	-101
+ 2578 0065 9A        		.byte	-102
+ 2579 0066 99        		.byte	-103
+ 2580 0067 98        		.byte	-104
+ 2581 0068 97        		.byte	-105
+ 2582 0069 96        		.byte	-106
+ 2583 006a 95        		.byte	-107
+ 2584 006b 94        		.byte	-108
+ 2585 006c 93        		.byte	-109
+ 2586 006d 92        		.byte	-110
+ 2587 006e 91        		.byte	-111
+ 2588 006f 90        		.byte	-112
+ 2589 0070 8F        		.byte	-113
+ 2590 0071 8E        		.byte	-114
+ 2591 0072 8D        		.byte	-115
+ 2592 0073 8C        		.byte	-116
+ 2593 0074 8B        		.byte	-117
+ 2594 0075 8A        		.byte	-118
+ 2595 0076 89        		.byte	-119
+ 2596 0077 88        		.byte	-120
+ 2597 0078 87        		.byte	-121
+ 2598 0079 86        		.byte	-122
+ 2599 007a 85        		.byte	-123
+ 2600 007b 84        		.byte	-124
+ 2601 007c 83        		.byte	-125
+ 2602 007d 82        		.byte	-126
+ 2603 007e 81        		.byte	-127
+ 2604 007f 80        		.byte	-128
+ 2605 0080 7F        		.byte	127
+ 2606 0081 7E        		.byte	126
+ 2607 0082 7D        		.byte	125
+ 2608 0083 7C        		.byte	124
+ 2609 0084 7B        		.byte	123
+ 2610 0085 7A        		.byte	122
+ 2611 0086 79        		.byte	121
+ 2612 0087 78        		.byte	120
+ 2613 0088 77        		.byte	119
+ 2614 0089 76        		.byte	118
+ 2615 008a 75        		.byte	117
+ 2616 008b 74        		.byte	116
+ 2617 008c 73        		.byte	115
+ 2618 008d 72        		.byte	114
+ 2619 008e 71        		.byte	113
+ 2620 008f 70        		.byte	112
+ 2621 0090 6F        		.byte	111
+ 2622 0091 6E        		.byte	110
+ 2623 0092 6D        		.byte	109
+ 2624 0093 6C        		.byte	108
+ 2625 0094 6B        		.byte	107
+ 2626 0095 6A        		.byte	106
+ 2627 0096 69        		.byte	105
+ 2628 0097 68        		.byte	104
+ 2629 0098 67        		.byte	103
+ 2630 0099 66        		.byte	102
+ 2631 009a 65        		.byte	101
+ 2632 009b 64        		.byte	100
+ 2633 009c 63        		.byte	99
+ 2634 009d 62        		.byte	98
+ 2635 009e 61        		.byte	97
+ 2636 009f 60        		.byte	96
+ 2637 00a0 5F        		.byte	95
+ 2638 00a1 5E        		.byte	94
+ 2639 00a2 5D        		.byte	93
+ 2640 00a3 5C        		.byte	92
+ 2641 00a4 5B        		.byte	91
+ 2642 00a5 5A        		.byte	90
+ 2643 00a6 59        		.byte	89
+ 2644 00a7 58        		.byte	88
+ 2645 00a8 57        		.byte	87
+ 2646 00a9 56        		.byte	86
+ 2647 00aa 55        		.byte	85
+ 2648 00ab 54        		.byte	84
+ 2649 00ac 53        		.byte	83
+ 2650 00ad 52        		.byte	82
+ 2651 00ae 51        		.byte	81
+ 2652 00af 50        		.byte	80
+ 2653 00b0 4F        		.byte	79
+ 2654 00b1 4E        		.byte	78
+ 2655 00b2 4D        		.byte	77
+ 2656 00b3 4C        		.byte	76
+ 2657 00b4 4B        		.byte	75
+ 2658 00b5 4A        		.byte	74
+ 2659 00b6 49        		.byte	73
+ 2660 00b7 48        		.byte	72
+ 2661 00b8 47        		.byte	71
+ 2662 00b9 46        		.byte	70
+ 2663 00ba 45        		.byte	69
+ 2664 00bb 44        		.byte	68
+ 2665 00bc 43        		.byte	67
+ 2666 00bd 42        		.byte	66
+ 2667 00be 41        		.byte	65
+ 2668 00bf 40        		.byte	64
+ 2669 00c0 3F        		.byte	63
+ 2670 00c1 3E        		.byte	62
+ 2671 00c2 3D        		.byte	61
+ 2672 00c3 3C        		.byte	60
+ 2673 00c4 3B        		.byte	59
+ 2674 00c5 3A        		.byte	58
+ 2675 00c6 39        		.byte	57
+ 2676 00c7 38        		.byte	56
+ 2677 00c8 37        		.byte	55
+ 2678 00c9 36        		.byte	54
+ 2679 00ca 35        		.byte	53
+ 2680 00cb 34        		.byte	52
+ 2681 00cc 33        		.byte	51
+ 2682 00cd 32        		.byte	50
+ 2683 00ce 31        		.byte	49
+ 2684 00cf 30        		.byte	48
+ 2685 00d0 2F        		.byte	47
+ 2686 00d1 2E        		.byte	46
+ 2687 00d2 2D        		.byte	45
+ 2688 00d3 2C        		.byte	44
+ 2689 00d4 2B        		.byte	43
+ 2690 00d5 2A        		.byte	42
+ 2691 00d6 29        		.byte	41
+ 2692 00d7 28        		.byte	40
+ 2693 00d8 27        		.byte	39
+ 2694 00d9 26        		.byte	38
+ 2695 00da 25        		.byte	37
+ 2696 00db 24        		.byte	36
+ 2697 00dc 23        		.byte	35
+ 2698 00dd 22        		.byte	34
+ 2699 00de 21        		.byte	33
+ 2700 00df 20        		.byte	32
+ 2701 00e0 1F        		.byte	31
+ 2702 00e1 1E        		.byte	30
+ 2703 00e2 1D        		.byte	29
+ 2704 00e3 1C        		.byte	28
+ 2705 00e4 1B        		.byte	27
+ 2706 00e5 1A        		.byte	26
+ 2707 00e6 19        		.byte	25
+ 2708 00e7 18        		.byte	24
+ 2709 00e8 17        		.byte	23
+ 2710 00e9 16        		.byte	22
+ 2711 00ea 15        		.byte	21
+ 2712 00eb 14        		.byte	20
+ 2713 00ec 13        		.byte	19
+ 2714 00ed 12        		.byte	18
+ 2715 00ee 11        		.byte	17
+ 2716 00ef 10        		.byte	16
+ 2717 00f0 0F        		.byte	15
+ 2718 00f1 0E        		.byte	14
+ 2719 00f2 0D        		.byte	13
+ 2720 00f3 0C        		.byte	12
+ 2721 00f4 0B        		.byte	11
+ 2722 00f5 0A        		.byte	10
+ 2723 00f6 09        		.byte	9
+ 2724 00f7 08        		.byte	8
+ 2725 00f8 07        		.byte	7
+ 2726 00f9 06        		.byte	6
+ 2727 00fa 05        		.byte	5
+ 2728 00fb 04        		.byte	4
+ 2729 00fc 03        		.byte	3
+ 2730 00fd 02        		.byte	2
+ 2731 00fe 01        		.byte	1
+ 2732 00ff 00        		.byte	0
+ 2733               	.global	sawtoothwave
+ 2734               		.section	.progmem.data.sawtoothwave,"a",@progbits
+ 2737               	sawtoothwave:
+ 2738 0000 00        		.byte	0
+ 2739 0001 01        		.byte	1
+ 2740 0002 02        		.byte	2
+ 2741 0003 03        		.byte	3
+ 2742 0004 04        		.byte	4
+ 2743 0005 05        		.byte	5
+ 2744 0006 06        		.byte	6
+ 2745 0007 07        		.byte	7
+ 2746 0008 08        		.byte	8
+ 2747 0009 09        		.byte	9
+ 2748 000a 0A        		.byte	10
+ 2749 000b 0B        		.byte	11
+ 2750 000c 0C        		.byte	12
+ 2751 000d 0D        		.byte	13
+ 2752 000e 0E        		.byte	14
+ 2753 000f 0F        		.byte	15
+ 2754 0010 10        		.byte	16
+ 2755 0011 11        		.byte	17
+ 2756 0012 12        		.byte	18
+ 2757 0013 13        		.byte	19
+ 2758 0014 14        		.byte	20
+ 2759 0015 15        		.byte	21
+ 2760 0016 16        		.byte	22
+ 2761 0017 17        		.byte	23
+ 2762 0018 18        		.byte	24
+ 2763 0019 19        		.byte	25
+ 2764 001a 1A        		.byte	26
+ 2765 001b 1B        		.byte	27
+ 2766 001c 1C        		.byte	28
+ 2767 001d 1D        		.byte	29
+ 2768 001e 1E        		.byte	30
+ 2769 001f 1F        		.byte	31
+ 2770 0020 20        		.byte	32
+ 2771 0021 21        		.byte	33
+ 2772 0022 22        		.byte	34
+ 2773 0023 23        		.byte	35
+ 2774 0024 24        		.byte	36
+ 2775 0025 25        		.byte	37
+ 2776 0026 26        		.byte	38
+ 2777 0027 27        		.byte	39
+ 2778 0028 28        		.byte	40
+ 2779 0029 29        		.byte	41
+ 2780 002a 2A        		.byte	42
+ 2781 002b 2B        		.byte	43
+ 2782 002c 2C        		.byte	44
+ 2783 002d 2D        		.byte	45
+ 2784 002e 2E        		.byte	46
+ 2785 002f 2F        		.byte	47
+ 2786 0030 30        		.byte	48
+ 2787 0031 31        		.byte	49
+ 2788 0032 32        		.byte	50
+ 2789 0033 33        		.byte	51
+ 2790 0034 34        		.byte	52
+ 2791 0035 35        		.byte	53
+ 2792 0036 36        		.byte	54
+ 2793 0037 37        		.byte	55
+ 2794 0038 38        		.byte	56
+ 2795 0039 39        		.byte	57
+ 2796 003a 3A        		.byte	58
+ 2797 003b 3B        		.byte	59
+ 2798 003c 3C        		.byte	60
+ 2799 003d 3D        		.byte	61
+ 2800 003e 3E        		.byte	62
+ 2801 003f 3F        		.byte	63
+ 2802 0040 40        		.byte	64
+ 2803 0041 41        		.byte	65
+ 2804 0042 42        		.byte	66
+ 2805 0043 43        		.byte	67
+ 2806 0044 44        		.byte	68
+ 2807 0045 45        		.byte	69
+ 2808 0046 46        		.byte	70
+ 2809 0047 47        		.byte	71
+ 2810 0048 48        		.byte	72
+ 2811 0049 49        		.byte	73
+ 2812 004a 4A        		.byte	74
+ 2813 004b 4B        		.byte	75
+ 2814 004c 4C        		.byte	76
+ 2815 004d 4D        		.byte	77
+ 2816 004e 4E        		.byte	78
+ 2817 004f 4F        		.byte	79
+ 2818 0050 50        		.byte	80
+ 2819 0051 51        		.byte	81
+ 2820 0052 52        		.byte	82
+ 2821 0053 53        		.byte	83
+ 2822 0054 54        		.byte	84
+ 2823 0055 55        		.byte	85
+ 2824 0056 56        		.byte	86
+ 2825 0057 57        		.byte	87
+ 2826 0058 58        		.byte	88
+ 2827 0059 59        		.byte	89
+ 2828 005a 5A        		.byte	90
+ 2829 005b 5B        		.byte	91
+ 2830 005c 5C        		.byte	92
+ 2831 005d 5D        		.byte	93
+ 2832 005e 5E        		.byte	94
+ 2833 005f 5F        		.byte	95
+ 2834 0060 60        		.byte	96
+ 2835 0061 61        		.byte	97
+ 2836 0062 62        		.byte	98
+ 2837 0063 63        		.byte	99
+ 2838 0064 64        		.byte	100
+ 2839 0065 65        		.byte	101
+ 2840 0066 66        		.byte	102
+ 2841 0067 67        		.byte	103
+ 2842 0068 68        		.byte	104
+ 2843 0069 69        		.byte	105
+ 2844 006a 6A        		.byte	106
+ 2845 006b 6B        		.byte	107
+ 2846 006c 6C        		.byte	108
+ 2847 006d 6D        		.byte	109
+ 2848 006e 6E        		.byte	110
+ 2849 006f 6F        		.byte	111
+ 2850 0070 70        		.byte	112
+ 2851 0071 71        		.byte	113
+ 2852 0072 72        		.byte	114
+ 2853 0073 73        		.byte	115
+ 2854 0074 74        		.byte	116
+ 2855 0075 75        		.byte	117
+ 2856 0076 76        		.byte	118
+ 2857 0077 77        		.byte	119
+ 2858 0078 78        		.byte	120
+ 2859 0079 79        		.byte	121
+ 2860 007a 7A        		.byte	122
+ 2861 007b 7B        		.byte	123
+ 2862 007c 7C        		.byte	124
+ 2863 007d 7D        		.byte	125
+ 2864 007e 7E        		.byte	126
+ 2865 007f 7F        		.byte	127
+ 2866 0080 80        		.byte	-128
+ 2867 0081 81        		.byte	-127
+ 2868 0082 82        		.byte	-126
+ 2869 0083 83        		.byte	-125
+ 2870 0084 84        		.byte	-124
+ 2871 0085 85        		.byte	-123
+ 2872 0086 86        		.byte	-122
+ 2873 0087 87        		.byte	-121
+ 2874 0088 88        		.byte	-120
+ 2875 0089 89        		.byte	-119
+ 2876 008a 8A        		.byte	-118
+ 2877 008b 8B        		.byte	-117
+ 2878 008c 8C        		.byte	-116
+ 2879 008d 8D        		.byte	-115
+ 2880 008e 8E        		.byte	-114
+ 2881 008f 8F        		.byte	-113
+ 2882 0090 90        		.byte	-112
+ 2883 0091 91        		.byte	-111
+ 2884 0092 92        		.byte	-110
+ 2885 0093 93        		.byte	-109
+ 2886 0094 94        		.byte	-108
+ 2887 0095 95        		.byte	-107
+ 2888 0096 96        		.byte	-106
+ 2889 0097 97        		.byte	-105
+ 2890 0098 98        		.byte	-104
+ 2891 0099 99        		.byte	-103
+ 2892 009a 9A        		.byte	-102
+ 2893 009b 9B        		.byte	-101
+ 2894 009c 9C        		.byte	-100
+ 2895 009d 9D        		.byte	-99
+ 2896 009e 9E        		.byte	-98
+ 2897 009f 9F        		.byte	-97
+ 2898 00a0 A0        		.byte	-96
+ 2899 00a1 A1        		.byte	-95
+ 2900 00a2 A2        		.byte	-94
+ 2901 00a3 A3        		.byte	-93
+ 2902 00a4 A4        		.byte	-92
+ 2903 00a5 A5        		.byte	-91
+ 2904 00a6 A6        		.byte	-90
+ 2905 00a7 A7        		.byte	-89
+ 2906 00a8 A8        		.byte	-88
+ 2907 00a9 A9        		.byte	-87
+ 2908 00aa AA        		.byte	-86
+ 2909 00ab AB        		.byte	-85
+ 2910 00ac AC        		.byte	-84
+ 2911 00ad AD        		.byte	-83
+ 2912 00ae AE        		.byte	-82
+ 2913 00af AF        		.byte	-81
+ 2914 00b0 B0        		.byte	-80
+ 2915 00b1 B1        		.byte	-79
+ 2916 00b2 B2        		.byte	-78
+ 2917 00b3 B3        		.byte	-77
+ 2918 00b4 B4        		.byte	-76
+ 2919 00b5 B5        		.byte	-75
+ 2920 00b6 B6        		.byte	-74
+ 2921 00b7 B7        		.byte	-73
+ 2922 00b8 B8        		.byte	-72
+ 2923 00b9 B9        		.byte	-71
+ 2924 00ba BA        		.byte	-70
+ 2925 00bb BB        		.byte	-69
+ 2926 00bc BC        		.byte	-68
+ 2927 00bd BD        		.byte	-67
+ 2928 00be BE        		.byte	-66
+ 2929 00bf BF        		.byte	-65
+ 2930 00c0 C0        		.byte	-64
+ 2931 00c1 C1        		.byte	-63
+ 2932 00c2 C2        		.byte	-62
+ 2933 00c3 C3        		.byte	-61
+ 2934 00c4 C4        		.byte	-60
+ 2935 00c5 C5        		.byte	-59
+ 2936 00c6 C6        		.byte	-58
+ 2937 00c7 C7        		.byte	-57
+ 2938 00c8 C8        		.byte	-56
+ 2939 00c9 C9        		.byte	-55
+ 2940 00ca CA        		.byte	-54
+ 2941 00cb CB        		.byte	-53
+ 2942 00cc CC        		.byte	-52
+ 2943 00cd CD        		.byte	-51
+ 2944 00ce CE        		.byte	-50
+ 2945 00cf CF        		.byte	-49
+ 2946 00d0 D0        		.byte	-48
+ 2947 00d1 D1        		.byte	-47
+ 2948 00d2 D2        		.byte	-46
+ 2949 00d3 D3        		.byte	-45
+ 2950 00d4 D4        		.byte	-44
+ 2951 00d5 D5        		.byte	-43
+ 2952 00d6 D6        		.byte	-42
+ 2953 00d7 D7        		.byte	-41
+ 2954 00d8 D8        		.byte	-40
+ 2955 00d9 D9        		.byte	-39
+ 2956 00da DA        		.byte	-38
+ 2957 00db DB        		.byte	-37
+ 2958 00dc DC        		.byte	-36
+ 2959 00dd DD        		.byte	-35
+ 2960 00de DE        		.byte	-34
+ 2961 00df DF        		.byte	-33
+ 2962 00e0 E0        		.byte	-32
+ 2963 00e1 E1        		.byte	-31
+ 2964 00e2 E2        		.byte	-30
+ 2965 00e3 E3        		.byte	-29
+ 2966 00e4 E4        		.byte	-28
+ 2967 00e5 E5        		.byte	-27
+ 2968 00e6 E6        		.byte	-26
+ 2969 00e7 E7        		.byte	-25
+ 2970 00e8 E8        		.byte	-24
+ 2971 00e9 E9        		.byte	-23
+ 2972 00ea EA        		.byte	-22
+ 2973 00eb EB        		.byte	-21
+ 2974 00ec EC        		.byte	-20
+ 2975 00ed ED        		.byte	-19
+ 2976 00ee EE        		.byte	-18
+ 2977 00ef EF        		.byte	-17
+ 2978 00f0 F0        		.byte	-16
+ 2979 00f1 F1        		.byte	-15
+ 2980 00f2 F2        		.byte	-14
+ 2981 00f3 F3        		.byte	-13
+ 2982 00f4 F4        		.byte	-12
+ 2983 00f5 F5        		.byte	-11
+ 2984 00f6 F6        		.byte	-10
+ 2985 00f7 F7        		.byte	-9
+ 2986 00f8 F8        		.byte	-8
+ 2987 00f9 F9        		.byte	-7
+ 2988 00fa FA        		.byte	-6
+ 2989 00fb FB        		.byte	-5
+ 2990 00fc FC        		.byte	-4
+ 2991 00fd FD        		.byte	-3
+ 2992 00fe FE        		.byte	-2
+ 2993 00ff FF        		.byte	-1
+ 2994               	.global	sinewave
+ 2995               		.section	.progmem.data.sinewave,"a",@progbits
+ 2998               	sinewave:
+ 2999 0000 80        		.byte	-128
+ 3000 0001 83        		.byte	-125
+ 3001 0002 86        		.byte	-122
+ 3002 0003 89        		.byte	-119
+ 3003 0004 8C        		.byte	-116
+ 3004 0005 8F        		.byte	-113
+ 3005 0006 92        		.byte	-110
+ 3006 0007 95        		.byte	-107
+ 3007 0008 98        		.byte	-104
+ 3008 0009 9C        		.byte	-100
+ 3009 000a 9F        		.byte	-97
+ 3010 000b A2        		.byte	-94
+ 3011 000c A5        		.byte	-91
+ 3012 000d A8        		.byte	-88
+ 3013 000e AB        		.byte	-85
+ 3014 000f AE        		.byte	-82
+ 3015 0010 B0        		.byte	-80
+ 3016 0011 B3        		.byte	-77
+ 3017 0012 B6        		.byte	-74
+ 3018 0013 B9        		.byte	-71
+ 3019 0014 BC        		.byte	-68
+ 3020 0015 BF        		.byte	-65
+ 3021 0016 C1        		.byte	-63
+ 3022 0017 C4        		.byte	-60
+ 3023 0018 C7        		.byte	-57
+ 3024 0019 C9        		.byte	-55
+ 3025 001a CC        		.byte	-52
+ 3026 001b CE        		.byte	-50
+ 3027 001c D1        		.byte	-47
+ 3028 001d D3        		.byte	-45
+ 3029 001e D5        		.byte	-43
+ 3030 001f D8        		.byte	-40
+ 3031 0020 DA        		.byte	-38
+ 3032 0021 DC        		.byte	-36
+ 3033 0022 DE        		.byte	-34
+ 3034 0023 E0        		.byte	-32
+ 3035 0024 E2        		.byte	-30
+ 3036 0025 E4        		.byte	-28
+ 3037 0026 E6        		.byte	-26
+ 3038 0027 E8        		.byte	-24
+ 3039 0028 EA        		.byte	-22
+ 3040 0029 EC        		.byte	-20
+ 3041 002a ED        		.byte	-19
+ 3042 002b EF        		.byte	-17
+ 3043 002c F0        		.byte	-16
+ 3044 002d F2        		.byte	-14
+ 3045 002e F3        		.byte	-13
+ 3046 002f F5        		.byte	-11
+ 3047 0030 F6        		.byte	-10
+ 3048 0031 F7        		.byte	-9
+ 3049 0032 F8        		.byte	-8
+ 3050 0033 F9        		.byte	-7
+ 3051 0034 FA        		.byte	-6
+ 3052 0035 FB        		.byte	-5
+ 3053 0036 FC        		.byte	-4
+ 3054 0037 FC        		.byte	-4
+ 3055 0038 FD        		.byte	-3
+ 3056 0039 FE        		.byte	-2
+ 3057 003a FE        		.byte	-2
+ 3058 003b FF        		.byte	-1
+ 3059 003c FF        		.byte	-1
+ 3060 003d FF        		.byte	-1
+ 3061 003e FF        		.byte	-1
+ 3062 003f FF        		.byte	-1
+ 3063 0040 FF        		.byte	-1
+ 3064 0041 FF        		.byte	-1
+ 3065 0042 FF        		.byte	-1
+ 3066 0043 FF        		.byte	-1
+ 3067 0044 FF        		.byte	-1
+ 3068 0045 FF        		.byte	-1
+ 3069 0046 FE        		.byte	-2
+ 3070 0047 FE        		.byte	-2
+ 3071 0048 FD        		.byte	-3
+ 3072 0049 FC        		.byte	-4
+ 3073 004a FC        		.byte	-4
+ 3074 004b FB        		.byte	-5
+ 3075 004c FA        		.byte	-6
+ 3076 004d F9        		.byte	-7
+ 3077 004e F8        		.byte	-8
+ 3078 004f F7        		.byte	-9
+ 3079 0050 F6        		.byte	-10
+ 3080 0051 F5        		.byte	-11
+ 3081 0052 F3        		.byte	-13
+ 3082 0053 F2        		.byte	-14
+ 3083 0054 F0        		.byte	-16
+ 3084 0055 EF        		.byte	-17
+ 3085 0056 ED        		.byte	-19
+ 3086 0057 EC        		.byte	-20
+ 3087 0058 EA        		.byte	-22
+ 3088 0059 E8        		.byte	-24
+ 3089 005a E6        		.byte	-26
+ 3090 005b E4        		.byte	-28
+ 3091 005c E2        		.byte	-30
+ 3092 005d E0        		.byte	-32
+ 3093 005e DE        		.byte	-34
+ 3094 005f DC        		.byte	-36
+ 3095 0060 DA        		.byte	-38
+ 3096 0061 D8        		.byte	-40
+ 3097 0062 D5        		.byte	-43
+ 3098 0063 D3        		.byte	-45
+ 3099 0064 D1        		.byte	-47
+ 3100 0065 CE        		.byte	-50
+ 3101 0066 CC        		.byte	-52
+ 3102 0067 C9        		.byte	-55
+ 3103 0068 C7        		.byte	-57
+ 3104 0069 C4        		.byte	-60
+ 3105 006a C1        		.byte	-63
+ 3106 006b BF        		.byte	-65
+ 3107 006c BC        		.byte	-68
+ 3108 006d B9        		.byte	-71
+ 3109 006e B6        		.byte	-74
+ 3110 006f B3        		.byte	-77
+ 3111 0070 B0        		.byte	-80
+ 3112 0071 AE        		.byte	-82
+ 3113 0072 AB        		.byte	-85
+ 3114 0073 A8        		.byte	-88
+ 3115 0074 A5        		.byte	-91
+ 3116 0075 A2        		.byte	-94
+ 3117 0076 9F        		.byte	-97
+ 3118 0077 9C        		.byte	-100
+ 3119 0078 98        		.byte	-104
+ 3120 0079 95        		.byte	-107
+ 3121 007a 92        		.byte	-110
+ 3122 007b 8F        		.byte	-113
+ 3123 007c 8C        		.byte	-116
+ 3124 007d 89        		.byte	-119
+ 3125 007e 86        		.byte	-122
+ 3126 007f 83        		.byte	-125
+ 3127 0080 80        		.byte	-128
+ 3128 0081 7C        		.byte	124
+ 3129 0082 79        		.byte	121
+ 3130 0083 76        		.byte	118
+ 3131 0084 73        		.byte	115
+ 3132 0085 70        		.byte	112
+ 3133 0086 6D        		.byte	109
+ 3134 0087 6A        		.byte	106
+ 3135 0088 67        		.byte	103
+ 3136 0089 63        		.byte	99
+ 3137 008a 60        		.byte	96
+ 3138 008b 5D        		.byte	93
+ 3139 008c 5A        		.byte	90
+ 3140 008d 57        		.byte	87
+ 3141 008e 54        		.byte	84
+ 3142 008f 51        		.byte	81
+ 3143 0090 4F        		.byte	79
+ 3144 0091 4C        		.byte	76
+ 3145 0092 49        		.byte	73
+ 3146 0093 46        		.byte	70
+ 3147 0094 43        		.byte	67
+ 3148 0095 40        		.byte	64
+ 3149 0096 3E        		.byte	62
+ 3150 0097 3B        		.byte	59
+ 3151 0098 38        		.byte	56
+ 3152 0099 36        		.byte	54
+ 3153 009a 33        		.byte	51
+ 3154 009b 31        		.byte	49
+ 3155 009c 2E        		.byte	46
+ 3156 009d 2C        		.byte	44
+ 3157 009e 2A        		.byte	42
+ 3158 009f 27        		.byte	39
+ 3159 00a0 25        		.byte	37
+ 3160 00a1 23        		.byte	35
+ 3161 00a2 21        		.byte	33
+ 3162 00a3 1F        		.byte	31
+ 3163 00a4 1D        		.byte	29
+ 3164 00a5 1B        		.byte	27
+ 3165 00a6 19        		.byte	25
+ 3166 00a7 17        		.byte	23
+ 3167 00a8 15        		.byte	21
+ 3168 00a9 13        		.byte	19
+ 3169 00aa 12        		.byte	18
+ 3170 00ab 10        		.byte	16
+ 3171 00ac 0F        		.byte	15
+ 3172 00ad 0D        		.byte	13
+ 3173 00ae 0C        		.byte	12
+ 3174 00af 0A        		.byte	10
+ 3175 00b0 09        		.byte	9
+ 3176 00b1 08        		.byte	8
+ 3177 00b2 07        		.byte	7
+ 3178 00b3 06        		.byte	6
+ 3179 00b4 05        		.byte	5
+ 3180 00b5 04        		.byte	4
+ 3181 00b6 03        		.byte	3
+ 3182 00b7 03        		.byte	3
+ 3183 00b8 02        		.byte	2
+ 3184 00b9 01        		.byte	1
+ 3185 00ba 01        		.byte	1
+ 3186 00bb 00        		.byte	0
+ 3187 00bc 00        		.byte	0
+ 3188 00bd 00        		.byte	0
+ 3189 00be 00        		.byte	0
+ 3190 00bf 00        		.byte	0
+ 3191 00c0 00        		.byte	0
+ 3192 00c1 00        		.byte	0
+ 3193 00c2 00        		.byte	0
+ 3194 00c3 00        		.byte	0
+ 3195 00c4 00        		.byte	0
+ 3196 00c5 00        		.byte	0
+ 3197 00c6 01        		.byte	1
+ 3198 00c7 01        		.byte	1
+ 3199 00c8 02        		.byte	2
+ 3200 00c9 03        		.byte	3
+ 3201 00ca 03        		.byte	3
+ 3202 00cb 04        		.byte	4
+ 3203 00cc 05        		.byte	5
+ 3204 00cd 06        		.byte	6
+ 3205 00ce 07        		.byte	7
+ 3206 00cf 08        		.byte	8
+ 3207 00d0 09        		.byte	9
+ 3208 00d1 0A        		.byte	10
+ 3209 00d2 0C        		.byte	12
+ 3210 00d3 0D        		.byte	13
+ 3211 00d4 0F        		.byte	15
+ 3212 00d5 10        		.byte	16
+ 3213 00d6 12        		.byte	18
+ 3214 00d7 13        		.byte	19
+ 3215 00d8 15        		.byte	21
+ 3216 00d9 17        		.byte	23
+ 3217 00da 19        		.byte	25
+ 3218 00db 1B        		.byte	27
+ 3219 00dc 1D        		.byte	29
+ 3220 00dd 1F        		.byte	31
+ 3221 00de 21        		.byte	33
+ 3222 00df 23        		.byte	35
+ 3223 00e0 25        		.byte	37
+ 3224 00e1 27        		.byte	39
+ 3225 00e2 2A        		.byte	42
+ 3226 00e3 2C        		.byte	44
+ 3227 00e4 2E        		.byte	46
+ 3228 00e5 31        		.byte	49
+ 3229 00e6 33        		.byte	51
+ 3230 00e7 36        		.byte	54
+ 3231 00e8 38        		.byte	56
+ 3232 00e9 3B        		.byte	59
+ 3233 00ea 3E        		.byte	62
+ 3234 00eb 40        		.byte	64
+ 3235 00ec 43        		.byte	67
+ 3236 00ed 46        		.byte	70
+ 3237 00ee 49        		.byte	73
+ 3238 00ef 4C        		.byte	76
+ 3239 00f0 4F        		.byte	79
+ 3240 00f1 51        		.byte	81
+ 3241 00f2 54        		.byte	84
+ 3242 00f3 57        		.byte	87
+ 3243 00f4 5A        		.byte	90
+ 3244 00f5 5D        		.byte	93
+ 3245 00f6 60        		.byte	96
+ 3246 00f7 63        		.byte	99
+ 3247 00f8 67        		.byte	103
+ 3248 00f9 6A        		.byte	106
+ 3249 00fa 6D        		.byte	109
+ 3250 00fb 70        		.byte	112
+ 3251 00fc 73        		.byte	115
+ 3252 00fd 76        		.byte	118
+ 3253 00fe 79        		.byte	121
+ 3254 00ff 7C        		.byte	124
+ 3255               	.global	buf
+ 3256               		.section	.buffer,"aw",@progbits
+ 3259               	buf:
+ 3260 0000 0000 0000 		.zero	256
+ 3260      0000 0000 
+ 3260      0000 0000 
+ 3260      0000 0000 
+ 3260      0000 0000 
+ 3261               	.global	setting
+ 3262               		.section	.eeprom,"aw",@progbits
+ 3265               	setting:
+ 3266 0000 01        		.byte	1
+ 3267 0001 E8        		.byte	-24
+ 3268 0002 03        		.byte	3
+ 3269 0003 00        		.byte	0
+ 3270 0004 00        		.byte	0
+ 3271 0005 E8        		.byte	-24
+ 3272 0006 03        		.byte	3
+ 3273 0007 00        		.byte	0
+ 3274 0008 00        		.byte	0
+ 3275 0009 E8        		.byte	-24
+ 3276 000a 03        		.byte	3
+ 3277 000b 00        		.byte	0
+ 3278 000c 00        		.byte	0
+ 3279 000d E8        		.byte	-24
+ 3280 000e 03        		.byte	3
+ 3281 000f 00        		.byte	0
+ 3282 0010 00        		.byte	0
+ 3283 0011 E8        		.byte	-24
+ 3284 0012 03        		.byte	3
+ 3285 0013 00        		.byte	0
+ 3286 0014 00        		.byte	0
+ 3287 0015 E8        		.byte	-24
+ 3288 0016 03        		.byte	3
+ 3289 0017 00        		.byte	0
+ 3290 0018 00        		.byte	0
+ 3291 0019 E8        		.byte	-24
+ 3292 001a 03        		.byte	3
+ 3293 001b 00        		.byte	0
+ 3294 001c 00        		.byte	0
+ 3295 001d 32        		.byte	50
+ 3296 001e 00        		.byte	0
+ 3297 001f 40        		.byte	64
+ 3298 0020 42        		.byte	66
+ 3299 0021 0F        		.byte	15
+ 3300 0022 00        		.byte	0
+ 3301 0023 64        		.byte	100
+ 3302 0024 00        		.byte	0
+ 3303 0025 00        		.byte	0
+ 3304 0026 00        		.byte	0
+ 3305 0027 64        		.byte	100
+ 3306 0028 00        		.byte	0
+ 3307 0029 00        		.byte	0
+ 3308 002a 00        		.byte	0
+ 3309 002b 64        		.byte	100
+ 3310 002c 00        		.byte	0
+ 3311 002d 00        		.byte	0
+ 3312 002e 00        		.byte	0
+ 3313 002f 64        		.byte	100
+ 3314 0030 00        		.byte	0
+ 3315 0031 00        		.byte	0
+ 3316 0032 00        		.byte	0
+ 3317 0033 0000      		.word	0
+ 3318 0035 00        		.byte	0
+ 3319               	.global	def_setting
+ 3320               		.section	.progmem.data.def_setting,"a",@progbits
+ 3323               	def_setting:
+ 3324 0000 01        		.byte	1
+ 3325 0001 E8        		.byte	-24
+ 3326 0002 03        		.byte	3
+ 3327 0003 00        		.byte	0
+ 3328 0004 00        		.byte	0
+ 3329 0005 E8        		.byte	-24
+ 3330 0006 03        		.byte	3
+ 3331 0007 00        		.byte	0
+ 3332 0008 00        		.byte	0
+ 3333 0009 E8        		.byte	-24
+ 3334 000a 03        		.byte	3
+ 3335 000b 00        		.byte	0
+ 3336 000c 00        		.byte	0
+ 3337 000d E8        		.byte	-24
+ 3338 000e 03        		.byte	3
+ 3339 000f 00        		.byte	0
+ 3340 0010 00        		.byte	0
+ 3341 0011 E8        		.byte	-24
+ 3342 0012 03        		.byte	3
+ 3343 0013 00        		.byte	0
+ 3344 0014 00        		.byte	0
+ 3345 0015 E8        		.byte	-24
+ 3346 0016 03        		.byte	3
+ 3347 0017 00        		.byte	0
+ 3348 0018 00        		.byte	0
+ 3349 0019 E8        		.byte	-24
+ 3350 001a 03        		.byte	3
+ 3351 001b 00        		.byte	0
+ 3352 001c 00        		.byte	0
+ 3353 001d 32        		.byte	50
+ 3354 001e 00        		.byte	0
+ 3355 001f 40        		.byte	64
+ 3356 0020 42        		.byte	66
+ 3357 0021 0F        		.byte	15
+ 3358 0022 00        		.byte	0
+ 3359 0023 64        		.byte	100
+ 3360 0024 00        		.byte	0
+ 3361 0025 00        		.byte	0
+ 3362 0026 00        		.byte	0
+ 3363 0027 64        		.byte	100
+ 3364 0028 00        		.byte	0
+ 3365 0029 00        		.byte	0
+ 3366 002a 00        		.byte	0
+ 3367 002b 64        		.byte	100
+ 3368 002c 00        		.byte	0
+ 3369 002d 00        		.byte	0
+ 3370 002e 00        		.byte	0
+ 3371 002f 64        		.byte	100
+ 3372 0030 00        		.byte	0
+ 3373 0031 00        		.byte	0
+ 3374 0032 00        		.byte	0
+ 3375 0033 0000      		.word	0
+ 3376 0035 00        		.byte	0
+ 3385               		.text
+ 3387               	.Letext0:
+ 3388               		.ident	"GCC: (AVR_8_bit_GNU_Toolchain_3.5.0_1662) 4.9.2"
+DEFINED SYMBOLS
+                            *ABS*:00000000 main.c
+C:\Users\Magenta\AppData\Local\Temp\ccxvEEQf.s:2      *ABS*:0000003e __SP_H__
+C:\Users\Magenta\AppData\Local\Temp\ccxvEEQf.s:3      *ABS*:0000003d __SP_L__
+C:\Users\Magenta\AppData\Local\Temp\ccxvEEQf.s:4      *ABS*:0000003f __SREG__
+C:\Users\Magenta\AppData\Local\Temp\ccxvEEQf.s:5      *ABS*:00000000 __tmp_reg__
+C:\Users\Magenta\AppData\Local\Temp\ccxvEEQf.s:6      *ABS*:00000001 __zero_reg__
+C:\Users\Magenta\AppData\Local\Temp\ccxvEEQf.s:130    .text.pwm_start:00000000 pwm_start
+C:\Users\Magenta\AppData\Local\Temp\ccxvEEQf.s:263    .text.dds_start:00000000 dds_start
+C:\Users\Magenta\AppData\Local\Temp\ccxvEEQf.s:335    .text.ddssq_start:00000000 ddssq_start
+C:\Users\Magenta\AppData\Local\Temp\ccxvEEQf.s:414    .text.get_phase:00000000 get_phase
+C:\Users\Magenta\AppData\Local\Temp\ccxvEEQf.s:493    .text.dds_main:00000000 dds_main
+C:\Users\Magenta\AppData\Local\Temp\ccxvEEQf.s:3265   .eeprom:00000000 setting
+C:\Users\Magenta\AppData\Local\Temp\ccxvEEQf.s:3259   .buffer:00000000 buf
+C:\Users\Magenta\AppData\Local\Temp\ccxvEEQf.s:639    .text.startup.main:00000000 main
+C:\Users\Magenta\AppData\Local\Temp\ccxvEEQf.s:3323   .progmem.data.def_setting:00000000 def_setting
+C:\Users\Magenta\AppData\Local\Temp\ccxvEEQf.s:2998   .progmem.data.sinewave:00000000 sinewave
+C:\Users\Magenta\AppData\Local\Temp\ccxvEEQf.s:1948   .progmem.data.__c.2135:00000000 __c.2135
+C:\Users\Magenta\AppData\Local\Temp\ccxvEEQf.s:2737   .progmem.data.sawtoothwave:00000000 sawtoothwave
+C:\Users\Magenta\AppData\Local\Temp\ccxvEEQf.s:1943   .progmem.data.__c.2139:00000000 __c.2139
+C:\Users\Magenta\AppData\Local\Temp\ccxvEEQf.s:2476   .progmem.data.rsawtoothwave:00000000 rsawtoothwave
+C:\Users\Magenta\AppData\Local\Temp\ccxvEEQf.s:1938   .progmem.data.__c.2142:00000000 __c.2142
+C:\Users\Magenta\AppData\Local\Temp\ccxvEEQf.s:2215   .progmem.data.trianglewave:00000000 trianglewave
+C:\Users\Magenta\AppData\Local\Temp\ccxvEEQf.s:1933   .progmem.data.__c.2145:00000000 __c.2145
+C:\Users\Magenta\AppData\Local\Temp\ccxvEEQf.s:1954   .progmem.data.ECG:00000000 ECG
+C:\Users\Magenta\AppData\Local\Temp\ccxvEEQf.s:1928   .progmem.data.__c.2148:00000000 __c.2148
+C:\Users\Magenta\AppData\Local\Temp\ccxvEEQf.s:1923   .progmem.data.__c.2151:00000000 __c.2151
+C:\Users\Magenta\AppData\Local\Temp\ccxvEEQf.s:1918   .progmem.data.__c.2154:00000000 __c.2154
+C:\Users\Magenta\AppData\Local\Temp\ccxvEEQf.s:1913   .progmem.data.__c.2157:00000000 __c.2157
+C:\Users\Magenta\AppData\Local\Temp\ccxvEEQf.s:1908   .progmem.data.__c.2159:00000000 __c.2159
+C:\Users\Magenta\AppData\Local\Temp\ccxvEEQf.s:1903   .progmem.data.__c.2161:00000000 __c.2161
+C:\Users\Magenta\AppData\Local\Temp\ccxvEEQf.s:1898   .progmem.data.__c.2163:00000000 __c.2163
+C:\Users\Magenta\AppData\Local\Temp\ccxvEEQf.s:1893   .progmem.data.__c.2169:00000000 __c.2169
+C:\Users\Magenta\AppData\Local\Temp\ccxvEEQf.s:1888   .progmem.data.__c.2175:00000000 __c.2175
+C:\Users\Magenta\AppData\Local\Temp\ccxvEEQf.s:1883   .progmem.data.__c.2177:00000000 __c.2177
+C:\Users\Magenta\AppData\Local\Temp\ccxvEEQf.s:1878   .progmem.data.__c.2179:00000000 __c.2179
+C:\Users\Magenta\AppData\Local\Temp\ccxvEEQf.s:1873   .progmem.data.__c.2181:00000000 __c.2181
+C:\Users\Magenta\AppData\Local\Temp\ccxvEEQf.s:1868   .progmem.data.__c.2183:00000000 __c.2183
+C:\Users\Magenta\AppData\Local\Temp\ccxvEEQf.s:1863   .progmem.data.__c.2186:00000000 __c.2186
+C:\Users\Magenta\AppData\Local\Temp\ccxvEEQf.s:1858   .progmem.data.__c.2188:00000000 __c.2188
+C:\Users\Magenta\AppData\Local\Temp\ccxvEEQf.s:1853   .progmem.data.__c.2190:00000000 __c.2190
+C:\Users\Magenta\AppData\Local\Temp\ccxvEEQf.s:1848   .progmem.data.__c.2192:00000000 __c.2192
+C:\Users\Magenta\AppData\Local\Temp\ccxvEEQf.s:1843   .progmem.data.__c.2194:00000000 __c.2194
+C:\Users\Magenta\AppData\Local\Temp\ccxvEEQf.s:1838   .progmem.data.__c.2197:00000000 __c.2197
+C:\Users\Magenta\AppData\Local\Temp\ccxvEEQf.s:1833   .progmem.data.__c.2200:00000000 __c.2200
+
+UNDEFINED SYMBOLS
+__udivmodsi4
+__mulsi3
+__udivdi3
+__ashldi3
+dds
+dds_sq
+nnl_puts_P
+print_on_off
+print_fq
+btn_wait
+btn_wait_up
+eeprom_update_dword
+generator
+eeprom_update_byte
+memcpy_P
+input_fd
+eeprom_update_block
+lcd_init
+lcd_clrscr
+eeprom_read_block
+rand
+print_u
+input_dc
+input_ext_sync
+input_hs
+n_putchar
+lcd_goto
+pulse
+input_t
+input_n
+input_trig
+tv_vbars
+tv_gen

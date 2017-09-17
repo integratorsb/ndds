@@ -1,0 +1,737 @@
+   1               		.file	"TV_video_generator.c"
+   2               	__SP_H__ = 0x3e
+   3               	__SP_L__ = 0x3d
+   4               	__SREG__ = 0x3f
+   5               	__tmp_reg__ = 0
+   6               	__zero_reg__ = 1
+   8               		.text
+   9               	.Ltext0:
+ 121               		.section	.text.vsync_pulse,"ax",@progbits
+ 123               	.global	vsync_pulse
+ 125               	vsync_pulse:
+   1:TV_video_generator.c **** /*
+   2:TV_video_generator.c ****  * TV_video_generator.c
+   3:TV_video_generator.c ****  *
+   4:TV_video_generator.c ****  * Created: 24.07.2017 23:05:55
+   5:TV_video_generator.c ****  *  Author: integrator.sb@gmail.com
+   6:TV_video_generator.c ****  */ 
+   7:TV_video_generator.c **** /*
+   8:TV_video_generator.c **** http://www.javiervalcarce.eu/html/arduino-tv-signal-generator-en.html
+   9:TV_video_generator.c **** */
+  10:TV_video_generator.c **** 
+  11:TV_video_generator.c **** #include "config.h"
+  12:TV_video_generator.c **** #include <avr/io.h>
+  13:TV_video_generator.c **** #include <util/delay.h>
+  14:TV_video_generator.c **** #include "menu.h"
+  15:TV_video_generator.c **** #include "TV_video_generator.h"
+  16:TV_video_generator.c **** 
+  17:TV_video_generator.c **** 
+  18:TV_video_generator.c ****  void vsync_pulse()
+  19:TV_video_generator.c **** {
+ 127               	.LM0:
+ 128               	.LFBB1:
+ 129               	/* prologue: function */
+ 130               	/* frame size = 0 */
+ 131               	/* stack size = 0 */
+ 132               	.L__stack_usage = 0
+  20:TV_video_generator.c ****       R2RPORT = LEVEL_SYNC; 
+ 134               	.LM1:
+ 135 0000 12BA      		out 0x12,__zero_reg__
+ 136               	.LBB24:
+ 137               	.LBB25:
+ 139               	.Ltext1:
+   1:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** /* Copyright (c) 2002, Marek Michalkiewicz
+   2:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    Copyright (c) 2004,2005,2007 Joerg Wunsch
+   3:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    Copyright (c) 2007  Florin-Viorel Petrov
+   4:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    All rights reserved.
+   5:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+   6:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    Redistribution and use in source and binary forms, with or without
+   7:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    modification, are permitted provided that the following conditions are met:
+   8:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+   9:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    * Redistributions of source code must retain the above copyright
+  10:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****      notice, this list of conditions and the following disclaimer.
+  11:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+  12:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    * Redistributions in binary form must reproduce the above copyright
+  13:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****      notice, this list of conditions and the following disclaimer in
+  14:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****      the documentation and/or other materials provided with the
+  15:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****      distribution.
+  16:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+  17:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    * Neither the name of the copyright holders nor the names of
+  18:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****      contributors may be used to endorse or promote products derived
+  19:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****      from this software without specific prior written permission.
+  20:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+  21:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  22:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****   AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  23:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****   IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  24:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****   ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+  25:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****   LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+  26:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****   CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+  27:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****   SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+  28:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****   INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+  29:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  30:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+  31:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****   POSSIBILITY OF SUCH DAMAGE. */
+  32:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+  33:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** /* $Id$ */
+  34:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+  35:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** #ifndef _UTIL_DELAY_H_
+  36:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** #define _UTIL_DELAY_H_ 1
+  37:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+  38:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** #ifndef __HAS_DELAY_CYCLES
+  39:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** #define __HAS_DELAY_CYCLES 1
+  40:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** #endif
+  41:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+  42:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** #include <inttypes.h>
+  43:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** #include <util/delay_basic.h>
+  44:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** #include <math.h>
+  45:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+  46:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** /** \file */
+  47:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** /** \defgroup util_delay <util/delay.h>: Convenience functions for busy-wait delay loops
+  48:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     \code
+  49:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     #define F_CPU 1000000UL  // 1 MHz
+  50:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     //#define F_CPU 14.7456E6
+  51:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     #include <util/delay.h>
+  52:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     \endcode
+  53:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+  54:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     \note As an alternative method, it is possible to pass the
+  55:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     F_CPU macro down to the compiler from the Makefile.
+  56:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     Obviously, in that case, no \c \#define statement should be
+  57:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     used.
+  58:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+  59:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     The functions in this header file are wrappers around the basic
+  60:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     busy-wait functions from <util/delay_basic.h>.  They are meant as
+  61:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     convenience functions where actual time values can be specified
+  62:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     rather than a number of cycles to wait for.  The idea behind is
+  63:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     that compile-time constant expressions will be eliminated by
+  64:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     compiler optimization so floating-point expressions can be used
+  65:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     to calculate the number of delay cycles needed based on the CPU
+  66:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     frequency passed by the macro F_CPU.
+  67:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+  68:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     \note In order for these functions to work as intended, compiler
+  69:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     optimizations <em>must</em> be enabled, and the delay time
+  70:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     <em>must</em> be an expression that is a known constant at
+  71:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     compile-time.  If these requirements are not met, the resulting
+  72:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     delay will be much longer (and basically unpredictable), and
+  73:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     applications that otherwise do not use floating-point calculations
+  74:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     will experience severe code bloat by the floating-point library
+  75:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     routines linked into the application.
+  76:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+  77:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     The functions available allow the specification of microsecond, and
+  78:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     millisecond delays directly, using the application-supplied macro
+  79:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     F_CPU as the CPU clock frequency (in Hertz).
+  80:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+  81:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** */
+  82:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+  83:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** #if !defined(__DOXYGEN__)
+  84:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** static inline void _delay_us(double __us) __attribute__((always_inline));
+  85:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** static inline void _delay_ms(double __ms) __attribute__((always_inline));
+  86:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** #endif
+  87:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+  88:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** #ifndef F_CPU
+  89:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** /* prevent compiler error by supplying a default */
+  90:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** # warning "F_CPU not defined for <util/delay.h>"
+  91:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** # define F_CPU 1000000UL
+  92:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** #endif
+  93:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+  94:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** #ifndef __OPTIMIZE__
+  95:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** # warning "Compiler optimizations disabled; functions from <util/delay.h> won't work as designed"
+  96:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** #endif
+  97:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+  98:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** #if __HAS_DELAY_CYCLES && defined(__OPTIMIZE__) && \
+  99:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****   !defined(__DELAY_BACKWARD_COMPATIBLE__) &&	   \
+ 100:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****   __STDC_HOSTED__
+ 101:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** #  include <math.h>
+ 102:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** #endif
+ 103:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+ 104:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** /**
+ 105:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    \ingroup util_delay
+ 106:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+ 107:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    Perform a delay of \c __ms milliseconds, using _delay_loop_2().
+ 108:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+ 109:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    The macro F_CPU is supposed to be defined to a
+ 110:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    constant defining the CPU clock frequency (in Hertz).
+ 111:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+ 112:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    The maximal possible delay is 262.14 ms / F_CPU in MHz.
+ 113:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+ 114:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    When the user request delay which exceed the maximum possible one,
+ 115:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    _delay_ms() provides a decreased resolution functionality. In this
+ 116:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    mode _delay_ms() will work with a resolution of 1/10 ms, providing
+ 117:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    delays up to 6.5535 seconds (independent from CPU frequency).  The
+ 118:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    user will not be informed about decreased resolution.
+ 119:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+ 120:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    If the avr-gcc toolchain has __builtin_avr_delay_cycles(unsigned long)
+ 121:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    support, maximal possible delay is 4294967.295 ms/ F_CPU in MHz. For
+ 122:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    values greater than the maximal possible delay, overflows results in
+ 123:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    no delay i.e., 0ms.
+ 124:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+ 125:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    Conversion of __us into clock cycles may not always result in integer.
+ 126:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    By default, the clock cycles rounded up to next integer. This ensures that
+ 127:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    the user gets atleast __us microseconds of delay.
+ 128:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+ 129:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    Alternatively, user can define __DELAY_ROUND_DOWN__ and __DELAY_ROUND_CLOSEST__
+ 130:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    to round down and round to closest integer.
+ 131:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+ 132:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    Note: The new implementation of _delay_ms(double __ms) with 
+ 133:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     __builtin_avr_delay_cycles(unsigned long) support is not backward compatible. 
+ 134:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    User can define __DELAY_BACKWARD_COMPATIBLE__ to get a backward compatible delay.
+ 135:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    Also, the backward compatible
+ 136:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    algorithm will be chosen if the code is compiled in a <em>freestanding
+ 137:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    environment</em> (GCC option \c -ffreestanding), as the math functions
+ 138:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    required for rounding are not available to the compiler then.
+ 139:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+ 140:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****  */
+ 141:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** void
+ 142:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** _delay_ms(double __ms)
+ 143:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** {
+ 144:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 	double __tmp ; 
+ 145:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** #if __HAS_DELAY_CYCLES && defined(__OPTIMIZE__) && \
+ 146:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****   !defined(__DELAY_BACKWARD_COMPATIBLE__) &&	   \
+ 147:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****   __STDC_HOSTED__
+ 148:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 	uint32_t __ticks_dc;
+ 149:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 	extern void __builtin_avr_delay_cycles(unsigned long);
+ 150:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 	__tmp = ((F_CPU) / 1e3) * __ms;
+ 151:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+ 152:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 	#if defined(__DELAY_ROUND_DOWN__)
+ 153:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 		__ticks_dc = (uint32_t)fabs(__tmp);
+ 154:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+ 155:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 	#elif defined(__DELAY_ROUND_CLOSEST__)
+ 156:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 		__ticks_dc = (uint32_t)(fabs(__tmp)+0.5);
+ 157:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+ 158:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 	#else
+ 159:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 		//round up by default
+ 160:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
+ 161:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 	#endif
+ 162:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+ 163:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 	__builtin_avr_delay_cycles(__ticks_dc);
+ 164:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+ 165:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** #else
+ 166:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 	uint16_t __ticks;
+ 167:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 	__tmp = ((F_CPU) / 4e3) * __ms;
+ 168:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 	if (__tmp < 1.0)
+ 169:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 		__ticks = 1;
+ 170:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 	else if (__tmp > 65535)
+ 171:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 	{
+ 172:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 		//	__ticks = requested delay in 1/10 ms
+ 173:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 		__ticks = (uint16_t) (__ms * 10.0);
+ 174:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 		while(__ticks)
+ 175:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 		{
+ 176:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 			// wait 1/10 ms
+ 177:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 			_delay_loop_2(((F_CPU) / 4e3) / 10);
+ 178:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 			__ticks --;
+ 179:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 		}
+ 180:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 		return;
+ 181:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 	}
+ 182:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 	else
+ 183:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 		__ticks = (uint16_t)__tmp;
+ 184:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 	_delay_loop_2(__ticks);
+ 185:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** #endif
+ 186:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** }
+ 187:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+ 188:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** /**
+ 189:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    \ingroup util_delay
+ 190:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+ 191:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    Perform a delay of \c __us microseconds, using _delay_loop_1().
+ 192:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+ 193:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    The macro F_CPU is supposed to be defined to a
+ 194:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    constant defining the CPU clock frequency (in Hertz).
+ 195:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+ 196:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    The maximal possible delay is 768 us / F_CPU in MHz.
+ 197:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+ 198:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    If the user requests a delay greater than the maximal possible one,
+ 199:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    _delay_us() will automatically call _delay_ms() instead.  The user
+ 200:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    will not be informed about this case.
+ 201:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+ 202:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    If the avr-gcc toolchain has __builtin_avr_delay_cycles(unsigned long)
+ 203:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    support, maximal possible delay is 4294967.295 us/ F_CPU in MHz. For
+ 204:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    values greater than the maximal possible delay, overflow results in
+ 205:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    no delay i.e., 0us.
+ 206:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****   
+ 207:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    Conversion of __us into clock cycles may not always result in integer.
+ 208:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    By default, the clock cycles rounded up to next integer. This ensures that
+ 209:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    the user gets atleast __us microseconds of delay.
+ 210:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+ 211:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    Alternatively, user can define __DELAY_ROUND_DOWN__ and __DELAY_ROUND_CLOSEST__
+ 212:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    to round down and round to closest integer.
+ 213:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****  
+ 214:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    Note: The new implementation of _delay_us(double __us) with 
+ 215:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****     __builtin_avr_delay_cycles(unsigned long) support is not backward compatible.
+ 216:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    User can define __DELAY_BACKWARD_COMPATIBLE__ to get a backward compatible delay.
+ 217:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    Also, the backward compatible
+ 218:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    algorithm will be chosen if the code is compiled in a <em>freestanding
+ 219:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    environment</em> (GCC option \c -ffreestanding), as the math functions
+ 220:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    required for rounding are not available to the compiler then.
+ 221:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+ 222:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****  */
+ 223:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** void
+ 224:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** _delay_us(double __us)
+ 225:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** {
+ 226:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 	double __tmp ; 
+ 227:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** #if __HAS_DELAY_CYCLES && defined(__OPTIMIZE__) && \
+ 228:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****   !defined(__DELAY_BACKWARD_COMPATIBLE__) &&	   \
+ 229:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****   __STDC_HOSTED__
+ 230:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 	uint32_t __ticks_dc;
+ 231:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 	extern void __builtin_avr_delay_cycles(unsigned long);
+ 232:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 	__tmp = ((F_CPU) / 1e6) * __us;
+ 233:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+ 234:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 	#if defined(__DELAY_ROUND_DOWN__)
+ 235:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 		__ticks_dc = (uint32_t)fabs(__tmp);
+ 236:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+ 237:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 	#elif defined(__DELAY_ROUND_CLOSEST__)
+ 238:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 		__ticks_dc = (uint32_t)(fabs(__tmp)+0.5);
+ 239:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+ 240:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 	#else
+ 241:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 		//round up by default
+ 242:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
+ 243:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 	#endif
+ 244:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
+ 245:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 	__builtin_avr_delay_cycles(__ticks_dc);
+ 141               	.LM2:
+ 142 0002 80EA      		ldi r24,lo8(-96)
+ 143 0004 8A95      	1:	dec r24
+ 144 0006 01F4      		brne 1b
+ 145               	.LBE25:
+ 146               	.LBE24:
+ 148               	.Ltext2:
+  21:TV_video_generator.c ****       _delay_us(30); 
+  22:TV_video_generator.c ****       R2RPORT = LEVEL_BLACK; 
+ 150               	.LM3:
+ 151 0008 8FE0      		ldi r24,lo8(15)
+ 152 000a 82BB      		out 0x12,r24
+ 153               	.LBB26:
+ 154               	.LBB27:
+ 156               	.Ltext3:
+ 158               	.LM4:
+ 159 000c 8AE0      		ldi r24,lo8(10)
+ 160 000e 8A95      	1:	dec r24
+ 161 0010 01F4      		brne 1b
+ 162 0012 00C0      		rjmp .
+ 163 0014 0895      		ret
+ 164               	.LBE27:
+ 165               	.LBE26:
+ 167               	.Lscope1:
+ 168               		.section	.text.equal_pulse,"ax",@progbits
+ 170               	.global	equal_pulse
+ 172               	equal_pulse:
+ 174               	.Ltext4:
+  23:TV_video_generator.c ****       _delay_us(2); 
+  24:TV_video_generator.c **** }
+  25:TV_video_generator.c **** 
+  26:TV_video_generator.c ****  void equal_pulse()
+  27:TV_video_generator.c **** {
+ 176               	.LM5:
+ 177               	.LFBB2:
+ 178               	/* prologue: function */
+ 179               	/* frame size = 0 */
+ 180               	/* stack size = 0 */
+ 181               	.L__stack_usage = 0
+  28:TV_video_generator.c ****       R2RPORT = LEVEL_SYNC; 
+ 183               	.LM6:
+ 184 0000 12BA      		out 0x12,__zero_reg__
+ 185               	.LBB28:
+ 186               	.LBB29:
+ 188               	.Ltext5:
+ 190               	.LM7:
+ 191 0002 8AE0      		ldi r24,lo8(10)
+ 192 0004 8A95      	1:	dec r24
+ 193 0006 01F4      		brne 1b
+ 194 0008 00C0      		rjmp .
+ 195               	.LBE29:
+ 196               	.LBE28:
+ 198               	.Ltext6:
+  29:TV_video_generator.c ****       _delay_us(2); 
+  30:TV_video_generator.c ****       R2RPORT = LEVEL_BLACK; 
+ 200               	.LM8:
+ 201 000a 8FE0      		ldi r24,lo8(15)
+ 202 000c 82BB      		out 0x12,r24
+ 203               	.LBB30:
+ 204               	.LBB31:
+ 206               	.Ltext7:
+ 208               	.LM9:
+ 209 000e 80EA      		ldi r24,lo8(-96)
+ 210 0010 8A95      	1:	dec r24
+ 211 0012 01F4      		brne 1b
+ 212 0014 0895      		ret
+ 213               	.LBE31:
+ 214               	.LBE30:
+ 216               	.Lscope2:
+ 217               		.section	.text.hsync_pulse,"ax",@progbits
+ 219               	.global	hsync_pulse
+ 221               	hsync_pulse:
+ 223               	.Ltext8:
+  31:TV_video_generator.c ****       _delay_us(30);
+  32:TV_video_generator.c **** }
+  33:TV_video_generator.c **** 
+  34:TV_video_generator.c ****  void hsync_pulse()
+  35:TV_video_generator.c **** {
+ 225               	.LM10:
+ 226               	.LFBB3:
+ 227               	/* prologue: function */
+ 228               	/* frame size = 0 */
+ 229               	/* stack size = 0 */
+ 230               	.L__stack_usage = 0
+  36:TV_video_generator.c ****       R2RPORT = LEVEL_SYNC; 
+ 232               	.LM11:
+ 233 0000 12BA      		out 0x12,__zero_reg__
+ 234               	.LBB32:
+ 235               	.LBB33:
+ 237               	.Ltext9:
+ 239               	.LM12:
+ 240 0002 8AE1      		ldi r24,lo8(26)
+ 241 0004 8A95      	1:	dec r24
+ 242 0006 01F4      		brne 1b
+ 243 0008 00C0      		rjmp .
+ 244               	.LBE33:
+ 245               	.LBE32:
+ 247               	.Ltext10:
+  37:TV_video_generator.c ****       _delay_us(5); //4.7us
+  38:TV_video_generator.c ****       R2RPORT = LEVEL_BLACK; 
+ 249               	.LM13:
+ 250 000a 8FE0      		ldi r24,lo8(15)
+ 251 000c 82BB      		out 0x12,r24
+ 252               	.LBB34:
+ 253               	.LBB35:
+ 255               	.Ltext11:
+ 257               	.LM14:
+ 258 000e 85E2      		ldi r24,lo8(37)
+ 259 0010 8A95      	1:	dec r24
+ 260 0012 01F4      		brne 1b
+ 261 0014 0000      		nop
+ 262 0016 0895      		ret
+ 263               	.LBE35:
+ 264               	.LBE34:
+ 266               	.Lscope3:
+ 267               		.section	.text.tv_vbars,"ax",@progbits
+ 269               	.global	tv_vbars
+ 271               	tv_vbars:
+ 273               	.Ltext12:
+  39:TV_video_generator.c ****       _delay_us(7); //7.3us
+  40:TV_video_generator.c **** }
+  41:TV_video_generator.c **** 
+  42:TV_video_generator.c **** /*
+  43:TV_video_generator.c **** void tv_out()
+  44:TV_video_generator.c **** {
+  45:TV_video_generator.c **** 	uint16_t i;
+  46:TV_video_generator.c **** 	uint8_t c, n, k;
+  47:TV_video_generator.c **** 	
+  48:TV_video_generator.c **** 	n =0;
+  49:TV_video_generator.c **** 	c= 0;
+  50:TV_video_generator.c **** 	for( i = 0; i < 305; i++)
+  51:TV_video_generator.c **** 	{
+  52:TV_video_generator.c **** 		hsync_pulse();
+  53:TV_video_generator.c **** 		if(c == 0)
+  54:TV_video_generator.c **** 		{
+  55:TV_video_generator.c **** 			c = 25;
+  56:TV_video_generator.c **** 			n+=16;
+  57:TV_video_generator.c **** 		}
+  58:TV_video_generator.c **** 		else
+  59:TV_video_generator.c **** 			c--;
+  60:TV_video_generator.c **** 
+  61:TV_video_generator.c **** 		for(k = 13; k!=0;k--)
+  62:TV_video_generator.c **** 		{
+  63:TV_video_generator.c **** 			R2RPORT = buf[ n + c];
+  64:TV_video_generator.c **** 			_delay_us(4);
+  65:TV_video_generator.c **** 		}
+  66:TV_video_generator.c **** 
+  67:TV_video_generator.c **** 	}
+  68:TV_video_generator.c **** 	
+  69:TV_video_generator.c **** }
+  70:TV_video_generator.c **** void tv_out1()
+  71:TV_video_generator.c **** {
+  72:TV_video_generator.c **** 	uint16_t i;
+  73:TV_video_generator.c **** 	uint8_t c, k;
+  74:TV_video_generator.c **** 	
+  75:TV_video_generator.c **** 
+  76:TV_video_generator.c **** 	c= 0;
+  77:TV_video_generator.c **** 	for( i = 0; i < 305; i++)
+  78:TV_video_generator.c **** 	{
+  79:TV_video_generator.c **** 		hsync_pulse();
+  80:TV_video_generator.c **** 		if(c == 0)
+  81:TV_video_generator.c **** 		{
+  82:TV_video_generator.c **** 			c = 76;
+  83:TV_video_generator.c **** 			R2RPORT = LEVEL_WHITE;
+  84:TV_video_generator.c **** 			_delay_us(52);	
+  85:TV_video_generator.c **** 			R2RPORT = LEVEL_BLACK;
+  86:TV_video_generator.c **** 		}
+  87:TV_video_generator.c **** 		else
+  88:TV_video_generator.c **** 		{
+  89:TV_video_generator.c **** 			for(k = 13; k != 0;k--)
+  90:TV_video_generator.c **** 			{
+  91:TV_video_generator.c **** 				R2RPORT = LEVEL_BLACK;
+  92:TV_video_generator.c **** 				_delay_us(12);
+  93:TV_video_generator.c **** 				R2RPORT = LEVEL_WHITE;
+  94:TV_video_generator.c **** 				_delay_us(1);
+  95:TV_video_generator.c **** 			}
+  96:TV_video_generator.c **** 			c--;			
+  97:TV_video_generator.c **** 		}
+  98:TV_video_generator.c **** 
+  99:TV_video_generator.c **** 	}
+ 100:TV_video_generator.c **** }
+ 101:TV_video_generator.c **** */
+ 102:TV_video_generator.c **** 
+ 103:TV_video_generator.c **** 
+ 104:TV_video_generator.c **** void tv_vbars()
+ 105:TV_video_generator.c **** {
+ 275               	.LM15:
+ 276               	.LFBB4:
+ 277 0000 FF92      		push r15
+ 278 0002 0F93      		push r16
+ 279 0004 1F93      		push r17
+ 280 0006 CF93      		push r28
+ 281 0008 DF93      		push r29
+ 282               	/* prologue: function */
+ 283               	/* frame size = 0 */
+ 284               	/* stack size = 5 */
+ 285               	.L__stack_usage = 5
+ 287               	.LM16:
+ 288 000a C1E3      		ldi r28,lo8(49)
+ 289 000c D1E0      		ldi r29,lo8(1)
+ 106:TV_video_generator.c **** 	uint16_t i;
+ 107:TV_video_generator.c **** 	// 6-310 (305 lines):
+ 108:TV_video_generator.c **** 	for( i = 0; i < 305; i++)
+ 109:TV_video_generator.c **** 	{
+ 110:TV_video_generator.c **** 		hsync_pulse();
+ 111:TV_video_generator.c **** 		R2RPORT = LEVEL_GRAY; _delay_us(8);
+ 291               	.LM17:
+ 292 000e 1EE1      		ldi r17,lo8(30)
+ 112:TV_video_generator.c **** 		R2RPORT =LEVEL_BLACK; _delay_us(14);
+ 294               	.LM18:
+ 295 0010 0FE0      		ldi r16,lo8(15)
+ 113:TV_video_generator.c **** 		R2RPORT =LEVEL_WHITE; _delay_us(8);
+ 297               	.LM19:
+ 298 0012 83E3      		ldi r24,lo8(51)
+ 299 0014 F82E      		mov r15,r24
+ 300               	.L5:
+ 110:TV_video_generator.c **** 		R2RPORT = LEVEL_GRAY; _delay_us(8);
+ 302               	.LM20:
+ 303 0016 00D0      		rcall hsync_pulse
+ 111:TV_video_generator.c **** 		R2RPORT =LEVEL_BLACK; _delay_us(14);
+ 305               	.LM21:
+ 306 0018 12BB      		out 0x12,r17
+ 307               	.LBB36:
+ 308               	.LBB37:
+ 310               	.Ltext13:
+ 312               	.LM22:
+ 313 001a 8AE2      		ldi r24,lo8(42)
+ 314 001c 8A95      	1:	dec r24
+ 315 001e 01F4      		brne 1b
+ 316 0020 00C0      		rjmp .
+ 317               	.LBE37:
+ 318               	.LBE36:
+ 320               	.Ltext14:
+ 112:TV_video_generator.c **** 		R2RPORT =LEVEL_WHITE; _delay_us(8);
+ 322               	.LM23:
+ 323 0022 02BB      		out 0x12,r16
+ 324               	.LBB38:
+ 325               	.LBB39:
+ 327               	.Ltext15:
+ 329               	.LM24:
+ 330 0024 8AE4      		ldi r24,lo8(74)
+ 331 0026 8A95      	1:	dec r24
+ 332 0028 01F4      		brne 1b
+ 333 002a 00C0      		rjmp .
+ 334               	.LBE39:
+ 335               	.LBE38:
+ 337               	.Ltext16:
+ 339               	.LM25:
+ 340 002c F2BA      		out 0x12,r15
+ 341               	.LBB40:
+ 342               	.LBB41:
+ 344               	.Ltext17:
+ 346               	.LM26:
+ 347 002e 8AE2      		ldi r24,lo8(42)
+ 348 0030 8A95      	1:	dec r24
+ 349 0032 01F4      		brne 1b
+ 350 0034 00C0      		rjmp .
+ 351               	.LBE41:
+ 352               	.LBE40:
+ 354               	.Ltext18:
+ 114:TV_video_generator.c **** 		R2RPORT =LEVEL_BLACK; _delay_us(14);
+ 356               	.LM27:
+ 357 0036 02BB      		out 0x12,r16
+ 358               	.LBB42:
+ 359               	.LBB43:
+ 361               	.Ltext19:
+ 363               	.LM28:
+ 364 0038 8AE4      		ldi r24,lo8(74)
+ 365 003a 8A95      	1:	dec r24
+ 366 003c 01F4      		brne 1b
+ 367 003e 00C0      		rjmp .
+ 368               	.LBE43:
+ 369               	.LBE42:
+ 371               	.Ltext20:
+ 115:TV_video_generator.c **** 		R2RPORT =LEVEL_GRAY; _delay_us(8);
+ 373               	.LM29:
+ 374 0040 12BB      		out 0x12,r17
+ 375               	.LBB44:
+ 376               	.LBB45:
+ 378               	.Ltext21:
+ 380               	.LM30:
+ 381 0042 8AE2      		ldi r24,lo8(42)
+ 382 0044 8A95      	1:	dec r24
+ 383 0046 01F4      		brne 1b
+ 384 0048 00C0      		rjmp .
+ 385 004a 2197      		sbiw r28,1
+ 386               	.LBE45:
+ 387               	.LBE44:
+ 389               	.Ltext22:
+ 108:TV_video_generator.c **** 	{
+ 391               	.LM31:
+ 392 004c 01F4      		brne .L5
+ 393               	/* epilogue start */
+ 116:TV_video_generator.c **** 	}
+ 117:TV_video_generator.c **** }
+ 395               	.LM32:
+ 396 004e DF91      		pop r29
+ 397 0050 CF91      		pop r28
+ 398 0052 1F91      		pop r17
+ 399 0054 0F91      		pop r16
+ 400 0056 FF90      		pop r15
+ 401 0058 0895      		ret
+ 403               	.Lscope4:
+ 404               		.section	.text.tv_gen,"ax",@progbits
+ 407               	.global	tv_gen
+ 409               	tv_gen:
+ 118:TV_video_generator.c **** 
+ 119:TV_video_generator.c **** 
+ 120:TV_video_generator.c **** 
+ 121:TV_video_generator.c **** 
+ 122:TV_video_generator.c **** void tv_gen(void(*f)(void))
+ 123:TV_video_generator.c **** {
+ 411               	.LM33:
+ 412               	.LFBB5:
+ 413 0000 CF93      		push r28
+ 414 0002 DF93      		push r29
+ 415               	/* prologue: function */
+ 416               	/* frame size = 0 */
+ 417               	/* stack size = 2 */
+ 418               	.L__stack_usage = 2
+ 419 0004 EC01      		movw r28,r24
+ 124:TV_video_generator.c ****   
+ 125:TV_video_generator.c ****       R2RPORT = 0;
+ 421               	.LM34:
+ 422 0006 12BA      		out 0x12,__zero_reg__
+ 423               	.L9:
+ 126:TV_video_generator.c ****       while(!btnCheck(BTN_START))
+ 425               	.LM35:
+ 426 0008 9C9B      		sbis 0x13,4
+ 427 000a 00C0      		rjmp .L11
+ 127:TV_video_generator.c ****       {
+ 128:TV_video_generator.c **** 	      
+ 129:TV_video_generator.c **** 	      // 1:
+ 130:TV_video_generator.c **** 	      vsync_pulse(); vsync_pulse();
+ 429               	.LM36:
+ 430 000c 00D0      		rcall vsync_pulse
+ 431 000e 00D0      		rcall vsync_pulse
+ 131:TV_video_generator.c **** 	      // 2:
+ 132:TV_video_generator.c **** 	      vsync_pulse(); vsync_pulse();
+ 433               	.LM37:
+ 434 0010 00D0      		rcall vsync_pulse
+ 435 0012 00D0      		rcall vsync_pulse
+ 133:TV_video_generator.c **** 	      // 3:
+ 134:TV_video_generator.c **** 	      vsync_pulse(); equal_pulse();
+ 437               	.LM38:
+ 438 0014 00D0      		rcall vsync_pulse
+ 439 0016 00D0      		rcall equal_pulse
+ 135:TV_video_generator.c **** 	      // 4:
+ 136:TV_video_generator.c **** 	      equal_pulse(); equal_pulse();
+ 441               	.LM39:
+ 442 0018 00D0      		rcall equal_pulse
+ 443 001a 00D0      		rcall equal_pulse
+ 137:TV_video_generator.c **** 	      // 5:
+ 138:TV_video_generator.c **** 	      equal_pulse(); equal_pulse();
+ 445               	.LM40:
+ 446 001c 00D0      		rcall equal_pulse
+ 447 001e 00D0      		rcall equal_pulse
+ 139:TV_video_generator.c **** 	      
+ 140:TV_video_generator.c **** 		  f();
+ 449               	.LM41:
+ 450 0020 FE01      		movw r30,r28
+ 451 0022 0995      		icall
+ 141:TV_video_generator.c **** 	      
+ 142:TV_video_generator.c **** 	      // 311:
+ 143:TV_video_generator.c **** 	      equal_pulse(); equal_pulse();
+ 453               	.LM42:
+ 454 0024 00D0      		rcall equal_pulse
+ 455 0026 00D0      		rcall equal_pulse
+ 144:TV_video_generator.c **** 	      // 312:
+ 145:TV_video_generator.c **** 	      equal_pulse(); equal_pulse();
+ 457               	.LM43:
+ 458 0028 00D0      		rcall equal_pulse
+ 459 002a 00D0      		rcall equal_pulse
+ 146:TV_video_generator.c **** 	      // 313:
+ 147:TV_video_generator.c **** 	      equal_pulse(); vsync_pulse();
+ 461               	.LM44:
+ 462 002c 00D0      		rcall equal_pulse
+ 463 002e 00D0      		rcall vsync_pulse
+ 148:TV_video_generator.c **** 	      // 314:
+ 149:TV_video_generator.c **** 	      vsync_pulse(); vsync_pulse();
+ 465               	.LM45:
+ 466 0030 00D0      		rcall vsync_pulse
+ 467 0032 00D0      		rcall vsync_pulse
+ 150:TV_video_generator.c **** 	      // 315:
+ 151:TV_video_generator.c **** 	      vsync_pulse(); vsync_pulse();
+ 469               	.LM46:
+ 470 0034 00D0      		rcall vsync_pulse
+ 471 0036 00D0      		rcall vsync_pulse
+ 152:TV_video_generator.c **** 	      // 316:
+ 153:TV_video_generator.c **** 	      equal_pulse(); equal_pulse();
+ 473               	.LM47:
+ 474 0038 00D0      		rcall equal_pulse
+ 475 003a 00D0      		rcall equal_pulse
+ 154:TV_video_generator.c **** 	      // 317:
+ 155:TV_video_generator.c **** 	      equal_pulse(); equal_pulse();
+ 477               	.LM48:
+ 478 003c 00D0      		rcall equal_pulse
+ 479 003e 00D0      		rcall equal_pulse
+ 156:TV_video_generator.c **** 	      
+ 157:TV_video_generator.c **** 	      // 318-622 (305 lines):
+ 158:TV_video_generator.c **** 	      f();
+ 481               	.LM49:
+ 482 0040 FE01      		movw r30,r28
+ 483 0042 0995      		icall
+ 159:TV_video_generator.c **** 	      
+ 160:TV_video_generator.c **** 	      // 623:
+ 161:TV_video_generator.c **** 	      equal_pulse(); equal_pulse();
+ 485               	.LM50:
+ 486 0044 00D0      		rcall equal_pulse
+ 487 0046 00D0      		rcall equal_pulse
+ 162:TV_video_generator.c **** 	      // 624:
+ 163:TV_video_generator.c **** 	      equal_pulse(); equal_pulse();
+ 489               	.LM51:
+ 490 0048 00D0      		rcall equal_pulse
+ 491 004a 00D0      		rcall equal_pulse
+ 164:TV_video_generator.c **** 	      // 625:
+ 165:TV_video_generator.c **** 	      equal_pulse(); equal_pulse();
+ 493               	.LM52:
+ 494 004c 00D0      		rcall equal_pulse
+ 495 004e 00D0      		rcall equal_pulse
+ 496 0050 00C0      		rjmp .L9
+ 497               	.L11:
+ 166:TV_video_generator.c ****       }
+ 167:TV_video_generator.c **** 	R2RPORT = 0;
+ 499               	.LM53:
+ 500 0052 12BA      		out 0x12,__zero_reg__
+ 501               	/* epilogue start */
+ 168:TV_video_generator.c **** }...
+ 503               	.LM54:
+ 504 0054 DF91      		pop r29
+ 505 0056 CF91      		pop r28
+ 506 0058 0895      		ret
+ 508               	.Lscope5:
+ 509               		.text
+ 511               	.Letext0:
+ 512               		.ident	"GCC: (AVR_8_bit_GNU_Toolchain_3.5.0_1662) 4.9.2"
+DEFINED SYMBOLS
+                            *ABS*:00000000 TV_video_generator.c
+C:\Users\Magenta\AppData\Local\Temp\cciO7gex.s:2      *ABS*:0000003e __SP_H__
+C:\Users\Magenta\AppData\Local\Temp\cciO7gex.s:3      *ABS*:0000003d __SP_L__
+C:\Users\Magenta\AppData\Local\Temp\cciO7gex.s:4      *ABS*:0000003f __SREG__
+C:\Users\Magenta\AppData\Local\Temp\cciO7gex.s:5      *ABS*:00000000 __tmp_reg__
+C:\Users\Magenta\AppData\Local\Temp\cciO7gex.s:6      *ABS*:00000001 __zero_reg__
+C:\Users\Magenta\AppData\Local\Temp\cciO7gex.s:125    .text.vsync_pulse:00000000 vsync_pulse
+C:\Users\Magenta\AppData\Local\Temp\cciO7gex.s:172    .text.equal_pulse:00000000 equal_pulse
+C:\Users\Magenta\AppData\Local\Temp\cciO7gex.s:221    .text.hsync_pulse:00000000 hsync_pulse
+C:\Users\Magenta\AppData\Local\Temp\cciO7gex.s:271    .text.tv_vbars:00000000 tv_vbars
+C:\Users\Magenta\AppData\Local\Temp\cciO7gex.s:409    .text.tv_gen:00000000 tv_gen
+
+NO UNDEFINED SYMBOLS
