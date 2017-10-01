@@ -34,13 +34,13 @@
 
 # MCU name
 #MCU = atmega128
-MCU = atmega8a
+MCU = atmega8
 
 # Output format. (can be srec, ihex, binary)
 FORMAT = ihex
 
 # Target file name (without extension).
-TARGET = ndds
+TARGET = hex/ndds
 
 
 # List C source files here. (C dependencies are automatically generated.)
@@ -147,14 +147,13 @@ MATH_LIB = -lm
 # only used for heap (malloc()).
 #EXTMEMOPTS = -Wl,--defsym=__heap_start=0x801100,--defsym=__heap_end=0x80ffff
 
-EXTMEMOPTS =
+EXTMEMOPTS = -Wl,-section-start=.buffer=0x800100
 
 # Linker flags.
 #  -Wl,...:     tell GCC to pass this to linker.
 #    -Map:      create map file
 #    --cref:    add cross reference to  map file
 LDFLAGS = -Wl,-Map=$(TARGET).map,--cref
-LDFLAGS +=-Wl,-section-start=.buffer=0x800100
 LDFLAGS +=-Wl,--gc-sections
 LDFLAGS += $(EXTMEMOPTS)
 LDFLAGS += $(PRINTF_LIB) $(SCANF_LIB) $(MATH_LIB)
@@ -176,7 +175,7 @@ AVRDUDE_PROGRAMMER = usbasp
 AVRDUDE_PORT = usb    # programmer connected to serial device
 
 AVRDUDE_WRITE_FLASH = -U flash:w:$(TARGET).hex
-#AVRDUDE_WRITE_EEPROM = -U eeprom:w:$(TARGET).eep
+AVRDUDE_WRITE_EEPROM = -U eeprom:w:$(TARGET).eep
 
 
 # Uncomment the following if you want avrdude's erase cycle counter.

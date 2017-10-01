@@ -1189,21 +1189,21 @@
  740               		.ident	"GCC: (AVR_8_bit_GNU_Toolchain_3.5.0_1662) 4.9.2"
 DEFINED SYMBOLS
                             *ABS*:00000000 hd44780.c
-C:\Users\Magenta\AppData\Local\Temp\cc3mK64v.s:2      *ABS*:0000003e __SP_H__
-C:\Users\Magenta\AppData\Local\Temp\cc3mK64v.s:3      *ABS*:0000003d __SP_L__
-C:\Users\Magenta\AppData\Local\Temp\cc3mK64v.s:4      *ABS*:0000003f __SREG__
-C:\Users\Magenta\AppData\Local\Temp\cc3mK64v.s:5      *ABS*:00000000 __tmp_reg__
-C:\Users\Magenta\AppData\Local\Temp\cc3mK64v.s:6      *ABS*:00000001 __zero_reg__
-C:\Users\Magenta\AppData\Local\Temp\cc3mK64v.s:107    .text.lcd_e_port_low:00000000 lcd_e_port_low
-C:\Users\Magenta\AppData\Local\Temp\cc3mK64v.s:124    .text.lcd_e_port_high:00000000 lcd_e_port_high
-C:\Users\Magenta\AppData\Local\Temp\cc3mK64v.s:143    .text.lcd_write:00000000 lcd_write
-C:\Users\Magenta\AppData\Local\Temp\cc3mK64v.s:347    .text.lcd_command:00000000 lcd_command
-C:\Users\Magenta\AppData\Local\Temp\cc3mK64v.s:366    .text.lcd_goto:00000000 lcd_goto
-C:\Users\Magenta\AppData\Local\Temp\cc3mK64v.s:384    .text.lcd_clrscr:00000000 lcd_clrscr
-C:\Users\Magenta\AppData\Local\Temp\cc3mK64v.s:402    .text.lcd_home:00000000 lcd_home
-C:\Users\Magenta\AppData\Local\Temp\cc3mK64v.s:421    .text.lcd_putc:00000000 lcd_putc
-C:\Users\Magenta\AppData\Local\Temp\cc3mK64v.s:440    .text.lcd_puts:00000000 lcd_puts
-C:\Users\Magenta\AppData\Local\Temp\cc3mK64v.s:478    .text.lcd_puts_P:00000000 lcd_puts_P
-C:\Users\Magenta\AppData\Local\Temp\cc3mK64v.s:525    .text.lcd_init:00000000 lcd_init
+C:\Users\Magenta\AppData\Local\Temp\ccnRR5ka.s:2      *ABS*:0000003e __SP_H__
+C:\Users\Magenta\AppData\Local\Temp\ccnRR5ka.s:3      *ABS*:0000003d __SP_L__
+C:\Users\Magenta\AppData\Local\Temp\ccnRR5ka.s:4      *ABS*:0000003f __SREG__
+C:\Users\Magenta\AppData\Local\Temp\ccnRR5ka.s:5      *ABS*:00000000 __tmp_reg__
+C:\Users\Magenta\AppData\Local\Temp\ccnRR5ka.s:6      *ABS*:00000001 __zero_reg__
+C:\Users\Magenta\AppData\Local\Temp\ccnRR5ka.s:107    .text.lcd_e_port_low:00000000 lcd_e_port_low
+C:\Users\Magenta\AppData\Local\Temp\ccnRR5ka.s:124    .text.lcd_e_port_high:00000000 lcd_e_port_high
+C:\Users\Magenta\AppData\Local\Temp\ccnRR5ka.s:143    .text.lcd_write:00000000 lcd_write
+C:\Users\Magenta\AppData\Local\Temp\ccnRR5ka.s:347    .text.lcd_command:00000000 lcd_command
+C:\Users\Magenta\AppData\Local\Temp\ccnRR5ka.s:366    .text.lcd_goto:00000000 lcd_goto
+C:\Users\Magenta\AppData\Local\Temp\ccnRR5ka.s:384    .text.lcd_clrscr:00000000 lcd_clrscr
+C:\Users\Magenta\AppData\Local\Temp\ccnRR5ka.s:402    .text.lcd_home:00000000 lcd_home
+C:\Users\Magenta\AppData\Local\Temp\ccnRR5ka.s:421    .text.lcd_putc:00000000 lcd_putc
+C:\Users\Magenta\AppData\Local\Temp\ccnRR5ka.s:440    .text.lcd_puts:00000000 lcd_puts
+C:\Users\Magenta\AppData\Local\Temp\ccnRR5ka.s:478    .text.lcd_puts_P:00000000 lcd_puts_P
+C:\Users\Magenta\AppData\Local\Temp\ccnRR5ka.s:525    .text.lcd_init:00000000 lcd_init
 
 NO UNDEFINED SYMBOLS

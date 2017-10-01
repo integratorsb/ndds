@@ -20,7 +20,6 @@
  //состояния устройства
  enum{
 	 //M_IDLE,
-	 M_VER,		//версия прошивки	 
 	 M_SINW,	//генератор синуса
 	 M_STW,		//генератор пилы
 	 M_RSTW,	//генератор обратной пилы
@@ -31,7 +30,8 @@
 	 M_SQW,		//генератор прямоугольника(меандр)
 	 M_SQPWM,	//генератор прямоугольника с регулируемой скважностью и частотой
 	 M_HSSQW,	//генератор прямоугольника(меандр) 1-8 МГц
-	 M_PULSE	//генератор импульсов заданной формы
+	 M_PULSE,	//генератор импульсов заданной формы
+	 M_VER		//версия прошивки	 
  };
  
   enum{
@@ -45,6 +45,7 @@
 	  EXT_HIGHT,
 	  EXT_LOW
   };
+
 
  
 typedef struct  {
@@ -65,6 +66,7 @@ typedef struct  {
 	uint32_t pulse_t_off;
 	uint16_t pulse_n;
 	uint8_t pulse_trig;
+	uint8_t tv_type;
  }gen_t;
  
 //структура с настройками
@@ -72,6 +74,7 @@ extern gen_t generator;
 //буфер 
 extern uint8_t buf[256];
 
+extern void pwm_start(uint32_t freq, uint8_t d, uint8_t e);
 
 void n_putchar(char c);
 /*
@@ -99,13 +102,15 @@ void btn_wait_up(uint8_t b);
 void input_t(uint32_t* p, const char* t);
 
 //запускает режим ввода коэф. заполнения
-uint8_t input_dc(uint8_t dc);
+void input_dc(uint8_t is_run);
 
 //запускает режим ввода высокой частоты 
-void input_hs(uint32_t* p);
+//void input_hs(uint32_t* p);
+void input_hs();
 
 //запускает режим ввода частоты 
-void input_fd(uint32_t* p);
+//void input_fd(uint32_t* p);
+void input_fd(uint32_t* p, uint8_t is_run);
 
 //запускает режим ввода числа импульсов
 void input_n();
@@ -157,7 +162,6 @@ void print_on_off( uint8_t st);
  * \return uint8_t номер выбранного элемента v
  */
 uint8_t select_val(const char* t, const char* v[], uint8_t n);
-
 
 
 

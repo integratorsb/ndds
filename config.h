@@ -9,8 +9,13 @@
 #ifndef CONFIG_H_
 #define CONFIG_H_
 
-#define FW_VER "0.11"
+//#define SYM 1
+
+#define FW_VER "0.13"
+
+#ifndef F_CPU
 #define F_CPU 16000000ul
+#endif
 
 #define R2RPORT PORTD
 #define R2RDDR DDRD
@@ -20,8 +25,8 @@
 #define START PORTC4
 #define MODE PORTC3
 #define SET PORTC2
-#define UP PORTC0
-#define DOWN PORTC1
+#define UP PORTC1
+#define DOWN PORTC0
 
 #define  BTN_PIN PINC
 #define  BTN_PORT PORTC
@@ -50,13 +55,13 @@
 	#define  UART_TX PORTB4
 
 
-/*номер канала АЦП для сигнала модуляции*/
+/*вход E*/
 #define EXT_PIN 5
 #define EXT_PORT PORTC
 #define EXT_PINS PINC
 #define EXT_PIN_MSK (1<<EXT_PIN)
 
-/*выход цифрового сигнала*/
+/*выход D цифрового сигнала*/
 #define HSDDR DDRB
 #define HSPORT PORTB
 #define HSPIN PORTB2
@@ -138,7 +143,8 @@
 	100,\
 	100,\
 	0,\
-	0}
+	0,\
+	TV_VBARS}
 
 
 #endif /* CONFIG_H_ */

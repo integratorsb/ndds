@@ -224,8 +224,11 @@
  304 0012 807E      		andi r24,lo8(-32)
  305 0014 84BB      		out 0x14,r24
   83:menu.c        **** 	//_delay_ms(2);
-  84:menu.c        **** 	//BTN_PORT &= ~(BTN_MASK);	
-  85:menu.c        **** 	BTN_PORT |= BTN_MASK;
+  84:menu.c        **** 	
+  85:menu.c        **** 	#ifdef SYM
+  86:menu.c        **** 	BTN_PORT &= ~(BTN_MASK);	
+  87:menu.c        **** 	#else
+  88:menu.c        **** 	BTN_PORT |= BTN_MASK;
  307               	.LM26:
  308 0016 85B3      		in r24,0x15
  309 0018 8F61      		ori r24,lo8(31)
@@ -406,55 +409,57 @@
  323               	.LBE10:
  324               	.LBE9:
  326               	.Ltext2:
-  86:menu.c        **** 	_delay_ms(2);
-  87:menu.c        **** 	while(1)
-  88:menu.c        **** 	{
-  89:menu.c        **** 		_delay_ms(20);
-  90:menu.c        **** 		if(c != 0) c--;
-  91:menu.c        **** 		
-  92:menu.c        **** 		switch(st)
-  93:menu.c        **** 		{
-  94:menu.c        **** 			case 0:
-  95:menu.c        **** 			{
-  96:menu.c        **** 				if((msk = btnCheckAll())!=0)
-  97:menu.c        **** 					st++;
-  98:menu.c        **** 				break;
-  99:menu.c        **** 			}
- 100:menu.c        **** 			case 1:
- 101:menu.c        **** 			{
- 102:menu.c        **** 				//_delay_ms(10);
- 103:menu.c        **** 				if(btnCheck(msk) != 0)
- 104:menu.c        **** 				{
- 105:menu.c        **** 					st++;
+  89:menu.c        **** 	#endif
+  90:menu.c        **** 
+  91:menu.c        **** 	_delay_ms(2);
+  92:menu.c        **** 	while(1)
+  93:menu.c        **** 	{
+  94:menu.c        **** 		_delay_ms(20);
+  95:menu.c        **** 		if(c != 0) c--;
+  96:menu.c        **** 		
+  97:menu.c        **** 		switch(st)
+  98:menu.c        **** 		{
+  99:menu.c        **** 			case 0:
+ 100:menu.c        **** 			{
+ 101:menu.c        **** 				if((msk = btnCheckAll())!=0)
+ 102:menu.c        **** 					st++;
+ 103:menu.c        **** 				break;
+ 104:menu.c        **** 			}
+ 105:menu.c        **** 			case 1:
+ 106:menu.c        **** 			{
+ 107:menu.c        **** 				//_delay_ms(10);
+ 108:menu.c        **** 				if(btnCheck(msk) != 0)
+ 109:menu.c        **** 				{
+ 110:menu.c        **** 					st++;
  328               	.LM28:
  329 0028 12E0      		ldi r17,lo8(2)
- 106:menu.c        **** 					c = 25;
+ 111:menu.c        **** 					c = 25;
  331               	.LM29:
  332 002a 09E1      		ldi r16,lo8(25)
-  97:menu.c        **** 				break;
+ 102:menu.c        **** 				break;
  334               	.LM30:
  335 002c FF24      		clr r15
  336 002e F394      		inc r15
- 107:menu.c        **** 				}
- 108:menu.c        **** 				else
- 109:menu.c        **** 					st = 0;
- 110:menu.c        **** 				break;
- 111:menu.c        **** 			}
- 112:menu.c        **** 			case 2:
- 113:menu.c        **** 			{
- 114:menu.c        **** 				if((btnCheck(msk) == 0) && c != 0)
- 115:menu.c        **** 				{
- 116:menu.c        **** 					//обычное нажатие
- 117:menu.c        **** 					st = 0;
- 118:menu.c        **** 					BTN_PORT = p;
- 119:menu.c        **** 					BTN_DDR = d;
- 120:menu.c        **** 					return msk;
- 121:menu.c        **** 				}
- 122:menu.c        **** 				else if((btnCheck(msk) != 0) && c == 0)
- 123:menu.c        **** 				{
- 124:menu.c        **** 					//долгое нажатие
- 125:menu.c        **** 					//c = 10;
- 126:menu.c        **** 					st = 3;
+ 112:menu.c        **** 				}
+ 113:menu.c        **** 				else
+ 114:menu.c        **** 					st = 0;
+ 115:menu.c        **** 				break;
+ 116:menu.c        **** 			}
+ 117:menu.c        **** 			case 2:
+ 118:menu.c        **** 			{
+ 119:menu.c        **** 				if((btnCheck(msk) == 0) && c != 0)
+ 120:menu.c        **** 				{
+ 121:menu.c        **** 					//обычное нажатие
+ 122:menu.c        **** 					st = 0;
+ 123:menu.c        **** 					BTN_PORT = p;
+ 124:menu.c        **** 					BTN_DDR = d;
+ 125:menu.c        **** 					return msk;
+ 126:menu.c        **** 				}
+ 127:menu.c        **** 				else if((btnCheck(msk) != 0) && c == 0)
+ 128:menu.c        **** 				{
+ 129:menu.c        **** 					//долгое нажатие
+ 130:menu.c        **** 					//c = 10;
+ 131:menu.c        **** 					st = 3;
  338               	.LM31:
  339 0030 83E0      		ldi r24,lo8(3)
  340 0032 E82E      		mov r14,r24
@@ -475,19 +480,19 @@
  357               	.LBE12:
  358               	.LBE11:
  360               	.Ltext4:
-  90:menu.c        **** 		
+  95:menu.c        **** 		
  362               	.LM33:
- 363 0046 8091 0000 		lds r24,c.2095
+ 363 0046 8091 0000 		lds r24,c.2100
  364 004a 8823      		tst r24
  365 004c 01F0      		breq .L21
-  90:menu.c        **** 		
+  95:menu.c        **** 		
  367               	.LM34:
  368 004e 8150      		subi r24,lo8(-(-1))
- 369 0050 8093 0000 		sts c.2095,r24
+ 369 0050 8093 0000 		sts c.2100,r24
  370               	.L21:
-  92:menu.c        **** 		{
+  97:menu.c        **** 		{
  372               	.LM35:
- 373 0054 8091 0000 		lds r24,st.2093
+ 373 0054 8091 0000 		lds r24,st.2098
  374 0058 8130      		cpi r24,lo8(1)
  375 005a 01F0      		breq .L23
  376 005c 00F0      		brlo .L24
@@ -497,111 +502,111 @@
  380 0064 01F0      		breq .L26
  381 0066 00C0      		rjmp .L22
  382               	.L24:
-  96:menu.c        **** 					st++;
+ 101:menu.c        **** 					st++;
  384               	.LM36:
  385 0068 00D0      		rcall btnCheckAll
- 386 006a 8093 0000 		sts msk.2094,r24
+ 386 006a 8093 0000 		sts msk.2099,r24
  387 006e 8823      		tst r24
  388 0070 01F0      		breq .L20
-  97:menu.c        **** 				break;
+ 102:menu.c        **** 				break;
  390               	.LM37:
- 391 0072 F092 0000 		sts st.2093,r15
+ 391 0072 F092 0000 		sts st.2098,r15
  392 0076 00C0      		rjmp .L20
  393               	.L23:
- 103:menu.c        **** 				{
+ 108:menu.c        **** 				{
  395               	.LM38:
  396 0078 93B3      		in r25,0x13
- 397 007a 8091 0000 		lds r24,msk.2094
+ 397 007a 8091 0000 		lds r24,msk.2099
  398 007e 8923      		and r24,r25
  399 0080 01F4      		brne .L22
- 105:menu.c        **** 					c = 25;
+ 110:menu.c        **** 					c = 25;
  401               	.LM39:
- 402 0082 1093 0000 		sts st.2093,r17
- 106:menu.c        **** 				}
+ 402 0082 1093 0000 		sts st.2098,r17
+ 111:menu.c        **** 				}
  404               	.LM40:
- 405 0086 0093 0000 		sts c.2095,r16
+ 405 0086 0093 0000 		sts c.2100,r16
  406 008a 00C0      		rjmp .L20
  407               	.L25:
- 114:menu.c        **** 				{
+ 119:menu.c        **** 				{
  409               	.LM41:
  410 008c 93B3      		in r25,0x13
- 411 008e 8091 0000 		lds r24,msk.2094
+ 411 008e 8091 0000 		lds r24,msk.2099
  412 0092 9823      		and r25,r24
  413 0094 01F0      		breq .L30
- 114:menu.c        **** 				{
+ 119:menu.c        **** 				{
  415               	.LM42:
- 416 0096 9091 0000 		lds r25,c.2095
+ 416 0096 9091 0000 		lds r25,c.2100
  417 009a 9923      		tst r25
  418 009c 01F0      		breq .L30
- 117:menu.c        **** 					BTN_PORT = p;
+ 122:menu.c        **** 					BTN_PORT = p;
  420               	.LM43:
- 421 009e 1092 0000 		sts st.2093,__zero_reg__
+ 421 009e 1092 0000 		sts st.2098,__zero_reg__
  422 00a2 00C0      		rjmp .L48
  423               	.L30:
- 122:menu.c        **** 				{
+ 127:menu.c        **** 				{
  425               	.LM44:
  426 00a4 93B3      		in r25,0x13
  427 00a6 8923      		and r24,r25
  428 00a8 01F4      		brne .L20
- 122:menu.c        **** 				{
+ 127:menu.c        **** 				{
  430               	.LM45:
- 431 00aa 8091 0000 		lds r24,c.2095
+ 431 00aa 8091 0000 		lds r24,c.2100
  432 00ae 8111      		cpse r24,__zero_reg__
  433 00b0 00C0      		rjmp .L20
  435               	.LM46:
- 436 00b2 E092 0000 		sts st.2093,r14
+ 436 00b2 E092 0000 		sts st.2098,r14
  437 00b6 00C0      		rjmp .L20
  438               	.L26:
- 127:menu.c        **** 				}
- 128:menu.c        **** 
- 129:menu.c        **** 				break;
- 130:menu.c        **** 			}
- 131:menu.c        **** 			case 3:
- 132:menu.c        **** 			{
- 133:menu.c        **** 				if(c == 0)
+ 132:menu.c        **** 				}
+ 133:menu.c        **** 
+ 134:menu.c        **** 				break;
+ 135:menu.c        **** 			}
+ 136:menu.c        **** 			case 3:
+ 137:menu.c        **** 			{
+ 138:menu.c        **** 				if(c == 0)
  440               	.LM47:
- 441 00b8 8091 0000 		lds r24,c.2095
+ 441 00b8 8091 0000 		lds r24,c.2100
  442 00bc 8111      		cpse r24,__zero_reg__
  443 00be 00C0      		rjmp .L22
- 134:menu.c        **** 				{
- 135:menu.c        **** 					
- 136:menu.c        **** 					if((btnCheck(msk) == 0))
+ 139:menu.c        **** 				{
+ 140:menu.c        **** 					
+ 141:menu.c        **** 					if((btnCheck(msk) == 0))
  445               	.LM48:
  446 00c0 93B3      		in r25,0x13
- 447 00c2 8091 0000 		lds r24,msk.2094
+ 447 00c2 8091 0000 		lds r24,msk.2099
  448 00c6 8923      		and r24,r25
  449 00c8 01F0      		breq .L32
- 137:menu.c        **** 					{
- 138:menu.c        **** 						st = 0;
+ 142:menu.c        **** 					{
+ 143:menu.c        **** 						st = 0;
  451               	.LM49:
- 452 00ca 1092 0000 		sts st.2093,__zero_reg__
+ 452 00ca 1092 0000 		sts st.2098,__zero_reg__
  453               	.L32:
- 139:menu.c        **** 					}
- 140:menu.c        **** 					c = 5;
+ 144:menu.c        **** 					}
+ 145:menu.c        **** 					c = 2;
  455               	.LM50:
- 456 00ce 85E0      		ldi r24,lo8(5)
- 457 00d0 8093 0000 		sts c.2095,r24
+ 456 00ce 82E0      		ldi r24,lo8(2)
+ 457 00d0 8093 0000 		sts c.2100,r24
  458               	.L48:
- 141:menu.c        **** 					//_delay_ms(200);
- 142:menu.c        **** 					BTN_PORT = p;
+ 146:menu.c        **** 					//_delay_ms(200);
+ 147:menu.c        **** 					BTN_PORT = p;
  460               	.LM51:
  461 00d4 C5BB      		out 0x15,r28
- 143:menu.c        **** 					BTN_DDR = d;
+ 148:menu.c        **** 					BTN_DDR = d;
  463               	.LM52:
  464 00d6 D4BB      		out 0x14,r29
- 144:menu.c        **** 					return msk;
+ 149:menu.c        **** 					return msk;
  466               	.LM53:
- 467 00d8 8091 0000 		lds r24,msk.2094
+ 467 00d8 8091 0000 		lds r24,msk.2099
  468               	/* epilogue start */
- 145:menu.c        **** 				}
- 146:menu.c        **** 			}
- 147:menu.c        **** 			default:
- 148:menu.c        **** 				st =0;
- 149:menu.c        **** 				break;
- 150:menu.c        **** 		}
- 151:menu.c        **** 
- 152:menu.c        **** 	}
- 153:menu.c        **** }
+ 150:menu.c        **** 				}
+ 151:menu.c        **** 			}
+ 152:menu.c        **** 			default:
+ 153:menu.c        **** 				st =0;
+ 154:menu.c        **** 				break;
+ 155:menu.c        **** 		}
+ 156:menu.c        **** 
+ 157:menu.c        **** 	}
+ 158:menu.c        **** }
  470               	.LM54:
  471 00dc DF91      		pop r29
  472 00de CF91      		pop r28
@@ -611,19 +616,19 @@
  476 00e6 EF90      		pop r14
  477 00e8 0895      		ret
  478               	.L22:
- 148:menu.c        **** 				break;
+ 153:menu.c        **** 				break;
  480               	.LM55:
- 481 00ea 1092 0000 		sts st.2093,__zero_reg__
- 149:menu.c        **** 		}
+ 481 00ea 1092 0000 		sts st.2098,__zero_reg__
+ 154:menu.c        **** 		}
  483               	.LM56:
  484 00ee 00C0      		rjmp .L20
  493               	.Lscope4:
  494               		.section	.text.btn_wait_up,"ax",@progbits
  497               	.global	btn_wait_up
  499               	btn_wait_up:
- 154:menu.c        **** 
- 155:menu.c        **** void btn_wait_up(uint8_t b)
- 156:menu.c        **** {
+ 159:menu.c        **** 
+ 160:menu.c        **** void btn_wait_up(uint8_t b)
+ 161:menu.c        **** {
  501               	.LM57:
  502               	.LFBB5:
  503               	/* prologue: function */
@@ -631,7 +636,7 @@
  505               	/* stack size = 0 */
  506               	.L__stack_usage = 0
  507               	.L50:
- 157:menu.c        **** 	while(btnCheck(b))
+ 162:menu.c        **** 	while(btnCheck(b))
  509               	.LM58:
  510 0000 93B3      		in r25,0x13
  511 0002 9823      		and r25,r24
@@ -655,18 +660,18 @@
  531               	.LBE14:
  532               	.LBE13:
  534               	.Ltext6:
- 158:menu.c        **** 	_delay_ms(20);
- 159:menu.c        **** }
+ 163:menu.c        **** 	_delay_ms(20);
+ 164:menu.c        **** }
  536               	.LM60:
  537 001a 0895      		ret
  539               	.Lscope5:
  540               		.section	.text.print_u,"ax",@progbits
  543               	.global	print_u
  545               	print_u:
- 160:menu.c        **** 
- 161:menu.c        **** 
- 162:menu.c        **** void print_u(uint32_t a, uint8_t p)
- 163:menu.c        **** {
+ 165:menu.c        **** 
+ 166:menu.c        **** 
+ 167:menu.c        **** void print_u(uint32_t a, uint8_t p)
+ 168:menu.c        **** {
  547               	.LM61:
  548               	.LFBB6:
  549 0000 8F92      		push r8
@@ -701,13 +706,13 @@
  578 0032 2F5F      		subi r18,-1
  579 0034 3F4F      		sbci r19,-1
  580 0036 7901      		movw r14,r18
- 164:menu.c        **** 	char s[9];//, c;
- 165:menu.c        **** 	uint8_t i;
- 166:menu.c        **** 	
- 167:menu.c        **** 	i = 8;
- 168:menu.c        **** 	do
- 169:menu.c        **** 	{
- 170:menu.c        **** 		s[i] = (a % 10) + '0';
+ 169:menu.c        **** 	char s[9];//, c;
+ 170:menu.c        **** 	uint8_t i;
+ 171:menu.c        **** 	
+ 172:menu.c        **** 	i = 8;
+ 173:menu.c        **** 	do
+ 174:menu.c        **** 	{
+ 175:menu.c        **** 		s[i] = (a % 10) + '0';
  582               	.LM62:
  583 0038 2AE0      		ldi r18,lo8(10)
  584 003a 822E      		mov r8,r18
@@ -722,15 +727,15 @@
  594 0048 605D      		subi r22,lo8(-(48))
  595 004a F801      		movw r30,r16
  596 004c 6083      		st Z,r22
- 171:menu.c        **** 		a /= 10;
+ 176:menu.c        **** 		a /= 10;
  598               	.LM64:
  599 004e B901      		movw r22,r18
  600 0050 CA01      		movw r24,r20
  601 0052 0150      		subi r16,1
  602 0054 1109      		sbc r17,__zero_reg__
- 172:menu.c        **** 		i--;
- 173:menu.c        **** 	}
- 174:menu.c        **** 	while(i > 0);
+ 177:menu.c        **** 		i--;
+ 178:menu.c        **** 	}
+ 179:menu.c        **** 	while(i > 0);
  604               	.LM65:
  605 0056 0E15      		cp r16,r14
  606 0058 1F05      		cpc r17,r15
@@ -740,19 +745,19 @@
  611               	.LM66:
  612 0060 10E0      		ldi r17,0
  613               	.L57:
- 175:menu.c        **** 	
- 176:menu.c        **** 	i = 0;
- 177:menu.c        **** 	while(s[++i] == '0' && i < 8){};
+ 180:menu.c        **** 	
+ 181:menu.c        **** 	i = 0;
+ 182:menu.c        **** 	while(s[++i] == '0' && i < 8){};
  615               	.LM67:
  616 0062 1F5F      		subi r17,lo8(-(1))
  617 0064 8191      		ld r24,Z+
  618 0066 8033      		cpi r24,lo8(48)
  619 0068 01F0      		breq .L55
  620               	.L58:
- 178:menu.c        **** 	for(; i<9; i++)
- 179:menu.c        **** 	{
- 180:menu.c        **** 		n_putchar(s[i]);
- 181:menu.c        **** 		if(9 - i == p)
+ 183:menu.c        **** 	for(; i<9; i++)
+ 184:menu.c        **** 	{
+ 185:menu.c        **** 		n_putchar(s[i]);
+ 186:menu.c        **** 		if(9 - i == p)
  622               	.LM68:
  623 006a 89E0      		ldi r24,lo8(9)
  624 006c 882E      		mov r8,r24
@@ -761,13 +766,13 @@
  627 0072 D12C      		mov r13,__zero_reg__
  628 0074 00C0      		rjmp .L56
  629               	.L55:
- 177:menu.c        **** 	for(; i<9; i++)
+ 182:menu.c        **** 	for(; i<9; i++)
  631               	.LM69:
  632 0076 1830      		cpi r17,lo8(8)
  633 0078 01F4      		brne .L57
  634 007a 00C0      		rjmp .L58
  635               	.L56:
- 180:menu.c        **** 		if(9 - i == p)
+ 185:menu.c        **** 		if(9 - i == p)
  637               	.LM70:
  638 007c A12E      		mov r10,r17
  639 007e B12C      		mov r11,__zero_reg__
@@ -783,20 +788,20 @@
  650 0090 8C15      		cp r24,r12
  651 0092 9D05      		cpc r25,r13
  652 0094 01F4      		brne .L59
- 182:menu.c        **** 		n_putchar(',');
+ 187:menu.c        **** 		n_putchar(',');
  654               	.LM72:
  655 0096 8CE2      		ldi r24,lo8(44)
  656 0098 00D0      		rcall n_putchar
  657               	.L59:
- 178:menu.c        **** 	{
+ 183:menu.c        **** 	{
  659               	.LM73:
  660 009a 1F5F      		subi r17,lo8(-(1))
  661 009c 1930      		cpi r17,lo8(9)
  662 009e 01F4      		brne .L56
  663               	/* epilogue start */
- 183:menu.c        **** 	}
- 184:menu.c        **** 
- 185:menu.c        **** }
+ 188:menu.c        **** 	}
+ 189:menu.c        **** 
+ 190:menu.c        **** }
  665               	.LM74:
  666 00a0 2996      		adiw r28,9
  667 00a2 0FB6      		in __tmp_reg__,__SREG__
@@ -821,9 +826,9 @@
  691               		.section	.text.print_fq,"ax",@progbits
  694               	.global	print_fq
  696               	print_fq:
- 186:menu.c        **** 
- 187:menu.c        **** uint16_t print_fq(uint32_t f)
- 188:menu.c        **** {
+ 191:menu.c        **** 
+ 192:menu.c        **** uint16_t print_fq(uint32_t f)
+ 193:menu.c        **** {
  698               	.LM75:
  699               	.LFBB7:
  700 0000 CF92      		push r12
@@ -838,15 +843,15 @@
  709               	/* frame size = 0 */
  710               	/* stack size = 8 */
  711               	.L__stack_usage = 8
- 189:menu.c        **** 	char p, pr;
- 190:menu.c        **** 	uint16_t d;
- 191:menu.c        **** 	
- 192:menu.c        **** 	
- 193:menu.c        **** 	d = 1;
- 194:menu.c        **** 	pr = 0;
- 195:menu.c        **** 	p = 0;// после какого разряда стоит дес. точка
- 196:menu.c        **** 
- 197:menu.c        **** 	if(f < 10000)
+ 194:menu.c        **** 	char p, pr;
+ 195:menu.c        **** 	uint16_t d;
+ 196:menu.c        **** 	
+ 197:menu.c        **** 	
+ 198:menu.c        **** 	d = 1;
+ 199:menu.c        **** 	pr = 0;
+ 200:menu.c        **** 	p = 0;// после какого разряда стоит дес. точка
+ 201:menu.c        **** 
+ 202:menu.c        **** 	if(f < 10000)
  713               	.LM76:
  714 0010 6031      		cpi r22,16
  715 0012 27E2      		ldi r18,39
@@ -854,14 +859,14 @@
  717 0016 8105      		cpc r24,__zero_reg__
  718 0018 9105      		cpc r25,__zero_reg__
  719 001a 00F4      		brsh .L64
- 198:menu.c        **** 	{
- 199:menu.c        **** 		if(generator.m == M_SQPWM)
+ 203:menu.c        **** 	{
+ 204:menu.c        **** 		if(generator.m == M_SQPWM)
  721               	.LM77:
  722 001c 2091 0000 		lds r18,generator
- 723 0020 2930      		cpi r18,lo8(9)
+ 723 0020 2830      		cpi r18,lo8(8)
  724 0022 01F4      		brne .L69
- 200:menu.c        **** 		{
- 201:menu.c        **** 			if(f > 1000)
+ 205:menu.c        **** 		{
+ 206:menu.c        **** 			if(f > 1000)
  726               	.LM78:
  727 0024 693E      		cpi r22,-23
  728 0026 23E0      		ldi r18,3
@@ -871,15 +876,15 @@
  732 002e 00F4      		brsh .L71
  733 0030 00C0      		rjmp .L69
  734               	.L64:
- 202:menu.c        **** 			{
- 203:menu.c        **** 				d = 100;
- 204:menu.c        **** 				p = 2;
- 205:menu.c        **** 				pr ='K';
- 206:menu.c        **** 			}
- 207:menu.c        **** 		}
- 208:menu.c        **** 
- 209:menu.c        **** 	}
- 210:menu.c        **** 	else if (f < 100000)
+ 207:menu.c        **** 			{
+ 208:menu.c        **** 				d = 100;
+ 209:menu.c        **** 				p = 2;
+ 210:menu.c        **** 				pr ='K';
+ 211:menu.c        **** 			}
+ 212:menu.c        **** 		}
+ 213:menu.c        **** 
+ 214:menu.c        **** 	}
+ 215:menu.c        **** 	else if (f < 100000)
  736               	.LM79:
  737 0032 603A      		cpi r22,-96
  738 0034 26E8      		ldi r18,-122
@@ -888,32 +893,32 @@
  741 003a 8207      		cpc r24,r18
  742 003c 9105      		cpc r25,__zero_reg__
  743 003e 00F4      		brsh .L66
- 211:menu.c        **** 	{
- 212:menu.c        **** 		pr ='K';
- 213:menu.c        **** 		if(generator.m == M_SQPWM)
+ 216:menu.c        **** 	{
+ 217:menu.c        **** 		pr ='K';
+ 218:menu.c        **** 		if(generator.m == M_SQPWM)
  745               	.LM80:
  746 0040 2091 0000 		lds r18,generator
- 747 0044 2930      		cpi r18,lo8(9)
+ 747 0044 2830      		cpi r18,lo8(8)
  748 0046 01F0      		breq .L70
- 214:menu.c        **** 		{
- 215:menu.c        **** 			d = 1000;
- 216:menu.c        **** 			p = 0;
- 217:menu.c        **** 		}
- 218:menu.c        **** 		else
  219:menu.c        **** 		{
- 220:menu.c        **** 			d = 10;
+ 220:menu.c        **** 			d = 1000;
+ 221:menu.c        **** 			p = 0;
+ 222:menu.c        **** 		}
+ 223:menu.c        **** 		else
+ 224:menu.c        **** 		{
+ 225:menu.c        **** 			d = 10;
  750               	.LM81:
  751 0048 CAE0      		ldi r28,lo8(10)
  752 004a D0E0      		ldi r29,0
- 212:menu.c        **** 		if(generator.m == M_SQPWM)
+ 217:menu.c        **** 		if(generator.m == M_SQPWM)
  754               	.LM82:
  755 004c 1BE4      		ldi r17,lo8(75)
  756 004e 00C0      		rjmp .L76
  757               	.L66:
- 221:menu.c        **** 			p = 3;
- 222:menu.c        **** 		}
- 223:menu.c        **** 	}
- 224:menu.c        **** 	else if (f < 1000000)
+ 226:menu.c        **** 			p = 3;
+ 227:menu.c        **** 		}
+ 228:menu.c        **** 	}
+ 229:menu.c        **** 	else if (f < 1000000)
  759               	.LM83:
  760 0050 6034      		cpi r22,64
  761 0052 22E4      		ldi r18,66
@@ -922,64 +927,64 @@
  764 0058 8207      		cpc r24,r18
  765 005a 9105      		cpc r25,__zero_reg__
  766 005c 00F0      		brlo .L71
- 225:menu.c        **** 	{
- 226:menu.c        **** 
- 227:menu.c        **** 		pr ='K';
- 228:menu.c        **** 		d = 100;
- 229:menu.c        **** 		p = 2;
- 230:menu.c        **** 	}
- 231:menu.c        **** 	else
- 232:menu.c        **** 	{
- 233:menu.c        **** 		d = 10000;
+ 230:menu.c        **** 	{
+ 231:menu.c        **** 
+ 232:menu.c        **** 		pr ='K';
+ 233:menu.c        **** 		d = 100;
+ 234:menu.c        **** 		p = 2;
+ 235:menu.c        **** 	}
+ 236:menu.c        **** 	else
+ 237:menu.c        **** 	{
+ 238:menu.c        **** 		d = 10000;
  768               	.LM84:
  769 005e C0E1      		ldi r28,lo8(16)
  770 0060 D7E2      		ldi r29,lo8(39)
- 234:menu.c        **** 		p = 3;
- 235:menu.c        **** 		pr ='M';
+ 239:menu.c        **** 		p = 3;
+ 240:menu.c        **** 		pr ='M';
  772               	.LM85:
  773 0062 1DE4      		ldi r17,lo8(77)
  774               	.L76:
- 234:menu.c        **** 		p = 3;
+ 239:menu.c        **** 		p = 3;
  776               	.LM86:
  777 0064 03E0      		ldi r16,lo8(3)
  778 0066 00C0      		rjmp .L65
  779               	.L69:
- 193:menu.c        **** 	pr = 0;
+ 198:menu.c        **** 	pr = 0;
  781               	.LM87:
  782 0068 C1E0      		ldi r28,lo8(1)
  783 006a D0E0      		ldi r29,0
- 194:menu.c        **** 	p = 0;// после какого разряда стоит дес. точка
+ 199:menu.c        **** 	p = 0;// после какого разряда стоит дес. точка
  785               	.LM88:
  786 006c 10E0      		ldi r17,0
  787 006e 00C0      		rjmp .L75
  788               	.L70:
- 215:menu.c        **** 			p = 0;
+ 220:menu.c        **** 			p = 0;
  790               	.LM89:
  791 0070 C8EE      		ldi r28,lo8(-24)
  792 0072 D3E0      		ldi r29,lo8(3)
- 212:menu.c        **** 		if(generator.m == M_SQPWM)
+ 217:menu.c        **** 		if(generator.m == M_SQPWM)
  794               	.LM90:
  795 0074 1BE4      		ldi r17,lo8(75)
  796               	.L75:
- 216:menu.c        **** 		}
+ 221:menu.c        **** 		}
  798               	.LM91:
  799 0076 00E0      		ldi r16,0
  800 0078 00C0      		rjmp .L65
  801               	.L71:
- 228:menu.c        **** 		p = 2;
+ 233:menu.c        **** 		p = 2;
  803               	.LM92:
  804 007a C4E6      		ldi r28,lo8(100)
  805 007c D0E0      		ldi r29,0
- 227:menu.c        **** 		d = 100;
+ 232:menu.c        **** 		d = 100;
  807               	.LM93:
  808 007e 1BE4      		ldi r17,lo8(75)
- 229:menu.c        **** 	}
+ 234:menu.c        **** 	}
  810               	.LM94:
  811 0080 02E0      		ldi r16,lo8(2)
  812               	.L65:
- 236:menu.c        **** 
- 237:menu.c        **** 	}
- 238:menu.c        **** 	print_u(f/d, p);
+ 241:menu.c        **** 
+ 242:menu.c        **** 	}
+ 243:menu.c        **** 	print_u(f/d, p);
  814               	.LM95:
  815 0082 6E01      		movw r12,r28
  816 0084 E12C      		mov r14,__zero_reg__
@@ -991,22 +996,22 @@
  822 0090 B901      		movw r22,r18
  823 0092 402F      		mov r20,r16
  824 0094 00D0      		rcall print_u
- 239:menu.c        **** 	if(pr)
+ 244:menu.c        **** 	if(pr)
  826               	.LM96:
  827 0096 1123      		tst r17
  828 0098 01F0      		breq .L67
- 240:menu.c        **** 		n_putchar(pr);
+ 245:menu.c        **** 		n_putchar(pr);
  830               	.LM97:
  831 009a 812F      		mov r24,r17
  832 009c 00D0      		rcall n_putchar
  833               	.L67:
- 241:menu.c        **** 	nnl_puts_P(PSTR("Hz"));
+ 246:menu.c        **** 	nnl_puts_P(PSTR("Hz"));
  835               	.LM98:
- 836 009e 80E0      		ldi r24,lo8(__c.2131)
- 837 00a0 90E0      		ldi r25,hi8(__c.2131)
+ 836 009e 80E0      		ldi r24,lo8(__c.2136)
+ 837 00a0 90E0      		ldi r25,hi8(__c.2136)
  838 00a2 00D0      		rcall nnl_puts_P
- 242:menu.c        **** 	return d;
- 243:menu.c        **** }
+ 247:menu.c        **** 	return d;
+ 248:menu.c        **** }
  840               	.LM99:
  841 00a4 CE01      		movw r24,r28
  842               	/* epilogue start */
@@ -1023,9 +1028,9 @@
  859               		.section	.text.print_on_off,"ax",@progbits
  862               	.global	print_on_off
  864               	print_on_off:
- 244:menu.c        **** 
- 245:menu.c        **** void print_on_off( uint8_t st)
- 246:menu.c        **** {
+ 249:menu.c        **** 
+ 250:menu.c        **** void print_on_off( uint8_t st)
+ 251:menu.c        **** {
  866               	.LM100:
  867               	.LFBB8:
  868 0000 CF93      		push r28
@@ -1034,1366 +1039,1379 @@
  871               	/* stack size = 1 */
  872               	.L__stack_usage = 1
  873 0002 C82F      		mov r28,r24
- 247:menu.c        **** 
- 248:menu.c        **** 	lcd_goto(13);
+ 252:menu.c        **** 
+ 253:menu.c        **** 	lcd_goto(13);
  875               	.LM101:
  876 0004 8DE0      		ldi r24,lo8(13)
  877 0006 00D0      		rcall lcd_goto
- 249:menu.c        **** 
- 250:menu.c        **** 	if(st)
+ 254:menu.c        **** 
+ 255:menu.c        **** 	if(st)
  879               	.LM102:
  880 0008 CC23      		tst r28
  881 000a 01F0      		breq .L78
- 251:menu.c        **** 	{
- 252:menu.c        **** 		#ifdef USE_SW_UART
- 253:menu.c        **** 			SerialPutChar('\r');
+ 256:menu.c        **** 	{
+ 257:menu.c        **** 		#ifdef USE_SW_UART
+ 258:menu.c        **** 			SerialPutChar('\r');
  883               	.LM103:
  884 000c 8DE0      		ldi r24,lo8(13)
  885 000e 00D0      		rcall SerialPutChar
- 254:menu.c        **** 		#endif
- 255:menu.c        **** 		nnl_puts_P(PSTR("ON \n"));
+ 259:menu.c        **** 		#endif
+ 260:menu.c        **** 		nnl_puts_P(PSTR("ON \n"));
  887               	.LM104:
- 888 0010 80E0      		ldi r24,lo8(__c.2136)
- 889 0012 90E0      		ldi r25,hi8(__c.2136)
+ 888 0010 80E0      		ldi r24,lo8(__c.2141)
+ 889 0012 90E0      		ldi r25,hi8(__c.2141)
  890 0014 00C0      		rjmp .L79
  891               	.L78:
- 256:menu.c        **** 	}
- 257:menu.c        **** 	else
- 258:menu.c        **** 		nnl_puts_P(PSTR("OFF\n"));
+ 261:menu.c        **** 	}
+ 262:menu.c        **** 	else
+ 263:menu.c        **** 		nnl_puts_P(PSTR("OFF\n"));
  893               	.LM105:
- 894 0016 80E0      		ldi r24,lo8(__c.2138)
- 895 0018 90E0      		ldi r25,hi8(__c.2138)
+ 894 0016 80E0      		ldi r24,lo8(__c.2143)
+ 895 0018 90E0      		ldi r25,hi8(__c.2143)
  896               	.L79:
  897               	/* epilogue start */
- 259:menu.c        **** }
+ 264:menu.c        **** }
  899               	.LM106:
  900 001a CF91      		pop r28
- 258:menu.c        **** }
+ 263:menu.c        **** }
  902               	.LM107:
  903 001c 00C0      		rjmp nnl_puts_P
  905               	.Lscope8:
  906               		.section	.text.input_fd,"ax",@progbits
- 909               	.global	input_fd
- 911               	input_fd:
- 260:menu.c        **** 
- 261:menu.c        **** void input_fd(uint32_t* p)
- 262:menu.c        **** {
- 913               	.LM108:
- 914               	.LFBB9:
- 915 0000 4F92      		push r4
- 916 0002 5F92      		push r5
- 917 0004 6F92      		push r6
- 918 0006 7F92      		push r7
- 919 0008 8F92      		push r8
- 920 000a 9F92      		push r9
- 921 000c AF92      		push r10
- 922 000e BF92      		push r11
- 923 0010 CF92      		push r12
- 924 0012 DF92      		push r13
- 925 0014 EF92      		push r14
- 926 0016 FF92      		push r15
- 927 0018 0F93      		push r16
- 928 001a 1F93      		push r17
- 929 001c CF93      		push r28
- 930 001e DF93      		push r29
- 931 0020 00D0      		rcall .
- 932 0022 00D0      		rcall .
- 933 0024 CDB7      		in r28,__SP_L__
- 934 0026 DEB7      		in r29,__SP_H__
- 935               	/* prologue: function */
- 936               	/* frame size = 4 */
- 937               	/* stack size = 20 */
- 938               	.L__stack_usage = 20
- 939 0028 8C01      		movw r16,r24
- 263:menu.c        **** 	uint8_t b;
- 264:menu.c        **** 	uint16_t d;
- 265:menu.c        **** 	uint32_t multipler;
- 266:menu.c        **** 	uint32_t max, f;
- 267:menu.c        **** 	
- 268:menu.c        **** 	f = *p;
- 941               	.LM109:
- 942 002a DC01      		movw r26,r24
- 943 002c CD90      		ld r12,X+
- 944 002e DD90      		ld r13,X+
- 945 0030 ED90      		ld r14,X+
- 946 0032 FC90      		ld r15,X
- 269:menu.c        **** 	if(generator.m == M_SQPWM)
- 948               	.LM110:
- 949 0034 8091 0000 		lds r24,generator
- 950 0038 8930      		cpi r24,lo8(9)
- 951 003a 01F0      		breq .L88
- 270:menu.c        **** 		max = MAXFREQ_PWM;
- 271:menu.c        **** 	else if(generator.m == M_SQW)
- 953               	.LM111:
- 954 003c 8830      		cpi r24,lo8(8)
- 955 003e 01F0      		breq .L89
- 272:menu.c        **** 		max = MAXFREQ_SQW;
- 273:menu.c        **** 	else
- 274:menu.c        **** 		max = MAXFREQ_DDS;
- 957               	.LM112:
- 958 0040 87E0      		ldi r24,lo8(7)
- 959 0042 92EB      		ldi r25,lo8(-78)
- 960 0044 A1E0      		ldi r26,lo8(1)
- 961 0046 B0E0      		ldi r27,0
- 962 0048 00C0      		rjmp .L91
- 963               	.L88:
- 270:menu.c        **** 		max = MAXFREQ_PWM;
- 965               	.LM113:
- 966 004a 80EA      		ldi r24,lo8(-96)
- 967 004c 96E8      		ldi r25,lo8(-122)
- 968 004e A1E0      		ldi r26,lo8(1)
- 969 0050 B0E0      		ldi r27,0
- 970 0052 00C0      		rjmp .L91
- 971               	.L89:
- 272:menu.c        **** 		max = MAXFREQ_SQW;
- 973               	.LM114:
- 974 0054 80E2      		ldi r24,lo8(32)
- 975 0056 91EA      		ldi r25,lo8(-95)
- 976 0058 A7E0      		ldi r26,lo8(7)
- 977 005a B0E0      		ldi r27,0
- 978               	.L91:
- 979 005c 8983      		std Y+1,r24
- 980 005e 9A83      		std Y+2,r25
- 981 0060 AB83      		std Y+3,r26
- 982 0062 BC83      		std Y+4,r27
- 275:menu.c        **** 
- 276:menu.c        **** 	multipler = 0;
- 984               	.LM115:
- 985 0064 812C      		mov r8,__zero_reg__
- 986 0066 912C      		mov r9,__zero_reg__
- 987 0068 5401      		movw r10,r8
- 988               	.L82:
- 277:menu.c        **** 	while(1)
- 278:menu.c        **** 	{
- 279:menu.c        **** 
- 280:menu.c        **** 		nnl_puts_P(PSTR("\rF="));
- 990               	.LM116:
- 991 006a 80E0      		ldi r24,lo8(__c.2148)
- 992 006c 90E0      		ldi r25,hi8(__c.2148)
- 993 006e 00D0      		rcall nnl_puts_P
- 281:menu.c        **** 		d = print_fq(f);
- 995               	.LM117:
- 996 0070 C701      		movw r24,r14
- 997 0072 B601      		movw r22,r12
- 998 0074 00D0      		rcall print_fq
- 282:menu.c        **** 		f -= f % d;
- 1000               	.LM118:
- 1001 0076 2C01      		movw r4,r24
- 1002 0078 612C      		mov r6,__zero_reg__
- 1003 007a 712C      		mov r7,__zero_reg__
- 1004 007c C701      		movw r24,r14
- 1005 007e B601      		movw r22,r12
- 1006 0080 A301      		movw r20,r6
- 1007 0082 9201      		movw r18,r4
- 1008 0084 00D0      		rcall __udivmodsi4
- 1009 0086 C61A      		sub r12,r22
- 1010 0088 D70A      		sbc r13,r23
- 1011 008a E80A      		sbc r14,r24
- 1012 008c F90A      		sbc r15,r25
- 283:menu.c        **** 		if(multipler == 0)
- 1014               	.LM119:
- 1015 008e 8114      		cp r8,__zero_reg__
- 1016 0090 9104      		cpc r9,__zero_reg__
- 1017 0092 A104      		cpc r10,__zero_reg__
- 1018 0094 B104      		cpc r11,__zero_reg__
- 1019 0096 01F4      		brne .L83
- 284:menu.c        **** 			multipler = d;
- 1021               	.LM120:
- 1022 0098 5301      		movw r10,r6
- 1023 009a 4201      		movw r8,r4
- 1024               	.L83:
- 285:menu.c        **** 		
- 286:menu.c        **** 		nnl_puts_P(PSTR("\n(+/-) "));
- 1026               	.LM121:
- 1027 009c 80E0      		ldi r24,lo8(__c.2150)
- 1028 009e 90E0      		ldi r25,hi8(__c.2150)
- 1029 00a0 00D0      		rcall nnl_puts_P
- 287:menu.c        **** 		print_fq(multipler);
- 1031               	.LM122:
- 1032 00a2 C501      		movw r24,r10
- 1033 00a4 B401      		movw r22,r8
- 1034 00a6 00D0      		rcall print_fq
- 288:menu.c        **** 		b = btn_wait();
- 1036               	.LM123:
- 1037 00a8 00D0      		rcall btn_wait
- 289:menu.c        **** 		if(b == BTN_DOWN)
- 1039               	.LM124:
- 1040 00aa 8230      		cpi r24,lo8(2)
- 1041 00ac 01F4      		brne .L84
- 290:menu.c        **** 		{
- 291:menu.c        **** 			if(f > 1 + multipler )
- 1043               	.LM125:
- 1044 00ae D501      		movw r26,r10
- 1045 00b0 C401      		movw r24,r8
- 1046 00b2 0196      		adiw r24,1
- 1047 00b4 A11D      		adc r26,__zero_reg__
- 1048 00b6 B11D      		adc r27,__zero_reg__
- 1049 00b8 8C15      		cp r24,r12
- 1050 00ba 9D05      		cpc r25,r13
- 1051 00bc AE05      		cpc r26,r14
- 1052 00be BF05      		cpc r27,r15
- 1053 00c0 00F4      		brsh .L82
- 292:menu.c        **** 			f-= multipler;
- 1055               	.LM126:
- 1056 00c2 C818      		sub r12,r8
- 1057 00c4 D908      		sbc r13,r9
- 1058 00c6 EA08      		sbc r14,r10
- 1059 00c8 FB08      		sbc r15,r11
- 1060 00ca 00C0      		rjmp .L82
- 1061               	.L84:
- 293:menu.c        **** 		}
- 294:menu.c        **** 		else if(b == BTN_UP)
- 1063               	.LM127:
- 1064 00cc 8130      		cpi r24,lo8(1)
- 1065 00ce 01F4      		brne .L86
+ 910               	.global	input_fd
+ 912               	input_fd:
+ 265:menu.c        **** 
+ 266:menu.c        **** void input_fd(uint32_t* p, uint8_t is_run)
+ 267:menu.c        **** {
+ 914               	.LM108:
+ 915               	.LFBB9:
+ 916 0000 2F92      		push r2
+ 917 0002 3F92      		push r3
+ 918 0004 4F92      		push r4
+ 919 0006 5F92      		push r5
+ 920 0008 6F92      		push r6
+ 921 000a 7F92      		push r7
+ 922 000c 8F92      		push r8
+ 923 000e 9F92      		push r9
+ 924 0010 AF92      		push r10
+ 925 0012 BF92      		push r11
+ 926 0014 CF92      		push r12
+ 927 0016 DF92      		push r13
+ 928 0018 EF92      		push r14
+ 929 001a FF92      		push r15
+ 930 001c 1F93      		push r17
+ 931 001e CF93      		push r28
+ 932 0020 DF93      		push r29
+ 933 0022 00D0      		rcall .
+ 934 0024 00D0      		rcall .
+ 935 0026 CDB7      		in r28,__SP_L__
+ 936 0028 DEB7      		in r29,__SP_H__
+ 937               	/* prologue: function */
+ 938               	/* frame size = 4 */
+ 939               	/* stack size = 21 */
+ 940               	.L__stack_usage = 21
+ 941 002a 1C01      		movw r2,r24
+ 942 002c 162F      		mov r17,r22
+ 268:menu.c        **** 	uint8_t b;
+ 269:menu.c        **** 	uint16_t d;
+ 270:menu.c        **** 	uint32_t multipler;
+ 271:menu.c        **** 	uint32_t max, f;
+ 272:menu.c        **** 	
+ 273:menu.c        **** 	f = *p;
+ 944               	.LM109:
+ 945 002e DC01      		movw r26,r24
+ 946 0030 CD90      		ld r12,X+
+ 947 0032 DD90      		ld r13,X+
+ 948 0034 ED90      		ld r14,X+
+ 949 0036 FC90      		ld r15,X
+ 274:menu.c        **** 	if(generator.m == M_SQPWM)
+ 951               	.LM110:
+ 952 0038 8091 0000 		lds r24,generator
+ 953 003c 8830      		cpi r24,lo8(8)
+ 954 003e 01F0      		breq .L90
+ 275:menu.c        **** 		max = MAXFREQ_PWM;
+ 276:menu.c        **** 	else if(generator.m == M_SQW)
+ 956               	.LM111:
+ 957 0040 8730      		cpi r24,lo8(7)
+ 958 0042 01F0      		breq .L91
+ 277:menu.c        **** 		max = MAXFREQ_SQW;
+ 278:menu.c        **** 	else
+ 279:menu.c        **** 		max = MAXFREQ_DDS;
+ 960               	.LM112:
+ 961 0044 87E0      		ldi r24,lo8(7)
+ 962 0046 92EB      		ldi r25,lo8(-78)
+ 963 0048 A1E0      		ldi r26,lo8(1)
+ 964 004a B0E0      		ldi r27,0
+ 965 004c 00C0      		rjmp .L96
+ 966               	.L90:
+ 275:menu.c        **** 		max = MAXFREQ_PWM;
+ 968               	.LM113:
+ 969 004e 80EA      		ldi r24,lo8(-96)
+ 970 0050 96E8      		ldi r25,lo8(-122)
+ 971 0052 A1E0      		ldi r26,lo8(1)
+ 972 0054 B0E0      		ldi r27,0
+ 973 0056 00C0      		rjmp .L96
+ 974               	.L91:
+ 277:menu.c        **** 		max = MAXFREQ_SQW;
+ 976               	.LM114:
+ 977 0058 80E2      		ldi r24,lo8(32)
+ 978 005a 91EA      		ldi r25,lo8(-95)
+ 979 005c A7E0      		ldi r26,lo8(7)
+ 980 005e B0E0      		ldi r27,0
+ 981               	.L96:
+ 982 0060 8983      		std Y+1,r24
+ 983 0062 9A83      		std Y+2,r25
+ 984 0064 AB83      		std Y+3,r26
+ 985 0066 BC83      		std Y+4,r27
+ 280:menu.c        **** 
+ 281:menu.c        **** 	multipler = 0;
+ 987               	.LM115:
+ 988 0068 812C      		mov r8,__zero_reg__
+ 989 006a 912C      		mov r9,__zero_reg__
+ 990 006c 5401      		movw r10,r8
+ 991               	.L82:
+ 282:menu.c        **** 	while(1)
+ 283:menu.c        **** 	{
+ 284:menu.c        **** 
+ 285:menu.c        **** 		nnl_puts_P(PSTR("\rF="));
+ 993               	.LM116:
+ 994 006e 80E0      		ldi r24,lo8(__c.2154)
+ 995 0070 90E0      		ldi r25,hi8(__c.2154)
+ 996 0072 00D0      		rcall nnl_puts_P
+ 286:menu.c        **** 		d = print_fq(f);
+ 998               	.LM117:
+ 999 0074 C701      		movw r24,r14
+ 1000 0076 B601      		movw r22,r12
+ 1001 0078 00D0      		rcall print_fq
+ 287:menu.c        **** 		f -= f % d;
+ 1003               	.LM118:
+ 1004 007a 2C01      		movw r4,r24
+ 1005 007c 612C      		mov r6,__zero_reg__
+ 1006 007e 712C      		mov r7,__zero_reg__
+ 1007 0080 C701      		movw r24,r14
+ 1008 0082 B601      		movw r22,r12
+ 1009 0084 A301      		movw r20,r6
+ 1010 0086 9201      		movw r18,r4
+ 1011 0088 00D0      		rcall __udivmodsi4
+ 1012 008a C61A      		sub r12,r22
+ 1013 008c D70A      		sbc r13,r23
+ 1014 008e E80A      		sbc r14,r24
+ 1015 0090 F90A      		sbc r15,r25
+ 288:menu.c        **** 		if(multipler == 0)
+ 1017               	.LM119:
+ 1018 0092 8114      		cp r8,__zero_reg__
+ 1019 0094 9104      		cpc r9,__zero_reg__
+ 1020 0096 A104      		cpc r10,__zero_reg__
+ 1021 0098 B104      		cpc r11,__zero_reg__
+ 1022 009a 01F4      		brne .L83
+ 289:menu.c        **** 			multipler = d;
+ 1024               	.LM120:
+ 1025 009c 5301      		movw r10,r6
+ 1026 009e 4201      		movw r8,r4
+ 1027               	.L83:
+ 290:menu.c        **** 		
+ 291:menu.c        **** 		nnl_puts_P(PSTR("\n(+/-) "));
+ 1029               	.LM121:
+ 1030 00a0 80E0      		ldi r24,lo8(__c.2156)
+ 1031 00a2 90E0      		ldi r25,hi8(__c.2156)
+ 1032 00a4 00D0      		rcall nnl_puts_P
+ 292:menu.c        **** 		print_fq(multipler);
+ 1034               	.LM122:
+ 1035 00a6 C501      		movw r24,r10
+ 1036 00a8 B401      		movw r22,r8
+ 1037 00aa 00D0      		rcall print_fq
+ 293:menu.c        **** 		b = btn_wait();
+ 1039               	.LM123:
+ 1040 00ac 00D0      		rcall btn_wait
+ 294:menu.c        **** 		if(b == BTN_DOWN)
+ 1042               	.LM124:
+ 1043 00ae 8130      		cpi r24,lo8(1)
+ 1044 00b0 01F4      		brne .L84
  295:menu.c        **** 		{
- 296:menu.c        **** 			if(f < max-multipler )
- 1067               	.LM128:
- 1068 00d0 8981      		ldd r24,Y+1
- 1069 00d2 9A81      		ldd r25,Y+2
- 1070 00d4 AB81      		ldd r26,Y+3
- 1071 00d6 BC81      		ldd r27,Y+4
- 1072 00d8 8819      		sub r24,r8
- 1073 00da 9909      		sbc r25,r9
- 1074 00dc AA09      		sbc r26,r10
- 1075 00de BB09      		sbc r27,r11
- 1076 00e0 C816      		cp r12,r24
- 1077 00e2 D906      		cpc r13,r25
- 1078 00e4 EA06      		cpc r14,r26
- 1079 00e6 FB06      		cpc r15,r27
- 1080 00e8 00F0      		brlo .+2
- 1081 00ea 00C0      		rjmp .L82
- 297:menu.c        **** 			f += multipler;
- 1083               	.LM129:
- 1084 00ec C80C      		add r12,r8
- 1085 00ee D91C      		adc r13,r9
- 1086 00f0 EA1C      		adc r14,r10
- 1087 00f2 FB1C      		adc r15,r11
- 1088 00f4 00C0      		rjmp .L82
- 1089               	.L86:
+ 296:menu.c        **** 			if(f > 1 + multipler )
+ 1046               	.LM125:
+ 1047 00b2 D501      		movw r26,r10
+ 1048 00b4 C401      		movw r24,r8
+ 1049 00b6 0196      		adiw r24,1
+ 1050 00b8 A11D      		adc r26,__zero_reg__
+ 1051 00ba B11D      		adc r27,__zero_reg__
+ 1052 00bc 8C15      		cp r24,r12
+ 1053 00be 9D05      		cpc r25,r13
+ 1054 00c0 AE05      		cpc r26,r14
+ 1055 00c2 BF05      		cpc r27,r15
+ 1056 00c4 00F4      		brsh .L85
+ 297:menu.c        **** 			f-= multipler;
+ 1058               	.LM126:
+ 1059 00c6 C818      		sub r12,r8
+ 1060 00c8 D908      		sbc r13,r9
+ 1061 00ca EA08      		sbc r14,r10
+ 1062 00cc FB08      		sbc r15,r11
+ 1063 00ce 00C0      		rjmp .L85
+ 1064               	.L84:
  298:menu.c        **** 		}
- 299:menu.c        **** 		else if(b == BTN_MODE)
- 1091               	.LM130:
- 1092 00f6 8830      		cpi r24,lo8(8)
- 1093 00f8 01F4      		brne .L87
+ 299:menu.c        **** 		else if(b == BTN_UP)
+ 1066               	.LM127:
+ 1067 00d0 8230      		cpi r24,lo8(2)
+ 1068 00d2 01F4      		brne .L86
  300:menu.c        **** 		{
- 301:menu.c        **** 			if(multipler < 100000)
- 1095               	.LM131:
- 1096 00fa 90EA      		ldi r25,-96
- 1097 00fc 8916      		cp r8,r25
- 1098 00fe 96E8      		ldi r25,-122
- 1099 0100 9906      		cpc r9,r25
- 1100 0102 91E0      		ldi r25,1
- 1101 0104 A906      		cpc r10,r25
- 1102 0106 B104      		cpc r11,__zero_reg__
- 1103 0108 00F0      		brlo .L92
- 302:menu.c        **** 			multipler *= 10;
- 303:menu.c        **** 			else
- 304:menu.c        **** 			multipler = d;
- 1105               	.LM132:
- 1106 010a 5301      		movw r10,r6
- 1107 010c 4201      		movw r8,r4
- 1108 010e 00C0      		rjmp .L82
- 1109               	.L92:
- 302:menu.c        **** 			multipler *= 10;
- 1111               	.LM133:
- 1112 0110 AAE0      		ldi r26,lo8(10)
- 1113 0112 B0E0      		ldi r27,0
- 1114 0114 A501      		movw r20,r10
- 1115 0116 9401      		movw r18,r8
- 1116 0118 00D0      		rcall __muluhisi3
- 1117 011a 4B01      		movw r8,r22
- 1118 011c 5C01      		movw r10,r24
- 1119 011e 00C0      		rjmp .L82
- 1120               	.L87:
- 305:menu.c        **** 		}
- 306:menu.c        **** 		else if(b == BTN_SET)
- 1122               	.LM134:
- 1123 0120 8430      		cpi r24,lo8(4)
- 1124 0122 01F0      		breq .+2
- 1125 0124 00C0      		rjmp .L82
- 307:menu.c        **** 		{
- 308:menu.c        **** 			break;
+ 301:menu.c        **** 			if(f < max-multipler )
+ 1070               	.LM128:
+ 1071 00d4 8981      		ldd r24,Y+1
+ 1072 00d6 9A81      		ldd r25,Y+2
+ 1073 00d8 AB81      		ldd r26,Y+3
+ 1074 00da BC81      		ldd r27,Y+4
+ 1075 00dc 8819      		sub r24,r8
+ 1076 00de 9909      		sbc r25,r9
+ 1077 00e0 AA09      		sbc r26,r10
+ 1078 00e2 BB09      		sbc r27,r11
+ 1079 00e4 C816      		cp r12,r24
+ 1080 00e6 D906      		cpc r13,r25
+ 1081 00e8 EA06      		cpc r14,r26
+ 1082 00ea FB06      		cpc r15,r27
+ 1083 00ec 00F4      		brsh .L85
+ 302:menu.c        **** 			f += multipler;
+ 1085               	.LM129:
+ 1086 00ee C80C      		add r12,r8
+ 1087 00f0 D91C      		adc r13,r9
+ 1088 00f2 EA1C      		adc r14,r10
+ 1089 00f4 FB1C      		adc r15,r11
+ 1090 00f6 00C0      		rjmp .L85
+ 1091               	.L86:
+ 303:menu.c        **** 		}
+ 304:menu.c        **** 		else if(b == BTN_MODE)
+ 1093               	.LM130:
+ 1094 00f8 8830      		cpi r24,lo8(8)
+ 1095 00fa 01F4      		brne .L87
+ 305:menu.c        **** 		{
+ 306:menu.c        **** 			if(multipler < 100000)
+ 1097               	.LM131:
+ 1098 00fc 90EA      		ldi r25,-96
+ 1099 00fe 8916      		cp r8,r25
+ 1100 0100 96E8      		ldi r25,-122
+ 1101 0102 9906      		cpc r9,r25
+ 1102 0104 91E0      		ldi r25,1
+ 1103 0106 A906      		cpc r10,r25
+ 1104 0108 B104      		cpc r11,__zero_reg__
+ 1105 010a 00F4      		brsh .L92
+ 307:menu.c        **** 			multipler *= 10;
+ 1107               	.LM132:
+ 1108 010c AAE0      		ldi r26,lo8(10)
+ 1109 010e B0E0      		ldi r27,0
+ 1110 0110 A501      		movw r20,r10
+ 1111 0112 9401      		movw r18,r8
+ 1112 0114 00D0      		rcall __muluhisi3
+ 1113 0116 4B01      		movw r8,r22
+ 1114 0118 5C01      		movw r10,r24
+ 1115 011a 00C0      		rjmp .L85
+ 1116               	.L87:
+ 308:menu.c        **** 			else
+ 309:menu.c        **** 			multipler = d;
+ 310:menu.c        **** 		}
+ 311:menu.c        **** 		else if(b == BTN_SET)
+ 1118               	.LM133:
+ 1119 011c 8430      		cpi r24,lo8(4)
+ 1120 011e 01F4      		brne .L85
+ 1121 0120 00C0      		rjmp .L97
+ 1122               	.L92:
  309:menu.c        **** 		}
- 310:menu.c        **** 
- 311:menu.c        **** 	}
- 312:menu.c        **** 	*p = f;
- 1127               	.LM135:
- 1128 0126 D801      		movw r26,r16
- 1129 0128 CD92      		st X+,r12
- 1130 012a DD92      		st X+,r13
- 1131 012c ED92      		st X+,r14
- 1132 012e FC92      		st X,r15
- 1133 0130 1397      		sbiw r26,3
- 1134               	/* epilogue start */
- 313:menu.c        **** 	
- 314:menu.c        **** }
- 1136               	.LM136:
- 1137 0132 0F90      		pop __tmp_reg__
- 1138 0134 0F90      		pop __tmp_reg__
- 1139 0136 0F90      		pop __tmp_reg__
- 1140 0138 0F90      		pop __tmp_reg__
- 1141 013a DF91      		pop r29
- 1142 013c CF91      		pop r28
- 1143 013e 1F91      		pop r17
- 1144 0140 0F91      		pop r16
- 1145 0142 FF90      		pop r15
- 1146 0144 EF90      		pop r14
- 1147 0146 DF90      		pop r13
- 1148 0148 CF90      		pop r12
- 1149 014a BF90      		pop r11
- 1150 014c AF90      		pop r10
- 1151 014e 9F90      		pop r9
- 1152 0150 8F90      		pop r8
- 1153 0152 7F90      		pop r7
- 1154 0154 6F90      		pop r6
- 1155 0156 5F90      		pop r5
- 1156 0158 4F90      		pop r4
- 1157 015a 0895      		ret
- 1165               	.Lscope9:
- 1166               		.section	.text.input_hs,"ax",@progbits
- 1169               	.global	input_hs
- 1171               	input_hs:
+ 1124               	.LM134:
+ 1125 0122 5301      		movw r10,r6
+ 1126 0124 4201      		movw r8,r4
+ 1127               	.L85:
+ 312:menu.c        **** 		{
+ 313:menu.c        **** 			break;
+ 314:menu.c        **** 		}
  315:menu.c        **** 
- 316:menu.c        **** 
- 317:menu.c        **** 
- 318:menu.c        **** 
- 319:menu.c        **** void input_hs(uint32_t* p)
- 320:menu.c        **** {
- 1173               	.LM137:
- 1174               	.LFBB10:
- 1175 0000 CF92      		push r12
- 1176 0002 DF92      		push r13
- 1177 0004 EF92      		push r14
- 1178 0006 FF92      		push r15
- 1179 0008 0F93      		push r16
- 1180 000a 1F93      		push r17
- 1181 000c CF93      		push r28
- 1182               	/* prologue: function */
- 1183               	/* frame size = 0 */
- 1184               	/* stack size = 7 */
- 1185               	.L__stack_usage = 7
- 1186 000e 8C01      		movw r16,r24
- 321:menu.c        **** 	uint8_t b, f;
- 322:menu.c        **** 	
- 323:menu.c        **** 	f = *p/1000000;
- 1188               	.LM138:
- 1189 0010 FC01      		movw r30,r24
- 1190 0012 6081      		ld r22,Z
- 1191 0014 7181      		ldd r23,Z+1
- 1192 0016 8281      		ldd r24,Z+2
- 1193 0018 9381      		ldd r25,Z+3
- 1194 001a 20E4      		ldi r18,lo8(64)
- 1195 001c 32E4      		ldi r19,lo8(66)
- 1196 001e 4FE0      		ldi r20,lo8(15)
- 1197 0020 50E0      		ldi r21,0
- 1198 0022 00D0      		rcall __udivmodsi4
- 1199 0024 C22F      		mov r28,r18
- 324:menu.c        **** 	if(f > 8 || f == 0)
- 1201               	.LM139:
- 1202 0026 2150      		subi r18,lo8(-(-1))
- 1203 0028 2830      		cpi r18,lo8(8)
- 1204 002a 00F0      		brlo .L95
- 325:menu.c        **** 		f = 1;
- 1206               	.LM140:
- 1207 002c C1E0      		ldi r28,lo8(1)
- 1208               	.L95:
- 326:menu.c        **** 	while(1)
- 327:menu.c        **** 	{
- 328:menu.c        **** 
- 329:menu.c        **** 		nnl_puts_P(PSTR("\rF="));
- 1210               	.LM141:
- 1211 002e 80E0      		ldi r24,lo8(__c.2159)
- 1212 0030 90E0      		ldi r25,hi8(__c.2159)
- 1213 0032 00D0      		rcall nnl_puts_P
- 330:menu.c        **** 		print_u(f,0);
- 1215               	.LM142:
- 1216 0034 CC2E      		mov r12,r28
- 1217 0036 D12C      		mov r13,__zero_reg__
- 1218 0038 E12C      		mov r14,__zero_reg__
- 1219 003a F12C      		mov r15,__zero_reg__
- 1220 003c 40E0      		ldi r20,0
- 1221 003e C701      		movw r24,r14
- 1222 0040 B601      		movw r22,r12
- 1223 0042 00D0      		rcall print_u
- 331:menu.c        **** 		nnl_puts_P(PSTR("MHz\n(+/-)x2 "));
- 1225               	.LM143:
- 1226 0044 80E0      		ldi r24,lo8(__c.2161)
- 1227 0046 90E0      		ldi r25,hi8(__c.2161)
- 1228 0048 00D0      		rcall nnl_puts_P
- 332:menu.c        **** 		
- 333:menu.c        **** 		b = btn_wait();
- 1230               	.LM144:
- 1231 004a 00D0      		rcall btn_wait
- 334:menu.c        **** 		if(b == BTN_DOWN)
- 1233               	.LM145:
- 1234 004c 8230      		cpi r24,lo8(2)
- 1235 004e 01F4      		brne .L96
- 335:menu.c        **** 		{
- 336:menu.c        **** 			if(f > 1 )
- 1237               	.LM146:
- 1238 0050 C130      		cpi r28,lo8(1)
- 1239 0052 01F0      		breq .L95
- 337:menu.c        **** 				f /= 2;
- 1241               	.LM147:
- 1242 0054 C695      		lsr r28
- 1243 0056 00C0      		rjmp .L95
- 1244               	.L96:
- 338:menu.c        **** 
- 339:menu.c        **** 
- 340:menu.c        **** 		}
- 341:menu.c        **** 		else if(b == BTN_UP)
- 1246               	.LM148:
- 1247 0058 8130      		cpi r24,lo8(1)
- 1248 005a 01F4      		brne .L98
- 342:menu.c        **** 		{
- 343:menu.c        **** 			if(f < 8 )
- 1250               	.LM149:
- 1251 005c C830      		cpi r28,lo8(8)
- 1252 005e 00F4      		brsh .L95
- 344:menu.c        **** 				f *= 2;
- 1254               	.LM150:
- 1255 0060 CC0F      		lsl r28
- 1256 0062 00C0      		rjmp .L95
- 1257               	.L98:
- 345:menu.c        **** 
- 346:menu.c        **** 		}
- 347:menu.c        **** 		else if(b == BTN_SET)
- 1259               	.LM151:
- 1260 0064 8430      		cpi r24,lo8(4)
- 1261 0066 01F4      		brne .L95
- 348:menu.c        **** 		{
- 349:menu.c        **** 			break;
- 350:menu.c        **** 		}
- 351:menu.c        **** 	}
- 352:menu.c        **** 	*p = (uint32_t)(f * 1000000);
- 1263               	.LM152:
- 1264 0068 A701      		movw r20,r14
- 1265 006a 9601      		movw r18,r12
- 1266 006c 60E4      		ldi r22,lo8(64)
- 1267 006e 72E4      		ldi r23,lo8(66)
- 1268 0070 8FE0      		ldi r24,lo8(15)
- 1269 0072 90E0      		ldi r25,0
- 1270 0074 00D0      		rcall __mulsi3
- 1271 0076 F801      		movw r30,r16
- 1272 0078 6083      		st Z,r22
- 1273 007a 7183      		std Z+1,r23
- 1274 007c 8283      		std Z+2,r24
- 1275 007e 9383      		std Z+3,r25
- 1276               	/* epilogue start */
- 353:menu.c        **** }
- 1278               	.LM153:
- 1279 0080 CF91      		pop r28
- 1280 0082 1F91      		pop r17
- 1281 0084 0F91      		pop r16
- 1282 0086 FF90      		pop r15
- 1283 0088 EF90      		pop r14
- 1284 008a DF90      		pop r13
- 1285 008c CF90      		pop r12
- 1286 008e 0895      		ret
+ 316:menu.c        **** 		if(generator.m == M_SQPWM && is_run)
+ 1129               	.LM135:
+ 1130 0126 8091 0000 		lds r24,generator
+ 1131 012a 8830      		cpi r24,lo8(8)
+ 1132 012c 01F0      		breq .+2
+ 1133 012e 00C0      		rjmp .L82
+ 1135               	.LM136:
+ 1136 0130 1123      		tst r17
+ 1137 0132 01F4      		brne .+2
+ 1138 0134 00C0      		rjmp .L82
+ 317:menu.c        **** 			pwm_start(f, generator.pwm_d, 0);
+ 1140               	.LM137:
+ 1141 0136 20E0      		ldi r18,0
+ 1142 0138 4091 0000 		lds r20,generator+29
+ 1143 013c C701      		movw r24,r14
+ 1144 013e B601      		movw r22,r12
+ 1145 0140 00D0      		rcall pwm_start
+ 1146 0142 00C0      		rjmp .L82
+ 1147               	.L97:
+ 318:menu.c        **** 	}
+ 319:menu.c        **** 	
+ 320:menu.c        **** 	*p = f;
+ 1149               	.LM138:
+ 1150 0144 D101      		movw r26,r2
+ 1151 0146 CD92      		st X+,r12
+ 1152 0148 DD92      		st X+,r13
+ 1153 014a ED92      		st X+,r14
+ 1154 014c FC92      		st X,r15
+ 1155 014e 1397      		sbiw r26,3
+ 1156               	/* epilogue start */
+ 321:menu.c        **** }
+ 1158               	.LM139:
+ 1159 0150 0F90      		pop __tmp_reg__
+ 1160 0152 0F90      		pop __tmp_reg__
+ 1161 0154 0F90      		pop __tmp_reg__
+ 1162 0156 0F90      		pop __tmp_reg__
+ 1163 0158 DF91      		pop r29
+ 1164 015a CF91      		pop r28
+ 1165 015c 1F91      		pop r17
+ 1166 015e FF90      		pop r15
+ 1167 0160 EF90      		pop r14
+ 1168 0162 DF90      		pop r13
+ 1169 0164 CF90      		pop r12
+ 1170 0166 BF90      		pop r11
+ 1171 0168 AF90      		pop r10
+ 1172 016a 9F90      		pop r9
+ 1173 016c 8F90      		pop r8
+ 1174 016e 7F90      		pop r7
+ 1175 0170 6F90      		pop r6
+ 1176 0172 5F90      		pop r5
+ 1177 0174 4F90      		pop r4
+ 1178 0176 3F90      		pop r3
+ 1179 0178 2F90      		pop r2
+ 1180 017a 0895      		ret
+ 1188               	.Lscope9:
+ 1189               		.section	.text.input_dc,"ax",@progbits
+ 1192               	.global	input_dc
+ 1194               	input_dc:
+ 322:menu.c        **** 
+ 323:menu.c        **** inline void input_dc(uint8_t is_run)
+ 324:menu.c        **** {
+ 1196               	.LM140:
+ 1197               	.LFBB10:
+ 1198 0000 CF93      		push r28
+ 1199 0002 DF93      		push r29
+ 1200               	/* prologue: function */
+ 1201               	/* frame size = 0 */
+ 1202               	/* stack size = 2 */
+ 1203               	.L__stack_usage = 2
+ 1204 0004 D82F      		mov r29,r24
+ 325:menu.c        **** 	uint8_t b, dc;
+ 326:menu.c        **** 	dc = generator.pwm_d;
+ 1206               	.LM141:
+ 1207 0006 C091 0000 		lds r28,generator+29
+ 1208               	.L99:
+ 327:menu.c        **** 	while(1)
+ 328:menu.c        **** 	{
+ 329:menu.c        **** 		nnl_puts_P(PSTR("\rDC="));
+ 1210               	.LM142:
+ 1211 000a 80E0      		ldi r24,lo8(__c.2165)
+ 1212 000c 90E0      		ldi r25,hi8(__c.2165)
+ 1213 000e 00D0      		rcall nnl_puts_P
+ 330:menu.c        **** 		print_u(dc, 0);
+ 1215               	.LM143:
+ 1216 0010 8C2F      		mov r24,r28
+ 1217 0012 90E0      		ldi r25,0
+ 1218 0014 A0E0      		ldi r26,0
+ 1219 0016 B0E0      		ldi r27,0
+ 1220 0018 40E0      		ldi r20,0
+ 1221 001a BC01      		movw r22,r24
+ 1222 001c CD01      		movw r24,r26
+ 1223 001e 00D0      		rcall print_u
+ 331:menu.c        **** 		//putchar('%');
+ 332:menu.c        **** 		nnl_puts_P(PSTR("%\n(+/-) 1% "));
+ 1225               	.LM144:
+ 1226 0020 80E0      		ldi r24,lo8(__c.2167)
+ 1227 0022 90E0      		ldi r25,hi8(__c.2167)
+ 1228 0024 00D0      		rcall nnl_puts_P
+ 333:menu.c        **** 		
+ 334:menu.c        **** 		b = btn_wait();
+ 1230               	.LM145:
+ 1231 0026 00D0      		rcall btn_wait
+ 335:menu.c        **** 		if(b == BTN_DOWN)
+ 1233               	.LM146:
+ 1234 0028 8130      		cpi r24,lo8(1)
+ 1235 002a 01F4      		brne .L100
+ 336:menu.c        **** 		{
+ 337:menu.c        **** 			if(dc > 1 )
+ 1237               	.LM147:
+ 1238 002c C230      		cpi r28,lo8(2)
+ 1239 002e 00F0      		brlo .L101
+ 338:menu.c        **** 			dc -= 1;
+ 1241               	.LM148:
+ 1242 0030 C150      		subi r28,lo8(-(-1))
+ 1243 0032 00C0      		rjmp .L101
+ 1244               	.L100:
+ 339:menu.c        **** 		}
+ 340:menu.c        **** 		else if(b == BTN_UP)
+ 1246               	.LM149:
+ 1247 0034 8230      		cpi r24,lo8(2)
+ 1248 0036 01F4      		brne .L102
+ 341:menu.c        **** 		{
+ 342:menu.c        **** 			if(dc < 99 )
+ 1250               	.LM150:
+ 1251 0038 C336      		cpi r28,lo8(99)
+ 1252 003a 00F4      		brsh .L101
+ 343:menu.c        **** 			dc += 1;
+ 1254               	.LM151:
+ 1255 003c CF5F      		subi r28,lo8(-(1))
+ 1256 003e 00C0      		rjmp .L101
+ 1257               	.L102:
+ 344:menu.c        **** 		}
+ 345:menu.c        **** 		else if(b == BTN_SET)
+ 1259               	.LM152:
+ 1260 0040 8430      		cpi r24,lo8(4)
+ 1261 0042 01F0      		breq .L103
+ 1262               	.L101:
+ 346:menu.c        **** 		{
+ 347:menu.c        **** 			break;
+ 348:menu.c        **** 		}
+ 349:menu.c        **** 
+ 350:menu.c        **** 		if(is_run)
+ 1264               	.LM153:
+ 1265 0044 DD23      		tst r29
+ 1266 0046 01F0      		breq .L99
+ 351:menu.c        **** 			pwm_start(generator.pwm_f, dc, 0);
+ 1268               	.LM154:
+ 1269 0048 6091 0000 		lds r22,generator+25
+ 1270 004c 7091 0000 		lds r23,generator+25+1
+ 1271 0050 8091 0000 		lds r24,generator+25+2
+ 1272 0054 9091 0000 		lds r25,generator+25+3
+ 1273 0058 20E0      		ldi r18,0
+ 1274 005a 4C2F      		mov r20,r28
+ 1275 005c 00D0      		rcall pwm_start
+ 1276 005e 00C0      		rjmp .L99
+ 1277               	.L103:
+ 352:menu.c        **** 	}
+ 353:menu.c        **** 	generator.pwm_d = dc;	
+ 1279               	.LM155:
+ 1280 0060 C093 0000 		sts generator+29,r28
+ 1281               	/* epilogue start */
+ 354:menu.c        **** }
+ 1283               	.LM156:
+ 1284 0064 DF91      		pop r29
+ 1285 0066 CF91      		pop r28
+ 1286 0068 0895      		ret
  1292               	.Lscope10:
- 1293               		.section	.text.input_dc,"ax",@progbits
- 1296               	.global	input_dc
- 1298               	input_dc:
- 354:menu.c        **** 
+ 1293               		.section	.text.input_t,"ax",@progbits
+ 1297               	.global	input_t
+ 1299               	input_t:
  355:menu.c        **** 
- 356:menu.c        **** uint8_t input_dc(uint8_t dc)
+ 356:menu.c        **** void input_t(uint32_t* p, const char* title)
  357:menu.c        **** {
- 1300               	.LM154:
- 1301               	.LFBB11:
- 1302 0000 CF93      		push r28
- 1303               	/* prologue: function */
- 1304               	/* frame size = 0 */
- 1305               	/* stack size = 1 */
- 1306               	.L__stack_usage = 1
- 1307 0002 C82F      		mov r28,r24
- 1308               	.L103:
+ 1301               	.LM157:
+ 1302               	.LFBB11:
+ 1303 0000 4F92      		push r4
+ 1304 0002 5F92      		push r5
+ 1305 0004 6F92      		push r6
+ 1306 0006 7F92      		push r7
+ 1307 0008 8F92      		push r8
+ 1308 000a 9F92      		push r9
+ 1309 000c AF92      		push r10
+ 1310 000e BF92      		push r11
+ 1311 0010 CF92      		push r12
+ 1312 0012 DF92      		push r13
+ 1313 0014 EF92      		push r14
+ 1314 0016 FF92      		push r15
+ 1315 0018 0F93      		push r16
+ 1316 001a 1F93      		push r17
+ 1317 001c CF93      		push r28
+ 1318 001e DF93      		push r29
+ 1319               	/* prologue: function */
+ 1320               	/* frame size = 0 */
+ 1321               	/* stack size = 16 */
+ 1322               	.L__stack_usage = 16
+ 1323 0020 EC01      		movw r28,r24
+ 1324 0022 8B01      		movw r16,r22
  358:menu.c        **** 	uint8_t b;
- 359:menu.c        **** 	
- 360:menu.c        **** 	while(1)
- 361:menu.c        **** 	{
- 362:menu.c        **** 		nnl_puts_P(PSTR("\rDC="));
- 1310               	.LM155:
- 1311 0004 80E0      		ldi r24,lo8(__c.2169)
- 1312 0006 90E0      		ldi r25,hi8(__c.2169)
- 1313 0008 00D0      		rcall nnl_puts_P
- 363:menu.c        **** 		print_u(dc, 0);
- 1315               	.LM156:
- 1316 000a 8C2F      		mov r24,r28
- 1317 000c 90E0      		ldi r25,0
- 1318 000e A0E0      		ldi r26,0
- 1319 0010 B0E0      		ldi r27,0
- 1320 0012 40E0      		ldi r20,0
- 1321 0014 BC01      		movw r22,r24
- 1322 0016 CD01      		movw r24,r26
- 1323 0018 00D0      		rcall print_u
- 364:menu.c        **** 		//putchar('%');
- 365:menu.c        **** 		nnl_puts_P(PSTR("%\n(+/-) 1% "));
- 1325               	.LM157:
- 1326 001a 80E0      		ldi r24,lo8(__c.2171)
- 1327 001c 90E0      		ldi r25,hi8(__c.2171)
- 1328 001e 00D0      		rcall nnl_puts_P
- 366:menu.c        **** 		
- 367:menu.c        **** 		b = btn_wait();
- 1330               	.LM158:
- 1331 0020 00D0      		rcall btn_wait
- 368:menu.c        **** 		if(b == BTN_DOWN)
- 1333               	.LM159:
- 1334 0022 8230      		cpi r24,lo8(2)
- 1335 0024 01F4      		brne .L104
- 369:menu.c        **** 		{
- 370:menu.c        **** 			if(dc > 1 )
- 1337               	.LM160:
- 1338 0026 C230      		cpi r28,lo8(2)
- 1339 0028 00F0      		brlo .L103
- 371:menu.c        **** 				dc -= 1;
- 1341               	.LM161:
- 1342 002a C150      		subi r28,lo8(-(-1))
- 1343 002c 00C0      		rjmp .L103
- 1344               	.L104:
- 372:menu.c        **** 		}
- 373:menu.c        **** 		else if(b == BTN_UP)
- 1346               	.LM162:
- 1347 002e 8130      		cpi r24,lo8(1)
- 1348 0030 01F4      		brne .L106
+ 359:menu.c        **** 	uint32_t multipler, t;
+ 360:menu.c        **** 	
+ 361:menu.c        **** 	t = *p;
+ 1326               	.LM158:
+ 1327 0024 C880      		ld r12,Y
+ 1328 0026 D980      		ldd r13,Y+1
+ 1329 0028 EA80      		ldd r14,Y+2
+ 1330 002a FB80      		ldd r15,Y+3
+ 362:menu.c        **** 	if(t > MAX_T)
+ 1332               	.LM159:
+ 1333 002c 81E4      		ldi r24,65
+ 1334 002e C816      		cp r12,r24
+ 1335 0030 82E4      		ldi r24,66
+ 1336 0032 D806      		cpc r13,r24
+ 1337 0034 8FE0      		ldi r24,15
+ 1338 0036 E806      		cpc r14,r24
+ 1339 0038 F104      		cpc r15,__zero_reg__
+ 1340 003a 00F0      		brlo .L109
+ 363:menu.c        **** 		t = MIN_T;
+ 1342               	.LM160:
+ 1343 003c 32E0      		ldi r19,lo8(2)
+ 1344 003e C32E      		mov r12,r19
+ 1345 0040 D12C      		mov r13,__zero_reg__
+ 1346 0042 E12C      		mov r14,__zero_reg__
+ 1347 0044 F12C      		mov r15,__zero_reg__
+ 1348               	.L109:
+ 364:menu.c        **** 	
+ 365:menu.c        **** 	multipler = 1;
+ 366:menu.c        **** 	while(1)
+ 367:menu.c        **** 	{
+ 368:menu.c        **** 		nnl_puts_P(title);
+ 369:menu.c        **** 		print_u(t,0);
+ 370:menu.c        **** 		nnl_puts_P(PSTR("us\n(+/-) "));
+ 371:menu.c        **** 		print_u(multipler,0);
+ 372:menu.c        **** 		nnl_puts_P(PSTR("us"));
+ 373:menu.c        **** 		b = btn_wait();
+ 374:menu.c        **** 		if(b == BTN_DOWN)
+ 375:menu.c        **** 		{
+ 376:menu.c        **** 			if(t > MIN_T+multipler )
+ 377:menu.c        **** 			t-= multipler;
+ 378:menu.c        **** 		}
+ 379:menu.c        **** 		else if(b == BTN_UP)
+ 380:menu.c        **** 		{
+ 381:menu.c        **** 			if(t < MAX_T-multipler )
+ 382:menu.c        **** 			t+= multipler;
+ 383:menu.c        **** 		}
+ 384:menu.c        **** 		else if(b == BTN_MODE)
+ 385:menu.c        **** 		{
+ 386:menu.c        **** 			if(multipler < 1000000)
+ 387:menu.c        **** 				multipler *= 10;
+ 388:menu.c        **** 			else
+ 389:menu.c        **** 				multipler = 1;
+ 1350               	.LM161:
+ 1351 0046 412C      		mov r4,__zero_reg__
+ 1352 0048 512C      		mov r5,__zero_reg__
+ 1353 004a 3201      		movw r6,r4
+ 1354 004c 4394      		inc r4
+ 381:menu.c        **** 			t+= multipler;
+ 1356               	.LM162:
+ 1357 004e 20E4      		ldi r18,lo8(64)
+ 1358 0050 822E      		mov r8,r18
+ 1359 0052 22E4      		ldi r18,lo8(66)
+ 1360 0054 922E      		mov r9,r18
+ 1361 0056 2FE0      		ldi r18,lo8(15)
+ 1362 0058 A22E      		mov r10,r18
+ 1363 005a B12C      		mov r11,__zero_reg__
+ 1364               	.L110:
+ 368:menu.c        **** 		print_u(t,0);
+ 1366               	.LM163:
+ 1367 005c C801      		movw r24,r16
+ 1368 005e 00D0      		rcall nnl_puts_P
+ 369:menu.c        **** 		nnl_puts_P(PSTR("us\n(+/-) "));
+ 1370               	.LM164:
+ 1371 0060 40E0      		ldi r20,0
+ 1372 0062 C701      		movw r24,r14
+ 1373 0064 B601      		movw r22,r12
+ 1374 0066 00D0      		rcall print_u
+ 370:menu.c        **** 		print_u(multipler,0);
+ 1376               	.LM165:
+ 1377 0068 80E0      		ldi r24,lo8(__c.2178)
+ 1378 006a 90E0      		ldi r25,hi8(__c.2178)
+ 1379 006c 00D0      		rcall nnl_puts_P
+ 371:menu.c        **** 		nnl_puts_P(PSTR("us"));
+ 1381               	.LM166:
+ 1382 006e 40E0      		ldi r20,0
+ 1383 0070 C301      		movw r24,r6
+ 1384 0072 B201      		movw r22,r4
+ 1385 0074 00D0      		rcall print_u
+ 372:menu.c        **** 		b = btn_wait();
+ 1387               	.LM167:
+ 1388 0076 80E0      		ldi r24,lo8(__c.2180)
+ 1389 0078 90E0      		ldi r25,hi8(__c.2180)
+ 1390 007a 00D0      		rcall nnl_puts_P
+ 373:menu.c        **** 		if(b == BTN_DOWN)
+ 1392               	.LM168:
+ 1393 007c 00D0      		rcall btn_wait
  374:menu.c        **** 		{
- 375:menu.c        **** 			if(dc < 99 )
- 1350               	.LM163:
- 1351 0032 C336      		cpi r28,lo8(99)
- 1352 0034 00F4      		brsh .L103
- 376:menu.c        **** 				dc += 1;
- 1354               	.LM164:
- 1355 0036 CF5F      		subi r28,lo8(-(1))
- 1356 0038 00C0      		rjmp .L103
- 1357               	.L106:
+ 1395               	.LM169:
+ 1396 007e 8130      		cpi r24,lo8(1)
+ 1397 0080 01F4      		brne .L111
+ 376:menu.c        **** 			t-= multipler;
+ 1399               	.LM170:
+ 1400 0082 D301      		movw r26,r6
+ 1401 0084 C201      		movw r24,r4
+ 1402 0086 0296      		adiw r24,2
+ 1403 0088 A11D      		adc r26,__zero_reg__
+ 1404 008a B11D      		adc r27,__zero_reg__
+ 1405 008c 8C15      		cp r24,r12
+ 1406 008e 9D05      		cpc r25,r13
+ 1407 0090 AE05      		cpc r26,r14
+ 1408 0092 BF05      		cpc r27,r15
+ 1409 0094 00F4      		brsh .L110
  377:menu.c        **** 		}
- 378:menu.c        **** 		else if(b == BTN_SET)
- 1359               	.LM165:
- 1360 003a 8430      		cpi r24,lo8(4)
- 1361 003c 01F4      		brne .L103
+ 1411               	.LM171:
+ 1412 0096 C418      		sub r12,r4
+ 1413 0098 D508      		sbc r13,r5
+ 1414 009a E608      		sbc r14,r6
+ 1415 009c F708      		sbc r15,r7
+ 1416 009e 00C0      		rjmp .L110
+ 1417               	.L111:
  379:menu.c        **** 		{
- 380:menu.c        **** 			break;
- 381:menu.c        **** 		}
- 382:menu.c        **** 	}
- 383:menu.c        **** 	return dc;
- 384:menu.c        **** }
- 1363               	.LM166:
- 1364 003e 8C2F      		mov r24,r28
- 1365               	/* epilogue start */
- 1366 0040 CF91      		pop r28
- 1367 0042 0895      		ret
- 1372               	.Lscope11:
- 1373               		.section	.text.input_t,"ax",@progbits
- 1377               	.global	input_t
- 1379               	input_t:
- 385:menu.c        **** 
- 386:menu.c        **** void input_t(uint32_t* p, const char* title)
- 387:menu.c        **** {
- 1381               	.LM167:
- 1382               	.LFBB12:
- 1383 0000 4F92      		push r4
- 1384 0002 5F92      		push r5
- 1385 0004 6F92      		push r6
- 1386 0006 7F92      		push r7
- 1387 0008 8F92      		push r8
- 1388 000a 9F92      		push r9
- 1389 000c AF92      		push r10
- 1390 000e BF92      		push r11
- 1391 0010 CF92      		push r12
- 1392 0012 DF92      		push r13
- 1393 0014 EF92      		push r14
- 1394 0016 FF92      		push r15
- 1395 0018 0F93      		push r16
- 1396 001a 1F93      		push r17
- 1397 001c CF93      		push r28
- 1398 001e DF93      		push r29
- 1399               	/* prologue: function */
- 1400               	/* frame size = 0 */
- 1401               	/* stack size = 16 */
- 1402               	.L__stack_usage = 16
- 1403 0020 EC01      		movw r28,r24
- 1404 0022 8B01      		movw r16,r22
- 388:menu.c        **** 	uint8_t b;
- 389:menu.c        **** 	uint32_t multipler, t;
- 390:menu.c        **** 	t = *p;
- 1406               	.LM168:
- 1407 0024 C880      		ld r12,Y
- 1408 0026 D980      		ldd r13,Y+1
- 1409 0028 EA80      		ldd r14,Y+2
- 1410 002a FB80      		ldd r15,Y+3
- 391:menu.c        **** 	if(t > MAX_T)
- 1412               	.LM169:
- 1413 002c 81E4      		ldi r24,65
- 1414 002e C816      		cp r12,r24
- 1415 0030 82E4      		ldi r24,66
- 1416 0032 D806      		cpc r13,r24
- 1417 0034 8FE0      		ldi r24,15
- 1418 0036 E806      		cpc r14,r24
- 1419 0038 F104      		cpc r15,__zero_reg__
- 1420 003a 00F0      		brlo .L108
- 392:menu.c        **** 		t = MIN_T;
- 1422               	.LM170:
- 1423 003c 32E0      		ldi r19,lo8(2)
- 1424 003e C32E      		mov r12,r19
- 1425 0040 D12C      		mov r13,__zero_reg__
- 1426 0042 E12C      		mov r14,__zero_reg__
- 1427 0044 F12C      		mov r15,__zero_reg__
- 1428               	.L108:
- 393:menu.c        **** 	
- 394:menu.c        **** 	multipler = 1;
- 395:menu.c        **** 	while(1)
- 396:menu.c        **** 	{
- 397:menu.c        **** 		nnl_puts_P(title);
- 398:menu.c        **** 		print_u(t,0);
- 399:menu.c        **** 		nnl_puts_P(PSTR("us\n(+/-) "));
- 400:menu.c        **** 		print_u(multipler,0);
- 401:menu.c        **** 		nnl_puts_P(PSTR("us"));
- 402:menu.c        **** 		b = btn_wait();
- 403:menu.c        **** 		if(b == BTN_DOWN)
- 404:menu.c        **** 		{
- 405:menu.c        **** 			if(t > MIN_T+multipler )
- 406:menu.c        **** 			t-= multipler;
- 407:menu.c        **** 		}
- 408:menu.c        **** 		else if(b == BTN_UP)
- 409:menu.c        **** 		{
- 410:menu.c        **** 			if(t < MAX_T-multipler )
- 411:menu.c        **** 			t+= multipler;
- 412:menu.c        **** 		}
- 413:menu.c        **** 		else if(b == BTN_MODE)
- 414:menu.c        **** 		{
- 415:menu.c        **** 			if(multipler < 1000000)
- 416:menu.c        **** 				multipler *= 10;
- 417:menu.c        **** 			else
- 418:menu.c        **** 				multipler = 1;
- 1430               	.LM171:
- 1431 0046 412C      		mov r4,__zero_reg__
- 1432 0048 512C      		mov r5,__zero_reg__
- 1433 004a 3201      		movw r6,r4
- 1434 004c 4394      		inc r4
- 410:menu.c        **** 			t+= multipler;
- 1436               	.LM172:
- 1437 004e 20E4      		ldi r18,lo8(64)
- 1438 0050 822E      		mov r8,r18
- 1439 0052 22E4      		ldi r18,lo8(66)
- 1440 0054 922E      		mov r9,r18
- 1441 0056 2FE0      		ldi r18,lo8(15)
- 1442 0058 A22E      		mov r10,r18
- 1443 005a B12C      		mov r11,__zero_reg__
- 1444               	.L109:
- 397:menu.c        **** 		print_u(t,0);
- 1446               	.LM173:
- 1447 005c C801      		movw r24,r16
- 1448 005e 00D0      		rcall nnl_puts_P
- 398:menu.c        **** 		nnl_puts_P(PSTR("us\n(+/-) "));
- 1450               	.LM174:
- 1451 0060 40E0      		ldi r20,0
- 1452 0062 C701      		movw r24,r14
- 1453 0064 B601      		movw r22,r12
- 1454 0066 00D0      		rcall print_u
- 399:menu.c        **** 		print_u(multipler,0);
- 1456               	.LM175:
- 1457 0068 80E0      		ldi r24,lo8(__c.2182)
- 1458 006a 90E0      		ldi r25,hi8(__c.2182)
- 1459 006c 00D0      		rcall nnl_puts_P
- 400:menu.c        **** 		nnl_puts_P(PSTR("us"));
- 1461               	.LM176:
- 1462 006e 40E0      		ldi r20,0
- 1463 0070 C301      		movw r24,r6
- 1464 0072 B201      		movw r22,r4
- 1465 0074 00D0      		rcall print_u
- 401:menu.c        **** 		b = btn_wait();
- 1467               	.LM177:
- 1468 0076 80E0      		ldi r24,lo8(__c.2184)
- 1469 0078 90E0      		ldi r25,hi8(__c.2184)
- 1470 007a 00D0      		rcall nnl_puts_P
- 402:menu.c        **** 		if(b == BTN_DOWN)
- 1472               	.LM178:
- 1473 007c 00D0      		rcall btn_wait
- 403:menu.c        **** 		{
- 1475               	.LM179:
- 1476 007e 8230      		cpi r24,lo8(2)
- 1477 0080 01F4      		brne .L110
- 405:menu.c        **** 			t-= multipler;
- 1479               	.LM180:
- 1480 0082 D301      		movw r26,r6
- 1481 0084 C201      		movw r24,r4
- 1482 0086 0296      		adiw r24,2
- 1483 0088 A11D      		adc r26,__zero_reg__
- 1484 008a B11D      		adc r27,__zero_reg__
- 1485 008c 8C15      		cp r24,r12
- 1486 008e 9D05      		cpc r25,r13
- 1487 0090 AE05      		cpc r26,r14
- 1488 0092 BF05      		cpc r27,r15
- 1489 0094 00F4      		brsh .L109
- 406:menu.c        **** 		}
- 1491               	.LM181:
- 1492 0096 C418      		sub r12,r4
- 1493 0098 D508      		sbc r13,r5
- 1494 009a E608      		sbc r14,r6
- 1495 009c F708      		sbc r15,r7
- 1496 009e 00C0      		rjmp .L109
- 1497               	.L110:
- 408:menu.c        **** 		{
- 1499               	.LM182:
- 1500 00a0 8130      		cpi r24,lo8(1)
- 1501 00a2 01F4      		brne .L112
- 410:menu.c        **** 			t+= multipler;
- 1503               	.LM183:
- 1504 00a4 D501      		movw r26,r10
- 1505 00a6 C401      		movw r24,r8
- 1506 00a8 8419      		sub r24,r4
- 1507 00aa 9509      		sbc r25,r5
- 1508 00ac A609      		sbc r26,r6
- 1509 00ae B709      		sbc r27,r7
- 1510 00b0 C816      		cp r12,r24
- 1511 00b2 D906      		cpc r13,r25
- 1512 00b4 EA06      		cpc r14,r26
- 1513 00b6 FB06      		cpc r15,r27
- 1514 00b8 00F4      		brsh .L109
- 411:menu.c        **** 		}
- 1516               	.LM184:
- 1517 00ba C40C      		add r12,r4
- 1518 00bc D51C      		adc r13,r5
- 1519 00be E61C      		adc r14,r6
- 1520 00c0 F71C      		adc r15,r7
- 1521 00c2 00C0      		rjmp .L109
- 1522               	.L112:
- 413:menu.c        **** 		{
- 1524               	.LM185:
- 1525 00c4 8830      		cpi r24,lo8(8)
- 1526 00c6 01F4      		brne .L113
- 415:menu.c        **** 				multipler *= 10;
- 1528               	.LM186:
- 1529 00c8 80E4      		ldi r24,64
- 1530 00ca 4816      		cp r4,r24
- 1531 00cc 82E4      		ldi r24,66
- 1532 00ce 5806      		cpc r5,r24
- 1533 00d0 8FE0      		ldi r24,15
- 1534 00d2 6806      		cpc r6,r24
- 1535 00d4 7104      		cpc r7,__zero_reg__
- 1536 00d6 00F0      		brlo .L115
- 1538               	.LM187:
- 1539 00d8 412C      		mov r4,__zero_reg__
- 1540 00da 512C      		mov r5,__zero_reg__
- 1541 00dc 3201      		movw r6,r4
- 1542 00de 4394      		inc r4
- 1543 00e0 00C0      		rjmp .L109
- 1544               	.L115:
- 416:menu.c        **** 			else
- 1546               	.LM188:
- 1547 00e2 AAE0      		ldi r26,lo8(10)
- 1548 00e4 B0E0      		ldi r27,0
- 1549 00e6 A301      		movw r20,r6
- 1550 00e8 9201      		movw r18,r4
- 1551 00ea 00D0      		rcall __muluhisi3
- 1552 00ec 2B01      		movw r4,r22
- 1553 00ee 3C01      		movw r6,r24
- 1554 00f0 00C0      		rjmp .L109
- 1555               	.L113:
- 419:menu.c        **** 		}
- 420:menu.c        **** 		else if(b == BTN_SET)
- 1557               	.LM189:
- 1558 00f2 8430      		cpi r24,lo8(4)
- 1559 00f4 01F0      		breq .+2
- 1560 00f6 00C0      		rjmp .L109
- 421:menu.c        **** 		{
- 422:menu.c        **** 			break;
+ 1419               	.LM172:
+ 1420 00a0 8230      		cpi r24,lo8(2)
+ 1421 00a2 01F4      		brne .L113
+ 381:menu.c        **** 			t+= multipler;
+ 1423               	.LM173:
+ 1424 00a4 D501      		movw r26,r10
+ 1425 00a6 C401      		movw r24,r8
+ 1426 00a8 8419      		sub r24,r4
+ 1427 00aa 9509      		sbc r25,r5
+ 1428 00ac A609      		sbc r26,r6
+ 1429 00ae B709      		sbc r27,r7
+ 1430 00b0 C816      		cp r12,r24
+ 1431 00b2 D906      		cpc r13,r25
+ 1432 00b4 EA06      		cpc r14,r26
+ 1433 00b6 FB06      		cpc r15,r27
+ 1434 00b8 00F4      		brsh .L110
+ 382:menu.c        **** 		}
+ 1436               	.LM174:
+ 1437 00ba C40C      		add r12,r4
+ 1438 00bc D51C      		adc r13,r5
+ 1439 00be E61C      		adc r14,r6
+ 1440 00c0 F71C      		adc r15,r7
+ 1441 00c2 00C0      		rjmp .L110
+ 1442               	.L113:
+ 384:menu.c        **** 		{
+ 1444               	.LM175:
+ 1445 00c4 8830      		cpi r24,lo8(8)
+ 1446 00c6 01F4      		brne .L114
+ 386:menu.c        **** 				multipler *= 10;
+ 1448               	.LM176:
+ 1449 00c8 80E4      		ldi r24,64
+ 1450 00ca 4816      		cp r4,r24
+ 1451 00cc 82E4      		ldi r24,66
+ 1452 00ce 5806      		cpc r5,r24
+ 1453 00d0 8FE0      		ldi r24,15
+ 1454 00d2 6806      		cpc r6,r24
+ 1455 00d4 7104      		cpc r7,__zero_reg__
+ 1456 00d6 00F0      		brlo .L116
+ 1458               	.LM177:
+ 1459 00d8 412C      		mov r4,__zero_reg__
+ 1460 00da 512C      		mov r5,__zero_reg__
+ 1461 00dc 3201      		movw r6,r4
+ 1462 00de 4394      		inc r4
+ 1463 00e0 00C0      		rjmp .L110
+ 1464               	.L116:
+ 387:menu.c        **** 			else
+ 1466               	.LM178:
+ 1467 00e2 AAE0      		ldi r26,lo8(10)
+ 1468 00e4 B0E0      		ldi r27,0
+ 1469 00e6 A301      		movw r20,r6
+ 1470 00e8 9201      		movw r18,r4
+ 1471 00ea 00D0      		rcall __muluhisi3
+ 1472 00ec 2B01      		movw r4,r22
+ 1473 00ee 3C01      		movw r6,r24
+ 1474 00f0 00C0      		rjmp .L110
+ 1475               	.L114:
+ 390:menu.c        **** 		}
+ 391:menu.c        **** 		else if(b == BTN_SET)
+ 1477               	.LM179:
+ 1478 00f2 8430      		cpi r24,lo8(4)
+ 1479 00f4 01F0      		breq .+2
+ 1480 00f6 00C0      		rjmp .L110
+ 392:menu.c        **** 		{
+ 393:menu.c        **** 			break;
+ 394:menu.c        **** 		}
+ 395:menu.c        **** 
+ 396:menu.c        **** 	}
+ 397:menu.c        **** 	*p = t;
+ 1482               	.LM180:
+ 1483 00f8 C882      		st Y,r12
+ 1484 00fa D982      		std Y+1,r13
+ 1485 00fc EA82      		std Y+2,r14
+ 1486 00fe FB82      		std Y+3,r15
+ 1487               	/* epilogue start */
+ 398:menu.c        **** }
+ 1489               	.LM181:
+ 1490 0100 DF91      		pop r29
+ 1491 0102 CF91      		pop r28
+ 1492 0104 1F91      		pop r17
+ 1493 0106 0F91      		pop r16
+ 1494 0108 FF90      		pop r15
+ 1495 010a EF90      		pop r14
+ 1496 010c DF90      		pop r13
+ 1497 010e CF90      		pop r12
+ 1498 0110 BF90      		pop r11
+ 1499 0112 AF90      		pop r10
+ 1500 0114 9F90      		pop r9
+ 1501 0116 8F90      		pop r8
+ 1502 0118 7F90      		pop r7
+ 1503 011a 6F90      		pop r6
+ 1504 011c 5F90      		pop r5
+ 1505 011e 4F90      		pop r4
+ 1506 0120 0895      		ret
+ 1513               	.Lscope11:
+ 1514               		.section	.text.input_n,"ax",@progbits
+ 1516               	.global	input_n
+ 1518               	input_n:
+ 399:menu.c        **** 
+ 400:menu.c        **** inline void input_n()
+ 401:menu.c        **** {
+ 1520               	.LM182:
+ 1521               	.LFBB12:
+ 1522 0000 FF92      		push r15
+ 1523 0002 0F93      		push r16
+ 1524 0004 1F93      		push r17
+ 1525 0006 CF93      		push r28
+ 1526 0008 DF93      		push r29
+ 1527               	/* prologue: function */
+ 1528               	/* frame size = 0 */
+ 1529               	/* stack size = 5 */
+ 1530               	.L__stack_usage = 5
+ 402:menu.c        **** 	uint8_t b;
+ 403:menu.c        **** 	uint16_t multipler, n;
+ 404:menu.c        **** 
+ 405:menu.c        **** 
+ 406:menu.c        **** 	n = generator.pulse_n;
+ 1532               	.LM183:
+ 1533 000a C091 0000 		lds r28,generator+51
+ 1534 000e D091 0000 		lds r29,generator+51+1
+ 407:menu.c        **** 	multipler = 1;
+ 1536               	.LM184:
+ 1537 0012 01E0      		ldi r16,lo8(1)
+ 1538 0014 10E0      		ldi r17,0
+ 408:menu.c        **** 	while(1)
+ 409:menu.c        **** 	{
+ 410:menu.c        **** 		nnl_puts_P(PSTR("\rN="));
+ 411:menu.c        **** 		if(n != 0)
+ 412:menu.c        **** 			print_u(n,0);
+ 413:menu.c        **** 		else
+ 414:menu.c        **** 			nnl_puts_P(PSTR("ND"));
+ 415:menu.c        **** 		nnl_puts_P(PSTR("\n(+/-) "));
+ 416:menu.c        **** 		print_u(multipler,0);
+ 417:menu.c        **** 
+ 418:menu.c        **** 		b = btn_wait();
+ 419:menu.c        **** 		if(b == BTN_DOWN)
+ 420:menu.c        **** 		{
+ 421:menu.c        **** 			if(n >= multipler )
+ 422:menu.c        **** 				n-= multipler;
  423:menu.c        **** 		}
- 424:menu.c        **** 	}
- 425:menu.c        **** 	*p = t;
- 1562               	.LM190:
- 1563 00f8 C882      		st Y,r12
- 1564 00fa D982      		std Y+1,r13
- 1565 00fc EA82      		std Y+2,r14
- 1566 00fe FB82      		std Y+3,r15
- 1567               	/* epilogue start */
- 426:menu.c        **** }
- 1569               	.LM191:
- 1570 0100 DF91      		pop r29
- 1571 0102 CF91      		pop r28
- 1572 0104 1F91      		pop r17
- 1573 0106 0F91      		pop r16
- 1574 0108 FF90      		pop r15
- 1575 010a EF90      		pop r14
- 1576 010c DF90      		pop r13
- 1577 010e CF90      		pop r12
- 1578 0110 BF90      		pop r11
- 1579 0112 AF90      		pop r10
- 1580 0114 9F90      		pop r9
- 1581 0116 8F90      		pop r8
- 1582 0118 7F90      		pop r7
- 1583 011a 6F90      		pop r6
- 1584 011c 5F90      		pop r5
- 1585 011e 4F90      		pop r4
- 1586 0120 0895      		ret
- 1593               	.Lscope12:
- 1594               		.section	.text.input_n,"ax",@progbits
- 1596               	.global	input_n
- 1598               	input_n:
- 427:menu.c        **** 
- 428:menu.c        **** void input_n()
- 429:menu.c        **** {
- 1600               	.LM192:
- 1601               	.LFBB13:
- 1602 0000 1F93      		push r17
- 1603 0002 CF93      		push r28
- 1604 0004 DF93      		push r29
- 1605               	/* prologue: function */
- 1606               	/* frame size = 0 */
- 1607               	/* stack size = 3 */
- 1608               	.L__stack_usage = 3
- 430:menu.c        **** 	uint8_t b;
- 431:menu.c        **** 	uint16_t multipler;
- 432:menu.c        **** 
- 433:menu.c        **** 
- 434:menu.c        **** 	multipler = 1;
- 1610               	.LM193:
- 1611 0006 C1E0      		ldi r28,lo8(1)
- 1612 0008 D0E0      		ldi r29,0
- 435:menu.c        **** 	while(1)
- 436:menu.c        **** 	{
- 437:menu.c        **** 		nnl_puts_P(PSTR("\rN="));
- 438:menu.c        **** 		if(generator.pulse_n != 0)
- 439:menu.c        **** 			print_u(generator.pulse_n,0);
- 440:menu.c        **** 		else
- 441:menu.c        **** 			nnl_puts_P(PSTR("ND"));
- 442:menu.c        **** 		nnl_puts_P(PSTR("\n(+/-) "));
- 443:menu.c        **** 		print_u(multipler,0);
+ 424:menu.c        **** 		else if(b == BTN_UP)
+ 425:menu.c        **** 		{
+ 426:menu.c        **** 			if(n < 0xFFFF-multipler )
+ 427:menu.c        **** 			n += multipler;
+ 428:menu.c        **** 		}
+ 429:menu.c        **** 		else if(b == BTN_MODE)
+ 430:menu.c        **** 		{
+ 431:menu.c        **** 			if(multipler < 10000)
+ 432:menu.c        **** 			multipler *= 10;
+ 1540               	.LM185:
+ 1541 0016 8AE0      		ldi r24,lo8(10)
+ 1542 0018 F82E      		mov r15,r24
+ 1543               	.L118:
+ 410:menu.c        **** 		if(n != 0)
+ 1545               	.LM186:
+ 1546 001a 80E0      		ldi r24,lo8(__c.2189)
+ 1547 001c 90E0      		ldi r25,hi8(__c.2189)
+ 1548 001e 00D0      		rcall nnl_puts_P
+ 411:menu.c        **** 			print_u(n,0);
+ 1550               	.LM187:
+ 1551 0020 2097      		sbiw r28,0
+ 1552 0022 01F0      		breq .L119
+ 412:menu.c        **** 		else
+ 1554               	.LM188:
+ 1555 0024 CE01      		movw r24,r28
+ 1556 0026 A0E0      		ldi r26,0
+ 1557 0028 B0E0      		ldi r27,0
+ 1558 002a 40E0      		ldi r20,0
+ 1559 002c BC01      		movw r22,r24
+ 1560 002e CD01      		movw r24,r26
+ 1561 0030 00D0      		rcall print_u
+ 1562 0032 00C0      		rjmp .L120
+ 1563               	.L119:
+ 414:menu.c        **** 		nnl_puts_P(PSTR("\n(+/-) "));
+ 1565               	.LM189:
+ 1566 0034 80E0      		ldi r24,lo8(__c.2191)
+ 1567 0036 90E0      		ldi r25,hi8(__c.2191)
+ 1568 0038 00D0      		rcall nnl_puts_P
+ 1569               	.L120:
+ 415:menu.c        **** 		print_u(multipler,0);
+ 1571               	.LM190:
+ 1572 003a 80E0      		ldi r24,lo8(__c.2193)
+ 1573 003c 90E0      		ldi r25,hi8(__c.2193)
+ 1574 003e 00D0      		rcall nnl_puts_P
+ 416:menu.c        **** 
+ 1576               	.LM191:
+ 1577 0040 C801      		movw r24,r16
+ 1578 0042 A0E0      		ldi r26,0
+ 1579 0044 B0E0      		ldi r27,0
+ 1580 0046 40E0      		ldi r20,0
+ 1581 0048 BC01      		movw r22,r24
+ 1582 004a CD01      		movw r24,r26
+ 1583 004c 00D0      		rcall print_u
+ 418:menu.c        **** 		if(b == BTN_DOWN)
+ 1585               	.LM192:
+ 1586 004e 00D0      		rcall btn_wait
+ 419:menu.c        **** 		{
+ 1588               	.LM193:
+ 1589 0050 8130      		cpi r24,lo8(1)
+ 1590 0052 01F4      		brne .L121
+ 421:menu.c        **** 				n-= multipler;
+ 1592               	.LM194:
+ 1593 0054 C017      		cp r28,r16
+ 1594 0056 D107      		cpc r29,r17
+ 1595 0058 00F0      		brlo .L118
+ 422:menu.c        **** 		}
+ 1597               	.LM195:
+ 1598 005a C01B      		sub r28,r16
+ 1599 005c D10B      		sbc r29,r17
+ 1600 005e 00C0      		rjmp .L118
+ 1601               	.L121:
+ 424:menu.c        **** 		{
+ 1603               	.LM196:
+ 1604 0060 8230      		cpi r24,lo8(2)
+ 1605 0062 01F4      		brne .L123
+ 426:menu.c        **** 			n += multipler;
+ 1607               	.LM197:
+ 1608 0064 C801      		movw r24,r16
+ 1609 0066 8095      		com r24
+ 1610 0068 9095      		com r25
+ 1611 006a C817      		cp r28,r24
+ 1612 006c D907      		cpc r29,r25
+ 1613 006e 00F4      		brsh .L118
+ 427:menu.c        **** 		}
+ 1615               	.LM198:
+ 1616 0070 C00F      		add r28,r16
+ 1617 0072 D11F      		adc r29,r17
+ 1618 0074 00C0      		rjmp .L118
+ 1619               	.L123:
+ 429:menu.c        **** 		{
+ 1621               	.LM199:
+ 1622 0076 8830      		cpi r24,lo8(8)
+ 1623 0078 01F4      		brne .L124
+ 431:menu.c        **** 			multipler *= 10;
+ 1625               	.LM200:
+ 1626 007a 0031      		cpi r16,16
+ 1627 007c 87E2      		ldi r24,39
+ 1628 007e 1807      		cpc r17,r24
+ 1629 0080 00F0      		brlo .L126
+ 433:menu.c        **** 			else
+ 434:menu.c        **** 			multipler = 1;
+ 1631               	.LM201:
+ 1632 0082 01E0      		ldi r16,lo8(1)
+ 1633 0084 10E0      		ldi r17,0
+ 1634 0086 00C0      		rjmp .L118
+ 1635               	.L126:
+ 432:menu.c        **** 			else
+ 1637               	.LM202:
+ 1638 0088 C801      		movw r24,r16
+ 1639 008a F89E      		mul r15,r24
+ 1640 008c 8001      		movw r16,r0
+ 1641 008e F99E      		mul r15,r25
+ 1642 0090 100D      		add r17,r0
+ 1643 0092 1124      		clr __zero_reg__
+ 1644 0094 00C0      		rjmp .L118
+ 1645               	.L124:
+ 435:menu.c        **** 		}
+ 436:menu.c        **** 		else if(b == BTN_SET)
+ 1647               	.LM203:
+ 1648 0096 8430      		cpi r24,lo8(4)
+ 1649 0098 01F0      		breq .+2
+ 1650 009a 00C0      		rjmp .L118
+ 437:menu.c        **** 		{
+ 438:menu.c        **** 			break;
+ 439:menu.c        **** 		}
+ 440:menu.c        **** 
+ 441:menu.c        **** 	}
+ 442:menu.c        **** 	generator.pulse_n = n; 	
+ 1652               	.LM204:
+ 1653 009c D093 0000 		sts generator+51+1,r29
+ 1654 00a0 C093 0000 		sts generator+51,r28
+ 1655               	/* epilogue start */
+ 443:menu.c        **** }
+ 1657               	.LM205:
+ 1658 00a4 DF91      		pop r29
+ 1659 00a6 CF91      		pop r28
+ 1660 00a8 1F91      		pop r17
+ 1661 00aa 0F91      		pop r16
+ 1662 00ac FF90      		pop r15
+ 1663 00ae 0895      		ret
+ 1670               	.Lscope12:
+ 1671               		.section	.text.select_val,"ax",@progbits
+ 1676               	.global	select_val
+ 1678               	select_val:
  444:menu.c        **** 
- 445:menu.c        **** 		b = btn_wait();
- 446:menu.c        **** 		if(b == BTN_DOWN)
- 447:menu.c        **** 		{
- 448:menu.c        **** 			if(generator.pulse_n >= multipler )
- 449:menu.c        **** 				generator.pulse_n-= multipler;
- 450:menu.c        **** 		}
- 451:menu.c        **** 		else if(b == BTN_UP)
- 452:menu.c        **** 		{
- 453:menu.c        **** 			if(generator.pulse_n < 0xFFFF-multipler )
- 454:menu.c        **** 			generator.pulse_n+= multipler;
- 455:menu.c        **** 		}
- 456:menu.c        **** 		else if(b == BTN_MODE)
- 457:menu.c        **** 		{
- 458:menu.c        **** 			if(multipler < 10000)
- 459:menu.c        **** 			multipler *= 10;
- 1614               	.LM194:
- 1615 000a 1AE0      		ldi r17,lo8(10)
- 1616               	.L117:
- 437:menu.c        **** 		if(generator.pulse_n != 0)
- 1618               	.LM195:
- 1619 000c 80E0      		ldi r24,lo8(__c.2192)
- 1620 000e 90E0      		ldi r25,hi8(__c.2192)
- 1621 0010 00D0      		rcall nnl_puts_P
- 438:menu.c        **** 			print_u(generator.pulse_n,0);
- 1623               	.LM196:
- 1624 0012 6091 0000 		lds r22,generator+51
- 1625 0016 7091 0000 		lds r23,generator+51+1
- 1626 001a 6115      		cp r22,__zero_reg__
- 1627 001c 7105      		cpc r23,__zero_reg__
- 1628 001e 01F0      		breq .L118
- 439:menu.c        **** 		else
- 1630               	.LM197:
- 1631 0020 80E0      		ldi r24,0
- 1632 0022 90E0      		ldi r25,0
- 1633 0024 40E0      		ldi r20,0
- 1634 0026 00D0      		rcall print_u
- 1635 0028 00C0      		rjmp .L119
- 1636               	.L118:
- 441:menu.c        **** 		nnl_puts_P(PSTR("\n(+/-) "));
- 1638               	.LM198:
- 1639 002a 80E0      		ldi r24,lo8(__c.2194)
- 1640 002c 90E0      		ldi r25,hi8(__c.2194)
- 1641 002e 00D0      		rcall nnl_puts_P
- 1642               	.L119:
- 442:menu.c        **** 		print_u(multipler,0);
- 1644               	.LM199:
- 1645 0030 80E0      		ldi r24,lo8(__c.2196)
- 1646 0032 90E0      		ldi r25,hi8(__c.2196)
- 1647 0034 00D0      		rcall nnl_puts_P
- 443:menu.c        **** 
- 1649               	.LM200:
- 1650 0036 CE01      		movw r24,r28
- 1651 0038 A0E0      		ldi r26,0
- 1652 003a B0E0      		ldi r27,0
- 1653 003c 40E0      		ldi r20,0
- 1654 003e BC01      		movw r22,r24
- 1655 0040 CD01      		movw r24,r26
- 1656 0042 00D0      		rcall print_u
- 445:menu.c        **** 		if(b == BTN_DOWN)
- 1658               	.LM201:
- 1659 0044 00D0      		rcall btn_wait
- 446:menu.c        **** 		{
- 1661               	.LM202:
- 1662 0046 8230      		cpi r24,lo8(2)
- 1663 0048 01F4      		brne .L120
- 448:menu.c        **** 				generator.pulse_n-= multipler;
- 1665               	.LM203:
- 1666 004a 8091 0000 		lds r24,generator+51
- 1667 004e 9091 0000 		lds r25,generator+51+1
- 1668 0052 8C17      		cp r24,r28
- 1669 0054 9D07      		cpc r25,r29
- 1670 0056 00F0      		brlo .L117
- 449:menu.c        **** 		}
- 1672               	.LM204:
- 1673 0058 8C1B      		sub r24,r28
- 1674 005a 9D0B      		sbc r25,r29
- 1675 005c 00C0      		rjmp .L125
- 1676               	.L120:
- 451:menu.c        **** 		{
- 1678               	.LM205:
- 1679 005e 8130      		cpi r24,lo8(1)
- 1680 0060 01F4      		brne .L122
- 453:menu.c        **** 			generator.pulse_n+= multipler;
- 1682               	.LM206:
- 1683 0062 8091 0000 		lds r24,generator+51
- 1684 0066 9091 0000 		lds r25,generator+51+1
- 1685 006a 9E01      		movw r18,r28
- 1686 006c 2095      		com r18
- 1687 006e 3095      		com r19
- 1688 0070 8217      		cp r24,r18
- 1689 0072 9307      		cpc r25,r19
- 1690 0074 00F4      		brsh .L117
- 454:menu.c        **** 		}
- 1692               	.LM207:
- 1693 0076 8C0F      		add r24,r28
- 1694 0078 9D1F      		adc r25,r29
- 1695               	.L125:
- 1696 007a 9093 0000 		sts generator+51+1,r25
- 1697 007e 8093 0000 		sts generator+51,r24
- 1698 0082 00C0      		rjmp .L117
- 1699               	.L122:
- 456:menu.c        **** 		{
+ 445:menu.c        **** 
+ 446:menu.c        **** uint8_t select_val(const char* t, const char* v[], uint8_t n)
+ 447:menu.c        **** {
+ 1680               	.LM206:
+ 1681               	.LFBB13:
+ 1682 0000 AF92      		push r10
+ 1683 0002 BF92      		push r11
+ 1684 0004 CF92      		push r12
+ 1685 0006 DF92      		push r13
+ 1686 0008 EF92      		push r14
+ 1687 000a FF92      		push r15
+ 1688 000c 0F93      		push r16
+ 1689 000e 1F93      		push r17
+ 1690 0010 CF93      		push r28
+ 1691               	/* prologue: function */
+ 1692               	/* frame size = 0 */
+ 1693               	/* stack size = 9 */
+ 1694               	.L__stack_usage = 9
+ 1695 0012 7C01      		movw r14,r24
+ 1696 0014 6B01      		movw r12,r22
+ 448:menu.c        **** 	uint8_t b, i;
+ 449:menu.c        **** 	
+ 450:menu.c        **** 	i = 0;
+ 1698               	.LM207:
+ 1699 0016 C0E0      		ldi r28,0
+ 451:menu.c        **** 	
+ 452:menu.c        **** 	while(1)
+ 453:menu.c        **** 	{
+ 454:menu.c        **** 		nnl_puts_P(t);
+ 455:menu.c        **** 		nnl_puts_P(v[i]);	
+ 456:menu.c        **** 		b = btn_wait();
+ 457:menu.c        **** 		if(b == BTN_DOWN)
+ 458:menu.c        **** 		{
+ 459:menu.c        **** 			if(i > 0)
+ 460:menu.c        **** 				i--;
+ 461:menu.c        **** 		}
+ 462:menu.c        **** 		else if(b == BTN_UP)
+ 463:menu.c        **** 		{
+ 464:menu.c        **** 			if(i < n-1)
  1701               	.LM208:
- 1702 0084 8830      		cpi r24,lo8(8)
- 1703 0086 01F4      		brne .L123
- 458:menu.c        **** 			multipler *= 10;
- 1705               	.LM209:
- 1706 0088 C031      		cpi r28,16
- 1707 008a 87E2      		ldi r24,39
- 1708 008c D807      		cpc r29,r24
- 1709 008e 00F0      		brlo .L126
- 460:menu.c        **** 			else
- 461:menu.c        **** 			multipler = 1;
- 1711               	.LM210:
- 1712 0090 C1E0      		ldi r28,lo8(1)
- 1713 0092 D0E0      		ldi r29,0
- 1714 0094 00C0      		rjmp .L117
- 1715               	.L126:
- 459:menu.c        **** 			else
- 1717               	.LM211:
- 1718 0096 CE01      		movw r24,r28
- 1719 0098 189F      		mul r17,r24
- 1720 009a E001      		movw r28,r0
- 1721 009c 199F      		mul r17,r25
- 1722 009e D00D      		add r29,r0
- 1723 00a0 1124      		clr __zero_reg__
- 1724 00a2 00C0      		rjmp .L117
- 1725               	.L123:
- 462:menu.c        **** 		}
- 463:menu.c        **** 		else if(b == BTN_SET)
+ 1702 0018 042F      		mov r16,r20
+ 1703 001a 10E0      		ldi r17,0
+ 1704 001c 0150      		subi r16,1
+ 1705 001e 1109      		sbc r17,__zero_reg__
+ 1706               	.L128:
+ 454:menu.c        **** 		nnl_puts_P(v[i]);	
+ 1708               	.LM209:
+ 1709 0020 C701      		movw r24,r14
+ 1710 0022 00D0      		rcall nnl_puts_P
+ 455:menu.c        **** 		b = btn_wait();
+ 1712               	.LM210:
+ 1713 0024 AC2E      		mov r10,r28
+ 1714 0026 B12C      		mov r11,__zero_reg__
+ 1715 0028 F501      		movw r30,r10
+ 1716 002a EE0F      		lsl r30
+ 1717 002c FF1F      		rol r31
+ 1718 002e EC0D      		add r30,r12
+ 1719 0030 FD1D      		adc r31,r13
+ 1720 0032 8081      		ld r24,Z
+ 1721 0034 9181      		ldd r25,Z+1
+ 1722 0036 00D0      		rcall nnl_puts_P
+ 456:menu.c        **** 		if(b == BTN_DOWN)
+ 1724               	.LM211:
+ 1725 0038 00D0      		rcall btn_wait
+ 457:menu.c        **** 		{
  1727               	.LM212:
- 1728 00a4 8430      		cpi r24,lo8(4)
- 1729 00a6 01F0      		breq .+2
- 1730 00a8 00C0      		rjmp .L117
- 1731               	/* epilogue start */
- 464:menu.c        **** 		{
- 465:menu.c        **** 			break;
+ 1728 003a 8130      		cpi r24,lo8(1)
+ 1729 003c 01F4      		brne .L129
+ 459:menu.c        **** 				i--;
+ 1731               	.LM213:
+ 1732 003e CC23      		tst r28
+ 1733 0040 01F0      		breq .L128
+ 460:menu.c        **** 		}
+ 1735               	.LM214:
+ 1736 0042 C150      		subi r28,lo8(-(-1))
+ 1737 0044 00C0      		rjmp .L128
+ 1738               	.L129:
+ 462:menu.c        **** 		{
+ 1740               	.LM215:
+ 1741 0046 8230      		cpi r24,lo8(2)
+ 1742 0048 01F4      		brne .L131
+ 1744               	.LM216:
+ 1745 004a A016      		cp r10,r16
+ 1746 004c B106      		cpc r11,r17
+ 1747 004e 04F4      		brge .L128
+ 465:menu.c        **** 			i++;
+ 1749               	.LM217:
+ 1750 0050 CF5F      		subi r28,lo8(-(1))
+ 1751 0052 00C0      		rjmp .L128
+ 1752               	.L131:
  466:menu.c        **** 		}
- 467:menu.c        **** 	}
- 468:menu.c        **** }
- 1733               	.LM213:
- 1734 00aa DF91      		pop r29
- 1735 00ac CF91      		pop r28
- 1736 00ae 1F91      		pop r17
- 1737 00b0 0895      		ret
- 1743               	.Lscope13:
- 1744               		.section	.text.select_val,"ax",@progbits
- 1749               	.global	select_val
- 1751               	select_val:
- 469:menu.c        **** 
- 470:menu.c        **** 
- 471:menu.c        **** uint8_t select_val(const char* t, const char* v[], uint8_t n)
- 472:menu.c        **** {
- 1753               	.LM214:
- 1754               	.LFBB14:
- 1755 0000 AF92      		push r10
- 1756 0002 BF92      		push r11
- 1757 0004 CF92      		push r12
- 1758 0006 DF92      		push r13
- 1759 0008 EF92      		push r14
- 1760 000a FF92      		push r15
- 1761 000c 0F93      		push r16
- 1762 000e 1F93      		push r17
- 1763 0010 CF93      		push r28
- 1764               	/* prologue: function */
- 1765               	/* frame size = 0 */
- 1766               	/* stack size = 9 */
- 1767               	.L__stack_usage = 9
- 1768 0012 7C01      		movw r14,r24
- 1769 0014 6B01      		movw r12,r22
- 473:menu.c        **** 	uint8_t b, i;
- 474:menu.c        **** 	
- 475:menu.c        **** 	i = 0;
- 1771               	.LM215:
- 1772 0016 C0E0      		ldi r28,0
- 476:menu.c        **** 	
- 477:menu.c        **** 	while(1)
- 478:menu.c        **** 	{
- 479:menu.c        **** 		nnl_puts_P(t);
- 480:menu.c        **** 		nnl_puts_P(v[i]);	
- 481:menu.c        **** 		b = btn_wait();
- 482:menu.c        **** 		if(b == BTN_DOWN)
- 483:menu.c        **** 		{
- 484:menu.c        **** 			if(i > 0)
- 485:menu.c        **** 				i--;
- 486:menu.c        **** 		}
- 487:menu.c        **** 		else if(b == BTN_UP)
- 488:menu.c        **** 		{
- 489:menu.c        **** 			if(i < n-1)
- 1774               	.LM216:
- 1775 0018 042F      		mov r16,r20
- 1776 001a 10E0      		ldi r17,0
- 1777 001c 0150      		subi r16,1
- 1778 001e 1109      		sbc r17,__zero_reg__
- 1779               	.L128:
- 479:menu.c        **** 		nnl_puts_P(v[i]);	
- 1781               	.LM217:
- 1782 0020 C701      		movw r24,r14
- 1783 0022 00D0      		rcall nnl_puts_P
- 480:menu.c        **** 		b = btn_wait();
- 1785               	.LM218:
- 1786 0024 AC2E      		mov r10,r28
- 1787 0026 B12C      		mov r11,__zero_reg__
- 1788 0028 F501      		movw r30,r10
- 1789 002a EE0F      		lsl r30
- 1790 002c FF1F      		rol r31
- 1791 002e EC0D      		add r30,r12
- 1792 0030 FD1D      		adc r31,r13
- 1793 0032 8081      		ld r24,Z
- 1794 0034 9181      		ldd r25,Z+1
- 1795 0036 00D0      		rcall nnl_puts_P
- 481:menu.c        **** 		if(b == BTN_DOWN)
- 1797               	.LM219:
- 1798 0038 00D0      		rcall btn_wait
- 482:menu.c        **** 		{
- 1800               	.LM220:
- 1801 003a 8230      		cpi r24,lo8(2)
- 1802 003c 01F4      		brne .L129
- 484:menu.c        **** 				i--;
- 1804               	.LM221:
- 1805 003e CC23      		tst r28
- 1806 0040 01F0      		breq .L128
- 485:menu.c        **** 		}
- 1808               	.LM222:
- 1809 0042 C150      		subi r28,lo8(-(-1))
- 1810 0044 00C0      		rjmp .L128
- 1811               	.L129:
- 487:menu.c        **** 		{
- 1813               	.LM223:
- 1814 0046 8130      		cpi r24,lo8(1)
- 1815 0048 01F4      		brne .L131
- 1817               	.LM224:
- 1818 004a A016      		cp r10,r16
- 1819 004c B106      		cpc r11,r17
- 1820 004e 04F4      		brge .L128
- 490:menu.c        **** 			i++;
- 1822               	.LM225:
- 1823 0050 CF5F      		subi r28,lo8(-(1))
- 1824 0052 00C0      		rjmp .L128
- 1825               	.L131:
- 491:menu.c        **** 		}
- 492:menu.c        **** 		else if(b == BTN_SET)
- 1827               	.LM226:
- 1828 0054 8430      		cpi r24,lo8(4)
- 1829 0056 01F4      		brne .L128
- 493:menu.c        **** 		{
- 494:menu.c        **** 			break;
- 495:menu.c        **** 		}
- 496:menu.c        **** 
- 497:menu.c        **** 	}
- 498:menu.c        **** 	return i;
- 499:menu.c        **** }
- 1831               	.LM227:
- 1832 0058 8C2F      		mov r24,r28
- 1833               	/* epilogue start */
- 1834 005a CF91      		pop r28
- 1835 005c 1F91      		pop r17
- 1836 005e 0F91      		pop r16
- 1837 0060 FF90      		pop r15
- 1838 0062 EF90      		pop r14
- 1839 0064 DF90      		pop r13
- 1840 0066 CF90      		pop r12
- 1841 0068 BF90      		pop r11
- 1842 006a AF90      		pop r10
- 1843 006c 0895      		ret
- 1849               	.Lscope14:
- 1850               		.section	.text.input_trig,"ax",@progbits
- 1852               	.global	input_trig
- 1854               	input_trig:
- 500:menu.c        **** 
- 501:menu.c        **** uint8_t input_trig()
- 502:menu.c        **** {
- 1856               	.LM228:
- 1857               	.LFBB15:
- 1858 0000 CF93      		push r28
- 1859 0002 DF93      		push r29
- 1860 0004 00D0      		rcall .
- 1861 0006 00D0      		rcall .
- 1862 0008 00D0      		rcall .
- 1863 000a CDB7      		in r28,__SP_L__
- 1864 000c DEB7      		in r29,__SP_H__
- 1865               	/* prologue: function */
- 1866               	/* frame size = 6 */
- 1867               	/* stack size = 8 */
- 1868               	.L__stack_usage = 8
- 503:menu.c        **** 	const char* values[] = {
- 1870               	.LM229:
- 1871 000e 80E0      		ldi r24,lo8(__c.2212)
- 1872 0010 90E0      		ldi r25,hi8(__c.2212)
- 1873 0012 9A83      		std Y+2,r25
- 1874 0014 8983      		std Y+1,r24
- 1875 0016 80E0      		ldi r24,lo8(__c.2214)
- 1876 0018 90E0      		ldi r25,hi8(__c.2214)
- 1877 001a 9C83      		std Y+4,r25
- 1878 001c 8B83      		std Y+3,r24
- 1879 001e 80E0      		ldi r24,lo8(__c.2216)
- 1880 0020 90E0      		ldi r25,hi8(__c.2216)
- 1881 0022 9E83      		std Y+6,r25
- 1882 0024 8D83      		std Y+5,r24
- 504:menu.c        **** 		PSTR("NO"),
- 505:menu.c        **** 		PSTR("RISE "),
- 506:menu.c        **** 		PSTR("FALL ")
- 507:menu.c        **** 	};
+ 467:menu.c        **** 		else if(b == BTN_SET)
+ 1754               	.LM218:
+ 1755 0054 8430      		cpi r24,lo8(4)
+ 1756 0056 01F4      		brne .L128
+ 468:menu.c        **** 		{
+ 469:menu.c        **** 			break;
+ 470:menu.c        **** 		}
+ 471:menu.c        **** 
+ 472:menu.c        **** 	}
+ 473:menu.c        **** 	return i;
+ 474:menu.c        **** }
+ 1758               	.LM219:
+ 1759 0058 8C2F      		mov r24,r28
+ 1760               	/* epilogue start */
+ 1761 005a CF91      		pop r28
+ 1762 005c 1F91      		pop r17
+ 1763 005e 0F91      		pop r16
+ 1764 0060 FF90      		pop r15
+ 1765 0062 EF90      		pop r14
+ 1766 0064 DF90      		pop r13
+ 1767 0066 CF90      		pop r12
+ 1768 0068 BF90      		pop r11
+ 1769 006a AF90      		pop r10
+ 1770 006c 0895      		ret
+ 1776               	.Lscope13:
+ 1777               		.section	.text.input_trig,"ax",@progbits
+ 1779               	.global	input_trig
+ 1781               	input_trig:
+ 475:menu.c        **** 
+ 476:menu.c        **** inline uint8_t input_trig()
+ 477:menu.c        **** {
+ 1783               	.LM220:
+ 1784               	.LFBB14:
+ 1785 0000 CF93      		push r28
+ 1786 0002 DF93      		push r29
+ 1787 0004 00D0      		rcall .
+ 1788 0006 00D0      		rcall .
+ 1789 0008 00D0      		rcall .
+ 1790 000a CDB7      		in r28,__SP_L__
+ 1791 000c DEB7      		in r29,__SP_H__
+ 1792               	/* prologue: function */
+ 1793               	/* frame size = 6 */
+ 1794               	/* stack size = 8 */
+ 1795               	.L__stack_usage = 8
+ 478:menu.c        **** 	const char* values[] = {
+ 1797               	.LM221:
+ 1798 000e 80E0      		ldi r24,lo8(__c.2209)
+ 1799 0010 90E0      		ldi r25,hi8(__c.2209)
+ 1800 0012 9A83      		std Y+2,r25
+ 1801 0014 8983      		std Y+1,r24
+ 1802 0016 80E0      		ldi r24,lo8(__c.2211)
+ 1803 0018 90E0      		ldi r25,hi8(__c.2211)
+ 1804 001a 9C83      		std Y+4,r25
+ 1805 001c 8B83      		std Y+3,r24
+ 1806 001e 80E0      		ldi r24,lo8(__c.2213)
+ 1807 0020 90E0      		ldi r25,hi8(__c.2213)
+ 1808 0022 9E83      		std Y+6,r25
+ 1809 0024 8D83      		std Y+5,r24
+ 479:menu.c        **** 		PSTR("NO"),
+ 480:menu.c        **** 		PSTR("RISE "),
+ 481:menu.c        **** 		PSTR("FALL ")
+ 482:menu.c        **** 	};
+ 483:menu.c        **** 	
+ 484:menu.c        **** 	return select_val(PSTR("\rTrigger: "), values, 3);
+ 1811               	.LM222:
+ 1812 0026 43E0      		ldi r20,lo8(3)
+ 1813 0028 BE01      		movw r22,r28
+ 1814 002a 6F5F      		subi r22,-1
+ 1815 002c 7F4F      		sbci r23,-1
+ 1816 002e 80E0      		ldi r24,lo8(__c.2215)
+ 1817 0030 90E0      		ldi r25,hi8(__c.2215)
+ 1818 0032 00D0      		rcall select_val
+ 1819               	/* epilogue start */
+ 485:menu.c        **** }
+ 1821               	.LM223:
+ 1822 0034 2696      		adiw r28,6
+ 1823 0036 0FB6      		in __tmp_reg__,__SREG__
+ 1824 0038 F894      		cli
+ 1825 003a DEBF      		out __SP_H__,r29
+ 1826 003c 0FBE      		out __SREG__,__tmp_reg__
+ 1827 003e CDBF      		out __SP_L__,r28
+ 1828 0040 DF91      		pop r29
+ 1829 0042 CF91      		pop r28
+ 1830 0044 0895      		ret
+ 1835               	.Lscope14:
+ 1836               		.section	.text.input_ext_sync,"ax",@progbits
+ 1838               	.global	input_ext_sync
+ 1840               	input_ext_sync:
+ 486:menu.c        **** 
+ 487:menu.c        **** inline uint8_t input_ext_sync()
+ 488:menu.c        **** {
+ 1842               	.LM224:
+ 1843               	.LFBB15:
+ 1844 0000 CF93      		push r28
+ 1845 0002 DF93      		push r29
+ 1846 0004 00D0      		rcall .
+ 1847 0006 00D0      		rcall .
+ 1848 0008 00D0      		rcall .
+ 1849 000a CDB7      		in r28,__SP_L__
+ 1850 000c DEB7      		in r29,__SP_H__
+ 1851               	/* prologue: function */
+ 1852               	/* frame size = 6 */
+ 1853               	/* stack size = 8 */
+ 1854               	.L__stack_usage = 8
+ 489:menu.c        **** 	const char* values[] = {
+ 1856               	.LM225:
+ 1857 000e 80E0      		ldi r24,lo8(__c.2220)
+ 1858 0010 90E0      		ldi r25,hi8(__c.2220)
+ 1859 0012 9A83      		std Y+2,r25
+ 1860 0014 8983      		std Y+1,r24
+ 1861 0016 80E0      		ldi r24,lo8(__c.2222)
+ 1862 0018 90E0      		ldi r25,hi8(__c.2222)
+ 1863 001a 9C83      		std Y+4,r25
+ 1864 001c 8B83      		std Y+3,r24
+ 1865 001e 80E0      		ldi r24,lo8(__c.2224)
+ 1866 0020 90E0      		ldi r25,hi8(__c.2224)
+ 1867 0022 9E83      		std Y+6,r25
+ 1868 0024 8D83      		std Y+5,r24
+ 490:menu.c        **** 		PSTR("NO"),
+ 491:menu.c        **** 		PSTR("HIGH"),
+ 492:menu.c        **** 		PSTR("LOW")
+ 493:menu.c        **** 	};
+ 494:menu.c        **** 	
+ 495:menu.c        **** 	return select_val(PSTR("\rEXT SYNC: "), values, 3);
+ 1870               	.LM226:
+ 1871 0026 43E0      		ldi r20,lo8(3)
+ 1872 0028 BE01      		movw r22,r28
+ 1873 002a 6F5F      		subi r22,-1
+ 1874 002c 7F4F      		sbci r23,-1
+ 1875 002e 80E0      		ldi r24,lo8(__c.2226)
+ 1876 0030 90E0      		ldi r25,hi8(__c.2226)
+ 1877 0032 00D0      		rcall select_val
+ 1878               	/* epilogue start */
+ 496:menu.c        **** }
+ 1880               	.LM227:
+ 1881 0034 2696      		adiw r28,6
+ 1882 0036 0FB6      		in __tmp_reg__,__SREG__
+ 1883 0038 F894      		cli
+ 1884 003a DEBF      		out __SP_H__,r29
+ 1885 003c 0FBE      		out __SREG__,__tmp_reg__
+ 1886 003e CDBF      		out __SP_L__,r28
+ 1887 0040 DF91      		pop r29
+ 1888 0042 CF91      		pop r28
+ 1889 0044 0895      		ret
+ 1894               	.Lscope15:
+ 1895               		.section	.text.input_hs,"ax",@progbits
+ 1897               	.global	input_hs
+ 1899               	input_hs:
+ 497:menu.c        **** 
+ 498:menu.c        **** void input_hs()
+ 499:menu.c        **** {
+ 1901               	.LM228:
+ 1902               	.LFBB16:
+ 1903 0000 CF93      		push r28
+ 1904 0002 DF93      		push r29
+ 1905 0004 CDB7      		in r28,__SP_L__
+ 1906 0006 DEB7      		in r29,__SP_H__
+ 1907 0008 2897      		sbiw r28,8
+ 1908 000a 0FB6      		in __tmp_reg__,__SREG__
+ 1909 000c F894      		cli
+ 1910 000e DEBF      		out __SP_H__,r29
+ 1911 0010 0FBE      		out __SREG__,__tmp_reg__
+ 1912 0012 CDBF      		out __SP_L__,r28
+ 1913               	/* prologue: function */
+ 1914               	/* frame size = 8 */
+ 1915               	/* stack size = 10 */
+ 1916               	.L__stack_usage = 10
+ 500:menu.c        **** 	const char* values[] = {
+ 1918               	.LM229:
+ 1919 0014 80E0      		ldi r24,lo8(__c.2231)
+ 1920 0016 90E0      		ldi r25,hi8(__c.2231)
+ 1921 0018 9A83      		std Y+2,r25
+ 1922 001a 8983      		std Y+1,r24
+ 1923 001c 80E0      		ldi r24,lo8(__c.2233)
+ 1924 001e 90E0      		ldi r25,hi8(__c.2233)
+ 1925 0020 9C83      		std Y+4,r25
+ 1926 0022 8B83      		std Y+3,r24
+ 1927 0024 80E0      		ldi r24,lo8(__c.2235)
+ 1928 0026 90E0      		ldi r25,hi8(__c.2235)
+ 1929 0028 9E83      		std Y+6,r25
+ 1930 002a 8D83      		std Y+5,r24
+ 1931 002c 80E0      		ldi r24,lo8(__c.2237)
+ 1932 002e 90E0      		ldi r25,hi8(__c.2237)
+ 1933 0030 9887      		std Y+8,r25
+ 1934 0032 8F83      		std Y+7,r24
+ 501:menu.c        **** 		PSTR("1MHz"),
+ 502:menu.c        **** 		PSTR("2MHz"),
+ 503:menu.c        **** 		PSTR("4MHz"),
+ 504:menu.c        **** 		PSTR("8MHz")
+ 505:menu.c        **** 	};	
+ 506:menu.c        **** 
+ 507:menu.c        **** 	uint8_t  f;
  508:menu.c        **** 	
- 509:menu.c        **** 	return select_val(PSTR("\rTrigger: "), values, 3);
- 1884               	.LM230:
- 1885 0026 43E0      		ldi r20,lo8(3)
- 1886 0028 BE01      		movw r22,r28
- 1887 002a 6F5F      		subi r22,-1
- 1888 002c 7F4F      		sbci r23,-1
- 1889 002e 80E0      		ldi r24,lo8(__c.2218)
- 1890 0030 90E0      		ldi r25,hi8(__c.2218)
- 1891 0032 00D0      		rcall select_val
- 1892               	/* epilogue start */
- 510:menu.c        **** }
- 1894               	.LM231:
- 1895 0034 2696      		adiw r28,6
- 1896 0036 0FB6      		in __tmp_reg__,__SREG__
- 1897 0038 F894      		cli
- 1898 003a DEBF      		out __SP_H__,r29
- 1899 003c 0FBE      		out __SREG__,__tmp_reg__
- 1900 003e CDBF      		out __SP_L__,r28
- 1901 0040 DF91      		pop r29
- 1902 0042 CF91      		pop r28
- 1903 0044 0895      		ret
- 1908               	.Lscope15:
- 1909               		.section	.text.input_ext_sync,"ax",@progbits
- 1911               	.global	input_ext_sync
- 1913               	input_ext_sync:
+ 509:menu.c        **** 	f = 1<<select_val(PSTR("\rF="), values, 4);
+ 1936               	.LM230:
+ 1937 0034 44E0      		ldi r20,lo8(4)
+ 1938 0036 BE01      		movw r22,r28
+ 1939 0038 6F5F      		subi r22,-1
+ 1940 003a 7F4F      		sbci r23,-1
+ 1941 003c 80E0      		ldi r24,lo8(__c.2240)
+ 1942 003e 90E0      		ldi r25,hi8(__c.2240)
+ 1943 0040 00D0      		rcall select_val
+ 510:menu.c        **** 	generator.hs_f = (uint32_t)(1000000 * f);
+ 1945               	.LM231:
+ 1946 0042 A1E0      		ldi r26,lo8(1)
+ 1947 0044 00C0      		rjmp 2f
+ 1948               		1:
+ 1949 0046 AA0F      		lsl r26
+ 1950               		2:
+ 1951 0048 8A95      		dec r24
+ 1952 004a 02F4      		brpl 1b
+ 1953 004c B0E0      		ldi r27,0
+ 1954 004e 20E4      		ldi r18,lo8(64)
+ 1955 0050 32E4      		ldi r19,lo8(66)
+ 1956 0052 4FE0      		ldi r20,lo8(15)
+ 1957 0054 50E0      		ldi r21,0
+ 1958 0056 00D0      		rcall __muluhisi3
+ 1959 0058 6093 0000 		sts generator+31,r22
+ 1960 005c 7093 0000 		sts generator+31+1,r23
+ 1961 0060 8093 0000 		sts generator+31+2,r24
+ 1962 0064 9093 0000 		sts generator+31+3,r25
+ 1963               	/* epilogue start */
  511:menu.c        **** 
- 512:menu.c        **** uint8_t input_ext_sync()
- 513:menu.c        **** {
- 1915               	.LM232:
- 1916               	.LFBB16:
- 1917 0000 CF93      		push r28
- 1918 0002 DF93      		push r29
- 1919 0004 00D0      		rcall .
- 1920 0006 00D0      		rcall .
- 1921 0008 00D0      		rcall .
- 1922 000a CDB7      		in r28,__SP_L__
- 1923 000c DEB7      		in r29,__SP_H__
- 1924               	/* prologue: function */
- 1925               	/* frame size = 6 */
- 1926               	/* stack size = 8 */
- 1927               	.L__stack_usage = 8
- 514:menu.c        **** 	const char* values[] = {
- 1929               	.LM233:
- 1930 000e 80E0      		ldi r24,lo8(__c.2223)
- 1931 0010 90E0      		ldi r25,hi8(__c.2223)
- 1932 0012 9A83      		std Y+2,r25
- 1933 0014 8983      		std Y+1,r24
- 1934 0016 80E0      		ldi r24,lo8(__c.2225)
- 1935 0018 90E0      		ldi r25,hi8(__c.2225)
- 1936 001a 9C83      		std Y+4,r25
- 1937 001c 8B83      		std Y+3,r24
- 1938 001e 80E0      		ldi r24,lo8(__c.2227)
- 1939 0020 90E0      		ldi r25,hi8(__c.2227)
- 1940 0022 9E83      		std Y+6,r25
- 1941 0024 8D83      		std Y+5,r24
- 515:menu.c        **** 		PSTR("NO"),
- 516:menu.c        **** 		PSTR("HIGH"),
- 517:menu.c        **** 		PSTR("LOW")
- 518:menu.c        **** 	};
- 519:menu.c        **** 	
- 520:menu.c        **** 	return select_val(PSTR("\rEXT SYNC: "), values, 3);
- 1943               	.LM234:
- 1944 0026 43E0      		ldi r20,lo8(3)
- 1945 0028 BE01      		movw r22,r28
- 1946 002a 6F5F      		subi r22,-1
- 1947 002c 7F4F      		sbci r23,-1
- 1948 002e 80E0      		ldi r24,lo8(__c.2229)
- 1949 0030 90E0      		ldi r25,hi8(__c.2229)
- 1950 0032 00D0      		rcall select_val
- 1951               	/* epilogue start */
- 521:menu.c        **** }
- 1953               	.LM235:
- 1954 0034 2696      		adiw r28,6
- 1955 0036 0FB6      		in __tmp_reg__,__SREG__
- 1956 0038 F894      		cli
- 1957 003a DEBF      		out __SP_H__,r29
- 1958 003c 0FBE      		out __SREG__,__tmp_reg__
- 1959 003e CDBF      		out __SP_L__,r28
- 1960 0040 DF91      		pop r29
- 1961 0042 CF91      		pop r28
- 1962 0044 0895      		ret
- 1967               	.Lscope16:
- 1968               		.section	.progmem.data.__c.2229,"a",@progbits
- 1971               	__c.2229:
- 1972 0000 0D45 5854 		.string	"\rEXT SYNC: "
- 1972      2053 594E 
- 1972      433A 2000 
- 1973               		.section	.progmem.data.__c.2227,"a",@progbits
- 1976               	__c.2227:
- 1977 0000 4C4F 5700 		.string	"LOW"
- 1978               		.section	.progmem.data.__c.2225,"a",@progbits
- 1981               	__c.2225:
- 1982 0000 4849 4748 		.string	"HIGH"
- 1982      00
- 1983               		.section	.progmem.data.__c.2223,"a",@progbits
- 1986               	__c.2223:
- 1987 0000 4E4F 00   		.string	"NO"
- 1988               		.section	.progmem.data.__c.2218,"a",@progbits
- 1991               	__c.2218:
- 1992 0000 0D54 7269 		.string	"\rTrigger: "
- 1992      6767 6572 
- 1992      3A20 00
- 1993               		.section	.progmem.data.__c.2216,"a",@progbits
- 1996               	__c.2216:
- 1997 0000 4641 4C4C 		.string	"FALL "
- 1997      2000 
- 1998               		.section	.progmem.data.__c.2214,"a",@progbits
- 2001               	__c.2214:
- 2002 0000 5249 5345 		.string	"RISE "
- 2002      2000 
- 2003               		.section	.progmem.data.__c.2212,"a",@progbits
- 2006               	__c.2212:
- 2007 0000 4E4F 00   		.string	"NO"
- 2008               		.section	.progmem.data.__c.2196,"a",@progbits
- 2011               	__c.2196:
- 2012 0000 0A28 2B2F 		.string	"\n(+/-) "
- 2012      2D29 2000 
- 2013               		.section	.progmem.data.__c.2194,"a",@progbits
- 2016               	__c.2194:
- 2017 0000 4E44 00   		.string	"ND"
- 2018               		.section	.progmem.data.__c.2192,"a",@progbits
- 2021               	__c.2192:
- 2022 0000 0D4E 3D00 		.string	"\rN="
- 2023               		.section	.progmem.data.__c.2184,"a",@progbits
- 2026               	__c.2184:
- 2027 0000 7573 00   		.string	"us"
- 2028               		.section	.progmem.data.__c.2182,"a",@progbits
- 2031               	__c.2182:
- 2032 0000 7573 0A28 		.string	"us\n(+/-) "
- 2032      2B2F 2D29 
- 2032      2000 
- 2033               		.section	.progmem.data.__c.2171,"a",@progbits
- 2036               	__c.2171:
- 2037 0000 250A 282B 		.string	"%\n(+/-) 1% "
- 2037      2F2D 2920 
- 2037      3125 2000 
- 2038               		.section	.progmem.data.__c.2169,"a",@progbits
- 2041               	__c.2169:
- 2042 0000 0D44 433D 		.string	"\rDC="
- 2042      00
- 2043               		.section	.progmem.data.__c.2161,"a",@progbits
- 2046               	__c.2161:
- 2047 0000 4D48 7A0A 		.string	"MHz\n(+/-)x2 "
- 2047      282B 2F2D 
- 2047      2978 3220 
- 2047      00
- 2048               		.section	.progmem.data.__c.2159,"a",@progbits
- 2051               	__c.2159:
- 2052 0000 0D46 3D00 		.string	"\rF="
- 2053               		.section	.progmem.data.__c.2150,"a",@progbits
- 2056               	__c.2150:
- 2057 0000 0A28 2B2F 		.string	"\n(+/-) "
- 2057      2D29 2000 
- 2058               		.section	.progmem.data.__c.2148,"a",@progbits
- 2061               	__c.2148:
- 2062 0000 0D46 3D00 		.string	"\rF="
- 2063               		.section	.progmem.data.__c.2138,"a",@progbits
- 2066               	__c.2138:
- 2067 0000 4F46 460A 		.string	"OFF\n"
- 2067      00
- 2068               		.section	.progmem.data.__c.2136,"a",@progbits
- 2071               	__c.2136:
- 2072 0000 4F4E 200A 		.string	"ON \n"
- 2072      00
- 2073               		.section	.progmem.data.__c.2131,"a",@progbits
- 2076               	__c.2131:
- 2077 0000 487A 00   		.string	"Hz"
- 2078               		.section	.bss.msk.2094,"aw",@nobits
- 2081               	msk.2094:
- 2082 0000 00        		.zero	1
- 2083               		.section	.bss.st.2093,"aw",@nobits
- 2086               	st.2093:
- 2087 0000 00        		.zero	1
- 2088               		.section	.bss.c.2095,"aw",@nobits
- 2091               	c.2095:
- 2092 0000 00        		.zero	1
- 2093               		.comm	generator,54,1
- 2095               		.text
- 2097               	.Letext0:
- 2098               		.ident	"GCC: (AVR_8_bit_GNU_Toolchain_3.5.0_1662) 4.9.2"
- 2099               	.global __do_clear_bss
+ 512:menu.c        **** }...
+ 1965               	.LM232:
+ 1966 0068 2896      		adiw r28,8
+ 1967 006a 0FB6      		in __tmp_reg__,__SREG__
+ 1968 006c F894      		cli
+ 1969 006e DEBF      		out __SP_H__,r29
+ 1970 0070 0FBE      		out __SREG__,__tmp_reg__
+ 1971 0072 CDBF      		out __SP_L__,r28
+ 1972 0074 DF91      		pop r29
+ 1973 0076 CF91      		pop r28
+ 1974 0078 0895      		ret
+ 1979               	.Lscope16:
+ 1980               		.section	.progmem.data.__c.2240,"a",@progbits
+ 1983               	__c.2240:
+ 1984 0000 0D46 3D00 		.string	"\rF="
+ 1985               		.section	.progmem.data.__c.2237,"a",@progbits
+ 1988               	__c.2237:
+ 1989 0000 384D 487A 		.string	"8MHz"
+ 1989      00
+ 1990               		.section	.progmem.data.__c.2235,"a",@progbits
+ 1993               	__c.2235:
+ 1994 0000 344D 487A 		.string	"4MHz"
+ 1994      00
+ 1995               		.section	.progmem.data.__c.2233,"a",@progbits
+ 1998               	__c.2233:
+ 1999 0000 324D 487A 		.string	"2MHz"
+ 1999      00
+ 2000               		.section	.progmem.data.__c.2231,"a",@progbits
+ 2003               	__c.2231:
+ 2004 0000 314D 487A 		.string	"1MHz"
+ 2004      00
+ 2005               		.section	.progmem.data.__c.2226,"a",@progbits
+ 2008               	__c.2226:
+ 2009 0000 0D45 5854 		.string	"\rEXT SYNC: "
+ 2009      2053 594E 
+ 2009      433A 2000 
+ 2010               		.section	.progmem.data.__c.2224,"a",@progbits
+ 2013               	__c.2224:
+ 2014 0000 4C4F 5700 		.string	"LOW"
+ 2015               		.section	.progmem.data.__c.2222,"a",@progbits
+ 2018               	__c.2222:
+ 2019 0000 4849 4748 		.string	"HIGH"
+ 2019      00
+ 2020               		.section	.progmem.data.__c.2220,"a",@progbits
+ 2023               	__c.2220:
+ 2024 0000 4E4F 00   		.string	"NO"
+ 2025               		.section	.progmem.data.__c.2215,"a",@progbits
+ 2028               	__c.2215:
+ 2029 0000 0D54 7269 		.string	"\rTrigger: "
+ 2029      6767 6572 
+ 2029      3A20 00
+ 2030               		.section	.progmem.data.__c.2213,"a",@progbits
+ 2033               	__c.2213:
+ 2034 0000 4641 4C4C 		.string	"FALL "
+ 2034      2000 
+ 2035               		.section	.progmem.data.__c.2211,"a",@progbits
+ 2038               	__c.2211:
+ 2039 0000 5249 5345 		.string	"RISE "
+ 2039      2000 
+ 2040               		.section	.progmem.data.__c.2209,"a",@progbits
+ 2043               	__c.2209:
+ 2044 0000 4E4F 00   		.string	"NO"
+ 2045               		.section	.progmem.data.__c.2193,"a",@progbits
+ 2048               	__c.2193:
+ 2049 0000 0A28 2B2F 		.string	"\n(+/-) "
+ 2049      2D29 2000 
+ 2050               		.section	.progmem.data.__c.2191,"a",@progbits
+ 2053               	__c.2191:
+ 2054 0000 4E44 00   		.string	"ND"
+ 2055               		.section	.progmem.data.__c.2189,"a",@progbits
+ 2058               	__c.2189:
+ 2059 0000 0D4E 3D00 		.string	"\rN="
+ 2060               		.section	.progmem.data.__c.2180,"a",@progbits
+ 2063               	__c.2180:
+ 2064 0000 7573 00   		.string	"us"
+ 2065               		.section	.progmem.data.__c.2178,"a",@progbits
+ 2068               	__c.2178:
+ 2069 0000 7573 0A28 		.string	"us\n(+/-) "
+ 2069      2B2F 2D29 
+ 2069      2000 
+ 2070               		.section	.progmem.data.__c.2167,"a",@progbits
+ 2073               	__c.2167:
+ 2074 0000 250A 282B 		.string	"%\n(+/-) 1% "
+ 2074      2F2D 2920 
+ 2074      3125 2000 
+ 2075               		.section	.progmem.data.__c.2165,"a",@progbits
+ 2078               	__c.2165:
+ 2079 0000 0D44 433D 		.string	"\rDC="
+ 2079      00
+ 2080               		.section	.progmem.data.__c.2156,"a",@progbits
+ 2083               	__c.2156:
+ 2084 0000 0A28 2B2F 		.string	"\n(+/-) "
+ 2084      2D29 2000 
+ 2085               		.section	.progmem.data.__c.2154,"a",@progbits
+ 2088               	__c.2154:
+ 2089 0000 0D46 3D00 		.string	"\rF="
+ 2090               		.section	.progmem.data.__c.2143,"a",@progbits
+ 2093               	__c.2143:
+ 2094 0000 4F46 460A 		.string	"OFF\n"
+ 2094      00
+ 2095               		.section	.progmem.data.__c.2141,"a",@progbits
+ 2098               	__c.2141:
+ 2099 0000 4F4E 200A 		.string	"ON \n"
+ 2099      00
+ 2100               		.section	.progmem.data.__c.2136,"a",@progbits
+ 2103               	__c.2136:
+ 2104 0000 487A 00   		.string	"Hz"
+ 2105               		.section	.bss.msk.2099,"aw",@nobits
+ 2108               	msk.2099:
+ 2109 0000 00        		.zero	1
+ 2110               		.section	.bss.st.2098,"aw",@nobits
+ 2113               	st.2098:
+ 2114 0000 00        		.zero	1
+ 2115               		.section	.bss.c.2100,"aw",@nobits
+ 2118               	c.2100:
+ 2119 0000 00        		.zero	1
+ 2120               		.comm	generator,55,1
+ 2122               		.text
+ 2124               	.Letext0:
+ 2125               		.ident	"GCC: (AVR_8_bit_GNU_Toolchain_3.5.0_1662) 4.9.2"
+ 2126               	.global __do_clear_bss
 DEFINED SYMBOLS
                             *ABS*:00000000 menu.c
-C:\Users\Magenta\AppData\Local\Temp\ccmBS96r.s:2      *ABS*:0000003e __SP_H__
-C:\Users\Magenta\AppData\Local\Temp\ccmBS96r.s:3      *ABS*:0000003d __SP_L__
-C:\Users\Magenta\AppData\Local\Temp\ccmBS96r.s:4      *ABS*:0000003f __SREG__
-C:\Users\Magenta\AppData\Local\Temp\ccmBS96r.s:5      *ABS*:00000000 __tmp_reg__
-C:\Users\Magenta\AppData\Local\Temp\ccmBS96r.s:6      *ABS*:00000001 __zero_reg__
-C:\Users\Magenta\AppData\Local\Temp\ccmBS96r.s:133    .text.n_putchar:00000000 n_putchar
-C:\Users\Magenta\AppData\Local\Temp\ccmBS96r.s:186    .text.nnl_puts_P:00000000 nnl_puts_P
-C:\Users\Magenta\AppData\Local\Temp\ccmBS96r.s:233    .text.btnCheckAll:00000000 btnCheckAll
-C:\Users\Magenta\AppData\Local\Temp\ccmBS96r.s:281    .text.btn_wait:00000000 btn_wait
-C:\Users\Magenta\AppData\Local\Temp\ccmBS96r.s:2091   .bss.c.2095:00000000 c.2095
-C:\Users\Magenta\AppData\Local\Temp\ccmBS96r.s:2086   .bss.st.2093:00000000 st.2093
-C:\Users\Magenta\AppData\Local\Temp\ccmBS96r.s:2081   .bss.msk.2094:00000000 msk.2094
-C:\Users\Magenta\AppData\Local\Temp\ccmBS96r.s:499    .text.btn_wait_up:00000000 btn_wait_up
-C:\Users\Magenta\AppData\Local\Temp\ccmBS96r.s:545    .text.print_u:00000000 print_u
-C:\Users\Magenta\AppData\Local\Temp\ccmBS96r.s:696    .text.print_fq:00000000 print_fq
-                            *COM*:00000036 generator
-C:\Users\Magenta\AppData\Local\Temp\ccmBS96r.s:2076   .progmem.data.__c.2131:00000000 __c.2131
-C:\Users\Magenta\AppData\Local\Temp\ccmBS96r.s:864    .text.print_on_off:00000000 print_on_off
-C:\Users\Magenta\AppData\Local\Temp\ccmBS96r.s:2071   .progmem.data.__c.2136:00000000 __c.2136
-C:\Users\Magenta\AppData\Local\Temp\ccmBS96r.s:2066   .progmem.data.__c.2138:00000000 __c.2138
-C:\Users\Magenta\AppData\Local\Temp\ccmBS96r.s:911    .text.input_fd:00000000 input_fd
-C:\Users\Magenta\AppData\Local\Temp\ccmBS96r.s:2061   .progmem.data.__c.2148:00000000 __c.2148
-C:\Users\Magenta\AppData\Local\Temp\ccmBS96r.s:2056   .progmem.data.__c.2150:00000000 __c.2150
-C:\Users\Magenta\AppData\Local\Temp\ccmBS96r.s:1171   .text.input_hs:00000000 input_hs
-C:\Users\Magenta\AppData\Local\Temp\ccmBS96r.s:2051   .progmem.data.__c.2159:00000000 __c.2159
-C:\Users\Magenta\AppData\Local\Temp\ccmBS96r.s:2046   .progmem.data.__c.2161:00000000 __c.2161
-C:\Users\Magenta\AppData\Local\Temp\ccmBS96r.s:1298   .text.input_dc:00000000 input_dc
-C:\Users\Magenta\AppData\Local\Temp\ccmBS96r.s:2041   .progmem.data.__c.2169:00000000 __c.2169
-C:\Users\Magenta\AppData\Local\Temp\ccmBS96r.s:2036   .progmem.data.__c.2171:00000000 __c.2171
-C:\Users\Magenta\AppData\Local\Temp\ccmBS96r.s:1379   .text.input_t:00000000 input_t
-C:\Users\Magenta\AppData\Local\Temp\ccmBS96r.s:2031   .progmem.data.__c.2182:00000000 __c.2182
-C:\Users\Magenta\AppData\Local\Temp\ccmBS96r.s:2026   .progmem.data.__c.2184:00000000 __c.2184
-C:\Users\Magenta\AppData\Local\Temp\ccmBS96r.s:1598   .text.input_n:00000000 input_n
-C:\Users\Magenta\AppData\Local\Temp\ccmBS96r.s:2021   .progmem.data.__c.2192:00000000 __c.2192
-C:\Users\Magenta\AppData\Local\Temp\ccmBS96r.s:2016   .progmem.data.__c.2194:00000000 __c.2194
-C:\Users\Magenta\AppData\Local\Temp\ccmBS96r.s:2011   .progmem.data.__c.2196:00000000 __c.2196
-C:\Users\Magenta\AppData\Local\Temp\ccmBS96r.s:1751   .text.select_val:00000000 select_val
-C:\Users\Magenta\AppData\Local\Temp\ccmBS96r.s:1854   .text.input_trig:00000000 input_trig
-C:\Users\Magenta\AppData\Local\Temp\ccmBS96r.s:2006   .progmem.data.__c.2212:00000000 __c.2212
-C:\Users\Magenta\AppData\Local\Temp\ccmBS96r.s:2001   .progmem.data.__c.2214:00000000 __c.2214
-C:\Users\Magenta\AppData\Local\Temp\ccmBS96r.s:1996   .progmem.data.__c.2216:00000000 __c.2216
-C:\Users\Magenta\AppData\Local\Temp\ccmBS96r.s:1991   .progmem.data.__c.2218:00000000 __c.2218
-C:\Users\Magenta\AppData\Local\Temp\ccmBS96r.s:1913   .text.input_ext_sync:00000000 input_ext_sync
-C:\Users\Magenta\AppData\Local\Temp\ccmBS96r.s:1986   .progmem.data.__c.2223:00000000 __c.2223
-C:\Users\Magenta\AppData\Local\Temp\ccmBS96r.s:1981   .progmem.data.__c.2225:00000000 __c.2225
-C:\Users\Magenta\AppData\Local\Temp\ccmBS96r.s:1976   .progmem.data.__c.2227:00000000 __c.2227
-C:\Users\Magenta\AppData\Local\Temp\ccmBS96r.s:1971   .progmem.data.__c.2229:00000000 __c.2229
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:2      *ABS*:0000003e __SP_H__
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:3      *ABS*:0000003d __SP_L__
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:4      *ABS*:0000003f __SREG__
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:5      *ABS*:00000000 __tmp_reg__
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:6      *ABS*:00000001 __zero_reg__
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:133    .text.n_putchar:00000000 n_putchar
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:186    .text.nnl_puts_P:00000000 nnl_puts_P
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:233    .text.btnCheckAll:00000000 btnCheckAll
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:281    .text.btn_wait:00000000 btn_wait
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:2118   .bss.c.2100:00000000 c.2100
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:2113   .bss.st.2098:00000000 st.2098
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:2108   .bss.msk.2099:00000000 msk.2099
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:499    .text.btn_wait_up:00000000 btn_wait_up
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:545    .text.print_u:00000000 print_u
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:696    .text.print_fq:00000000 print_fq
+                            *COM*:00000037 generator
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:2103   .progmem.data.__c.2136:00000000 __c.2136
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:864    .text.print_on_off:00000000 print_on_off
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:2098   .progmem.data.__c.2141:00000000 __c.2141
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:2093   .progmem.data.__c.2143:00000000 __c.2143
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:912    .text.input_fd:00000000 input_fd
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:2088   .progmem.data.__c.2154:00000000 __c.2154
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:2083   .progmem.data.__c.2156:00000000 __c.2156
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:1194   .text.input_dc:00000000 input_dc
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:2078   .progmem.data.__c.2165:00000000 __c.2165
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:2073   .progmem.data.__c.2167:00000000 __c.2167
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:1299   .text.input_t:00000000 input_t
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:2068   .progmem.data.__c.2178:00000000 __c.2178
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:2063   .progmem.data.__c.2180:00000000 __c.2180
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:1518   .text.input_n:00000000 input_n
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:2058   .progmem.data.__c.2189:00000000 __c.2189
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:2053   .progmem.data.__c.2191:00000000 __c.2191
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:2048   .progmem.data.__c.2193:00000000 __c.2193
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:1678   .text.select_val:00000000 select_val
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:1781   .text.input_trig:00000000 input_trig
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:2043   .progmem.data.__c.2209:00000000 __c.2209
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:2038   .progmem.data.__c.2211:00000000 __c.2211
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:2033   .progmem.data.__c.2213:00000000 __c.2213
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:2028   .progmem.data.__c.2215:00000000 __c.2215
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:1840   .text.input_ext_sync:00000000 input_ext_sync
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:2023   .progmem.data.__c.2220:00000000 __c.2220
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:2018   .progmem.data.__c.2222:00000000 __c.2222
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:2013   .progmem.data.__c.2224:00000000 __c.2224
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:2008   .progmem.data.__c.2226:00000000 __c.2226
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:1899   .text.input_hs:00000000 input_hs
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:2003   .progmem.data.__c.2231:00000000 __c.2231
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:1998   .progmem.data.__c.2233:00000000 __c.2233
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:1993   .progmem.data.__c.2235:00000000 __c.2235
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:1988   .progmem.data.__c.2237:00000000 __c.2237
+C:\Users\Magenta\AppData\Local\Temp\ccKXyMrW.s:1983   .progmem.data.__c.2240:00000000 __c.2240
 
 UNDEFINED SYMBOLS
 lcd_clrscr
@@ -2402,5 +2420,5 @@ lcd_putc
 SerialPutChar
 __udivmodsi4
 __muluhisi3
-__mulsi3
+pwm_start
 __do_clear_bss

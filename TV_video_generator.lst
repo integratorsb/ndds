@@ -6,40 +6,42 @@
    6               	__zero_reg__ = 1
    8               		.text
    9               	.Ltext0:
- 121               		.section	.text.vsync_pulse,"ax",@progbits
- 123               	.global	vsync_pulse
- 125               	vsync_pulse:
+ 124               		.section	.text.vsync_pulse,"ax",@progbits
+ 126               	.global	vsync_pulse
+ 128               	vsync_pulse:
    1:TV_video_generator.c **** /*
    2:TV_video_generator.c ****  * TV_video_generator.c
    3:TV_video_generator.c ****  *
    4:TV_video_generator.c ****  * Created: 24.07.2017 23:05:55
    5:TV_video_generator.c ****  *  Author: integrator.sb@gmail.com
    6:TV_video_generator.c ****  */ 
-   7:TV_video_generator.c **** /*
-   8:TV_video_generator.c **** http://www.javiervalcarce.eu/html/arduino-tv-signal-generator-en.html
-   9:TV_video_generator.c **** */
-  10:TV_video_generator.c **** 
-  11:TV_video_generator.c **** #include "config.h"
-  12:TV_video_generator.c **** #include <avr/io.h>
-  13:TV_video_generator.c **** #include <util/delay.h>
-  14:TV_video_generator.c **** #include "menu.h"
-  15:TV_video_generator.c **** #include "TV_video_generator.h"
-  16:TV_video_generator.c **** 
-  17:TV_video_generator.c **** 
-  18:TV_video_generator.c ****  void vsync_pulse()
-  19:TV_video_generator.c **** {
- 127               	.LM0:
- 128               	.LFBB1:
- 129               	/* prologue: function */
- 130               	/* frame size = 0 */
- 131               	/* stack size = 0 */
- 132               	.L__stack_usage = 0
-  20:TV_video_generator.c ****       R2RPORT = LEVEL_SYNC; 
- 134               	.LM1:
- 135 0000 12BA      		out 0x12,__zero_reg__
- 136               	.LBB24:
- 137               	.LBB25:
- 139               	.Ltext1:
+   7:TV_video_generator.c **** 
+   8:TV_video_generator.c **** /*
+   9:TV_video_generator.c **** На основе кода
+  10:TV_video_generator.c **** http://www.javiervalcarce.eu/html/arduino-tv-signal-generator-en.html
+  11:TV_video_generator.c **** */
+  12:TV_video_generator.c **** 
+  13:TV_video_generator.c **** #include "config.h"
+  14:TV_video_generator.c **** #include <avr/io.h>
+  15:TV_video_generator.c **** #include <util/delay.h>
+  16:TV_video_generator.c **** #include "menu.h"
+  17:TV_video_generator.c **** #include "TV_video_generator.h"
+  18:TV_video_generator.c **** 
+  19:TV_video_generator.c **** 
+  20:TV_video_generator.c ****  void vsync_pulse()
+  21:TV_video_generator.c **** {
+ 130               	.LM0:
+ 131               	.LFBB1:
+ 132               	/* prologue: function */
+ 133               	/* frame size = 0 */
+ 134               	/* stack size = 0 */
+ 135               	.L__stack_usage = 0
+  22:TV_video_generator.c ****       R2RPORT = LEVEL_SYNC; 
+ 137               	.LM1:
+ 138 0000 12BA      		out 0x12,__zero_reg__
+ 139               	.LBB34:
+ 140               	.LBB35:
+ 142               	.Ltext1:
    1:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** /* Copyright (c) 2002, Marek Michalkiewicz
    2:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    Copyright (c) 2004,2005,2007 Joerg Wunsch
    3:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h ****    Copyright (c) 2007  Florin-Viorel Petrov
@@ -285,453 +287,724 @@
  243:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 	#endif
  244:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 
  245:c:\program files (x86)\atmel\studio 7\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h **** 	__builtin_avr_delay_cycles(__ticks_dc);
- 141               	.LM2:
- 142 0002 80EA      		ldi r24,lo8(-96)
- 143 0004 8A95      	1:	dec r24
- 144 0006 01F4      		brne 1b
- 145               	.LBE25:
- 146               	.LBE24:
- 148               	.Ltext2:
-  21:TV_video_generator.c ****       _delay_us(30); 
-  22:TV_video_generator.c ****       R2RPORT = LEVEL_BLACK; 
- 150               	.LM3:
- 151 0008 8FE0      		ldi r24,lo8(15)
- 152 000a 82BB      		out 0x12,r24
- 153               	.LBB26:
- 154               	.LBB27:
- 156               	.Ltext3:
- 158               	.LM4:
- 159 000c 8AE0      		ldi r24,lo8(10)
- 160 000e 8A95      	1:	dec r24
- 161 0010 01F4      		brne 1b
- 162 0012 00C0      		rjmp .
- 163 0014 0895      		ret
- 164               	.LBE27:
- 165               	.LBE26:
- 167               	.Lscope1:
- 168               		.section	.text.equal_pulse,"ax",@progbits
- 170               	.global	equal_pulse
- 172               	equal_pulse:
- 174               	.Ltext4:
-  23:TV_video_generator.c ****       _delay_us(2); 
-  24:TV_video_generator.c **** }
-  25:TV_video_generator.c **** 
-  26:TV_video_generator.c ****  void equal_pulse()
-  27:TV_video_generator.c **** {
- 176               	.LM5:
- 177               	.LFBB2:
- 178               	/* prologue: function */
- 179               	/* frame size = 0 */
- 180               	/* stack size = 0 */
- 181               	.L__stack_usage = 0
-  28:TV_video_generator.c ****       R2RPORT = LEVEL_SYNC; 
- 183               	.LM6:
- 184 0000 12BA      		out 0x12,__zero_reg__
- 185               	.LBB28:
- 186               	.LBB29:
- 188               	.Ltext5:
- 190               	.LM7:
- 191 0002 8AE0      		ldi r24,lo8(10)
- 192 0004 8A95      	1:	dec r24
- 193 0006 01F4      		brne 1b
- 194 0008 00C0      		rjmp .
- 195               	.LBE29:
- 196               	.LBE28:
- 198               	.Ltext6:
-  29:TV_video_generator.c ****       _delay_us(2); 
-  30:TV_video_generator.c ****       R2RPORT = LEVEL_BLACK; 
- 200               	.LM8:
- 201 000a 8FE0      		ldi r24,lo8(15)
- 202 000c 82BB      		out 0x12,r24
- 203               	.LBB30:
- 204               	.LBB31:
- 206               	.Ltext7:
- 208               	.LM9:
- 209 000e 80EA      		ldi r24,lo8(-96)
- 210 0010 8A95      	1:	dec r24
- 211 0012 01F4      		brne 1b
- 212 0014 0895      		ret
- 213               	.LBE31:
- 214               	.LBE30:
- 216               	.Lscope2:
- 217               		.section	.text.hsync_pulse,"ax",@progbits
- 219               	.global	hsync_pulse
- 221               	hsync_pulse:
- 223               	.Ltext8:
-  31:TV_video_generator.c ****       _delay_us(30);
-  32:TV_video_generator.c **** }
-  33:TV_video_generator.c **** 
-  34:TV_video_generator.c ****  void hsync_pulse()
-  35:TV_video_generator.c **** {
- 225               	.LM10:
- 226               	.LFBB3:
- 227               	/* prologue: function */
- 228               	/* frame size = 0 */
- 229               	/* stack size = 0 */
- 230               	.L__stack_usage = 0
-  36:TV_video_generator.c ****       R2RPORT = LEVEL_SYNC; 
- 232               	.LM11:
- 233 0000 12BA      		out 0x12,__zero_reg__
- 234               	.LBB32:
- 235               	.LBB33:
- 237               	.Ltext9:
- 239               	.LM12:
- 240 0002 8AE1      		ldi r24,lo8(26)
- 241 0004 8A95      	1:	dec r24
- 242 0006 01F4      		brne 1b
- 243 0008 00C0      		rjmp .
- 244               	.LBE33:
- 245               	.LBE32:
- 247               	.Ltext10:
-  37:TV_video_generator.c ****       _delay_us(5); //4.7us
-  38:TV_video_generator.c ****       R2RPORT = LEVEL_BLACK; 
- 249               	.LM13:
- 250 000a 8FE0      		ldi r24,lo8(15)
- 251 000c 82BB      		out 0x12,r24
- 252               	.LBB34:
- 253               	.LBB35:
- 255               	.Ltext11:
- 257               	.LM14:
- 258 000e 85E2      		ldi r24,lo8(37)
- 259 0010 8A95      	1:	dec r24
- 260 0012 01F4      		brne 1b
- 261 0014 0000      		nop
- 262 0016 0895      		ret
- 263               	.LBE35:
- 264               	.LBE34:
- 266               	.Lscope3:
- 267               		.section	.text.tv_vbars,"ax",@progbits
- 269               	.global	tv_vbars
- 271               	tv_vbars:
- 273               	.Ltext12:
-  39:TV_video_generator.c ****       _delay_us(7); //7.3us
-  40:TV_video_generator.c **** }
-  41:TV_video_generator.c **** 
-  42:TV_video_generator.c **** /*
-  43:TV_video_generator.c **** void tv_out()
-  44:TV_video_generator.c **** {
-  45:TV_video_generator.c **** 	uint16_t i;
-  46:TV_video_generator.c **** 	uint8_t c, n, k;
-  47:TV_video_generator.c **** 	
-  48:TV_video_generator.c **** 	n =0;
-  49:TV_video_generator.c **** 	c= 0;
+ 144               	.LM2:
+ 145 0002 80EA      		ldi r24,lo8(-96)
+ 146 0004 8A95      	1:	dec r24
+ 147 0006 01F4      		brne 1b
+ 148               	.LBE35:
+ 149               	.LBE34:
+ 151               	.Ltext2:
+  23:TV_video_generator.c ****       _delay_us(30); 
+  24:TV_video_generator.c ****       R2RPORT = LEVEL_BLACK; 
+ 153               	.LM3:
+ 154 0008 8FE0      		ldi r24,lo8(15)
+ 155 000a 82BB      		out 0x12,r24
+ 156               	.LBB36:
+ 157               	.LBB37:
+ 159               	.Ltext3:
+ 161               	.LM4:
+ 162 000c 8AE0      		ldi r24,lo8(10)
+ 163 000e 8A95      	1:	dec r24
+ 164 0010 01F4      		brne 1b
+ 165 0012 00C0      		rjmp .
+ 166 0014 0895      		ret
+ 167               	.LBE37:
+ 168               	.LBE36:
+ 170               	.Lscope1:
+ 171               		.section	.text.equal_pulse,"ax",@progbits
+ 173               	.global	equal_pulse
+ 175               	equal_pulse:
+ 177               	.Ltext4:
+  25:TV_video_generator.c ****       _delay_us(2); 
+  26:TV_video_generator.c **** }
+  27:TV_video_generator.c **** 
+  28:TV_video_generator.c ****  void equal_pulse()
+  29:TV_video_generator.c **** {
+ 179               	.LM5:
+ 180               	.LFBB2:
+ 181               	/* prologue: function */
+ 182               	/* frame size = 0 */
+ 183               	/* stack size = 0 */
+ 184               	.L__stack_usage = 0
+  30:TV_video_generator.c ****       R2RPORT = LEVEL_SYNC; 
+ 186               	.LM6:
+ 187 0000 12BA      		out 0x12,__zero_reg__
+ 188               	.LBB38:
+ 189               	.LBB39:
+ 191               	.Ltext5:
+ 193               	.LM7:
+ 194 0002 8AE0      		ldi r24,lo8(10)
+ 195 0004 8A95      	1:	dec r24
+ 196 0006 01F4      		brne 1b
+ 197 0008 00C0      		rjmp .
+ 198               	.LBE39:
+ 199               	.LBE38:
+ 201               	.Ltext6:
+  31:TV_video_generator.c ****       _delay_us(2); 
+  32:TV_video_generator.c ****       R2RPORT = LEVEL_BLACK; 
+ 203               	.LM8:
+ 204 000a 8FE0      		ldi r24,lo8(15)
+ 205 000c 82BB      		out 0x12,r24
+ 206               	.LBB40:
+ 207               	.LBB41:
+ 209               	.Ltext7:
+ 211               	.LM9:
+ 212 000e 80EA      		ldi r24,lo8(-96)
+ 213 0010 8A95      	1:	dec r24
+ 214 0012 01F4      		brne 1b
+ 215 0014 0895      		ret
+ 216               	.LBE41:
+ 217               	.LBE40:
+ 219               	.Lscope2:
+ 220               		.section	.text.hsync_pulse,"ax",@progbits
+ 222               	.global	hsync_pulse
+ 224               	hsync_pulse:
+ 226               	.Ltext8:
+  33:TV_video_generator.c ****       _delay_us(30);
+  34:TV_video_generator.c **** }
+  35:TV_video_generator.c **** 
+  36:TV_video_generator.c ****  void hsync_pulse()
+  37:TV_video_generator.c **** {
+ 228               	.LM10:
+ 229               	.LFBB3:
+ 230               	/* prologue: function */
+ 231               	/* frame size = 0 */
+ 232               	/* stack size = 0 */
+ 233               	.L__stack_usage = 0
+  38:TV_video_generator.c ****       R2RPORT = LEVEL_SYNC; 
+ 235               	.LM11:
+ 236 0000 12BA      		out 0x12,__zero_reg__
+ 237               	.LBB42:
+ 238               	.LBB43:
+ 240               	.Ltext9:
+ 242               	.LM12:
+ 243 0002 85E1      		ldi r24,lo8(21)
+ 244 0004 8A95      	1:	dec r24
+ 245 0006 01F4      		brne 1b
+ 246 0008 0000      		nop
+ 247               	.LBE43:
+ 248               	.LBE42:
+ 250               	.Ltext10:
+  39:TV_video_generator.c ****       _delay_us(4); //4.7us
+  40:TV_video_generator.c ****       R2RPORT = LEVEL_BLACK; 
+ 252               	.LM13:
+ 253 000a 8FE0      		ldi r24,lo8(15)
+ 254 000c 82BB      		out 0x12,r24
+ 255               	.LBB44:
+ 256               	.LBB45:
+ 258               	.Ltext11:
+ 260               	.LM14:
+ 261 000e 85E2      		ldi r24,lo8(37)
+ 262 0010 8A95      	1:	dec r24
+ 263 0012 01F4      		brne 1b
+ 264 0014 0000      		nop
+ 265 0016 0895      		ret
+ 266               	.LBE45:
+ 267               	.LBE44:
+ 269               	.Lscope3:
+ 270               		.section	.text.tv_vbars,"ax",@progbits
+ 272               	.global	tv_vbars
+ 274               	tv_vbars:
+ 276               	.Ltext12:
+  41:TV_video_generator.c ****       _delay_us(7); //7.3us
+  42:TV_video_generator.c **** }
+  43:TV_video_generator.c **** 
+  44:TV_video_generator.c **** 
+  45:TV_video_generator.c **** 
+  46:TV_video_generator.c **** void tv_vbars()
+  47:TV_video_generator.c **** {
+ 278               	.LM15:
+ 279               	.LFBB4:
+ 280 0000 FF92      		push r15
+ 281 0002 0F93      		push r16
+ 282 0004 1F93      		push r17
+ 283 0006 CF93      		push r28
+ 284 0008 DF93      		push r29
+ 285               	/* prologue: function */
+ 286               	/* frame size = 0 */
+ 287               	/* stack size = 5 */
+ 288               	.L__stack_usage = 5
+ 290               	.LM16:
+ 291 000a C1E3      		ldi r28,lo8(49)
+ 292 000c D1E0      		ldi r29,lo8(1)
+  48:TV_video_generator.c **** 	uint16_t i;
+  49:TV_video_generator.c **** 	// 6-310 (305 lines):
   50:TV_video_generator.c **** 	for( i = 0; i < 305; i++)
   51:TV_video_generator.c **** 	{
   52:TV_video_generator.c **** 		hsync_pulse();
-  53:TV_video_generator.c **** 		if(c == 0)
-  54:TV_video_generator.c **** 		{
-  55:TV_video_generator.c **** 			c = 25;
-  56:TV_video_generator.c **** 			n+=16;
-  57:TV_video_generator.c **** 		}
-  58:TV_video_generator.c **** 		else
-  59:TV_video_generator.c **** 			c--;
+  53:TV_video_generator.c **** 		R2RPORT = LEVEL_GRAY; _delay_us(8);
+ 294               	.LM17:
+ 295 000e 1EE1      		ldi r17,lo8(30)
+  54:TV_video_generator.c **** 		R2RPORT =LEVEL_BLACK; _delay_us(14);
+ 297               	.LM18:
+ 298 0010 0FE0      		ldi r16,lo8(15)
+  55:TV_video_generator.c **** 		R2RPORT =LEVEL_WHITE; _delay_us(8);
+ 300               	.LM19:
+ 301 0012 83E3      		ldi r24,lo8(51)
+ 302 0014 F82E      		mov r15,r24
+ 303               	.L5:
+  52:TV_video_generator.c **** 		R2RPORT = LEVEL_GRAY; _delay_us(8);
+ 305               	.LM20:
+ 306 0016 00D0      		rcall hsync_pulse
+  53:TV_video_generator.c **** 		R2RPORT =LEVEL_BLACK; _delay_us(14);
+ 308               	.LM21:
+ 309 0018 12BB      		out 0x12,r17
+ 310               	.LBB46:
+ 311               	.LBB47:
+ 313               	.Ltext13:
+ 315               	.LM22:
+ 316 001a 8AE2      		ldi r24,lo8(42)
+ 317 001c 8A95      	1:	dec r24
+ 318 001e 01F4      		brne 1b
+ 319 0020 00C0      		rjmp .
+ 320               	.LBE47:
+ 321               	.LBE46:
+ 323               	.Ltext14:
+  54:TV_video_generator.c **** 		R2RPORT =LEVEL_WHITE; _delay_us(8);
+ 325               	.LM23:
+ 326 0022 02BB      		out 0x12,r16
+ 327               	.LBB48:
+ 328               	.LBB49:
+ 330               	.Ltext15:
+ 332               	.LM24:
+ 333 0024 8AE4      		ldi r24,lo8(74)
+ 334 0026 8A95      	1:	dec r24
+ 335 0028 01F4      		brne 1b
+ 336 002a 00C0      		rjmp .
+ 337               	.LBE49:
+ 338               	.LBE48:
+ 340               	.Ltext16:
+ 342               	.LM25:
+ 343 002c F2BA      		out 0x12,r15
+ 344               	.LBB50:
+ 345               	.LBB51:
+ 347               	.Ltext17:
+ 349               	.LM26:
+ 350 002e 8AE2      		ldi r24,lo8(42)
+ 351 0030 8A95      	1:	dec r24
+ 352 0032 01F4      		brne 1b
+ 353 0034 00C0      		rjmp .
+ 354               	.LBE51:
+ 355               	.LBE50:
+ 357               	.Ltext18:
+  56:TV_video_generator.c **** 		R2RPORT =LEVEL_BLACK; _delay_us(14);
+ 359               	.LM27:
+ 360 0036 02BB      		out 0x12,r16
+ 361               	.LBB52:
+ 362               	.LBB53:
+ 364               	.Ltext19:
+ 366               	.LM28:
+ 367 0038 8AE4      		ldi r24,lo8(74)
+ 368 003a 8A95      	1:	dec r24
+ 369 003c 01F4      		brne 1b
+ 370 003e 00C0      		rjmp .
+ 371               	.LBE53:
+ 372               	.LBE52:
+ 374               	.Ltext20:
+  57:TV_video_generator.c **** 		R2RPORT =LEVEL_GRAY; _delay_us(8);
+ 376               	.LM29:
+ 377 0040 12BB      		out 0x12,r17
+ 378               	.LBB54:
+ 379               	.LBB55:
+ 381               	.Ltext21:
+ 383               	.LM30:
+ 384 0042 8AE2      		ldi r24,lo8(42)
+ 385 0044 8A95      	1:	dec r24
+ 386 0046 01F4      		brne 1b
+ 387 0048 00C0      		rjmp .
+ 388 004a 2197      		sbiw r28,1
+ 389               	.LBE55:
+ 390               	.LBE54:
+ 392               	.Ltext22:
+  50:TV_video_generator.c **** 	{
+ 394               	.LM31:
+ 395 004c 01F4      		brne .L5
+ 396               	/* epilogue start */
+  58:TV_video_generator.c **** 	}
+  59:TV_video_generator.c **** }
+ 398               	.LM32:
+ 399 004e DF91      		pop r29
+ 400 0050 CF91      		pop r28
+ 401 0052 1F91      		pop r17
+ 402 0054 0F91      		pop r16
+ 403 0056 FF90      		pop r15
+ 404 0058 0895      		ret
+ 406               	.Lscope4:
+ 407               		.section	.text.tv_squares,"ax",@progbits
+ 410               	.global	tv_squares
+ 412               	tv_squares:
   60:TV_video_generator.c **** 
-  61:TV_video_generator.c **** 		for(k = 13; k!=0;k--)
-  62:TV_video_generator.c **** 		{
-  63:TV_video_generator.c **** 			R2RPORT = buf[ n + c];
-  64:TV_video_generator.c **** 			_delay_us(4);
-  65:TV_video_generator.c **** 		}
-  66:TV_video_generator.c **** 
-  67:TV_video_generator.c **** 	}
+  61:TV_video_generator.c **** void tv_squares(uint8_t c1)
+  62:TV_video_generator.c **** {
+ 414               	.LM33:
+ 415               	.LFBB5:
+ 416 0000 CF92      		push r12
+ 417 0002 DF92      		push r13
+ 418 0004 FF92      		push r15
+ 419 0006 0F93      		push r16
+ 420 0008 1F93      		push r17
+ 421 000a CF93      		push r28
+ 422 000c DF93      		push r29
+ 423 000e 00D0      		rcall .
+ 424 0010 1F92      		push __zero_reg__
+ 425 0012 CDB7      		in r28,__SP_L__
+ 426 0014 DEB7      		in r29,__SP_H__
+ 427               	/* prologue: function */
+ 428               	/* frame size = 3 */
+ 429               	/* stack size = 10 */
+ 430               	.L__stack_usage = 10
+  63:TV_video_generator.c **** 	uint16_t i;
+  64:TV_video_generator.c **** 	uint8_t l1, l2, c, c2;//, tmp;
+  65:TV_video_generator.c **** 	
+  66:TV_video_generator.c **** 	c = 0;
+  67:TV_video_generator.c **** 	c2 = LEVEL_WHITE;
   68:TV_video_generator.c **** 	
-  69:TV_video_generator.c **** }
-  70:TV_video_generator.c **** void tv_out1()
-  71:TV_video_generator.c **** {
-  72:TV_video_generator.c **** 	uint16_t i;
-  73:TV_video_generator.c **** 	uint8_t c, k;
-  74:TV_video_generator.c **** 	
-  75:TV_video_generator.c **** 
-  76:TV_video_generator.c **** 	c= 0;
-  77:TV_video_generator.c **** 	for( i = 0; i < 305; i++)
-  78:TV_video_generator.c **** 	{
-  79:TV_video_generator.c **** 		hsync_pulse();
-  80:TV_video_generator.c **** 		if(c == 0)
-  81:TV_video_generator.c **** 		{
-  82:TV_video_generator.c **** 			c = 76;
-  83:TV_video_generator.c **** 			R2RPORT = LEVEL_WHITE;
-  84:TV_video_generator.c **** 			_delay_us(52);	
-  85:TV_video_generator.c **** 			R2RPORT = LEVEL_BLACK;
-  86:TV_video_generator.c **** 		}
-  87:TV_video_generator.c **** 		else
-  88:TV_video_generator.c **** 		{
-  89:TV_video_generator.c **** 			for(k = 13; k != 0;k--)
-  90:TV_video_generator.c **** 			{
-  91:TV_video_generator.c **** 				R2RPORT = LEVEL_BLACK;
-  92:TV_video_generator.c **** 				_delay_us(12);
-  93:TV_video_generator.c **** 				R2RPORT = LEVEL_WHITE;
-  94:TV_video_generator.c **** 				_delay_us(1);
-  95:TV_video_generator.c **** 			}
-  96:TV_video_generator.c **** 			c--;			
-  97:TV_video_generator.c **** 		}
-  98:TV_video_generator.c **** 
-  99:TV_video_generator.c **** 	}
- 100:TV_video_generator.c **** }
- 101:TV_video_generator.c **** */
- 102:TV_video_generator.c **** 
- 103:TV_video_generator.c **** 
- 104:TV_video_generator.c **** void tv_vbars()
- 105:TV_video_generator.c **** {
- 275               	.LM15:
- 276               	.LFBB4:
- 277 0000 FF92      		push r15
- 278 0002 0F93      		push r16
- 279 0004 1F93      		push r17
- 280 0006 CF93      		push r28
- 281 0008 DF93      		push r29
- 282               	/* prologue: function */
- 283               	/* frame size = 0 */
- 284               	/* stack size = 5 */
- 285               	.L__stack_usage = 5
- 287               	.LM16:
- 288 000a C1E3      		ldi r28,lo8(49)
- 289 000c D1E0      		ldi r29,lo8(1)
- 106:TV_video_generator.c **** 	uint16_t i;
- 107:TV_video_generator.c **** 	// 6-310 (305 lines):
- 108:TV_video_generator.c **** 	for( i = 0; i < 305; i++)
- 109:TV_video_generator.c **** 	{
- 110:TV_video_generator.c **** 		hsync_pulse();
- 111:TV_video_generator.c **** 		R2RPORT = LEVEL_GRAY; _delay_us(8);
- 291               	.LM17:
- 292 000e 1EE1      		ldi r17,lo8(30)
- 112:TV_video_generator.c **** 		R2RPORT =LEVEL_BLACK; _delay_us(14);
- 294               	.LM18:
- 295 0010 0FE0      		ldi r16,lo8(15)
- 113:TV_video_generator.c **** 		R2RPORT =LEVEL_WHITE; _delay_us(8);
- 297               	.LM19:
- 298 0012 83E3      		ldi r24,lo8(51)
- 299 0014 F82E      		mov r15,r24
- 300               	.L5:
- 110:TV_video_generator.c **** 		R2RPORT = LEVEL_GRAY; _delay_us(8);
- 302               	.LM20:
- 303 0016 00D0      		rcall hsync_pulse
- 111:TV_video_generator.c **** 		R2RPORT =LEVEL_BLACK; _delay_us(14);
- 305               	.LM21:
- 306 0018 12BB      		out 0x12,r17
- 307               	.LBB36:
- 308               	.LBB37:
- 310               	.Ltext13:
- 312               	.LM22:
- 313 001a 8AE2      		ldi r24,lo8(42)
- 314 001c 8A95      	1:	dec r24
- 315 001e 01F4      		brne 1b
- 316 0020 00C0      		rjmp .
- 317               	.LBE37:
- 318               	.LBE36:
- 320               	.Ltext14:
- 112:TV_video_generator.c **** 		R2RPORT =LEVEL_WHITE; _delay_us(8);
- 322               	.LM23:
- 323 0022 02BB      		out 0x12,r16
- 324               	.LBB38:
- 325               	.LBB39:
- 327               	.Ltext15:
- 329               	.LM24:
- 330 0024 8AE4      		ldi r24,lo8(74)
- 331 0026 8A95      	1:	dec r24
- 332 0028 01F4      		brne 1b
- 333 002a 00C0      		rjmp .
- 334               	.LBE39:
- 335               	.LBE38:
- 337               	.Ltext16:
- 339               	.LM25:
- 340 002c F2BA      		out 0x12,r15
- 341               	.LBB40:
- 342               	.LBB41:
- 344               	.Ltext17:
- 346               	.LM26:
- 347 002e 8AE2      		ldi r24,lo8(42)
- 348 0030 8A95      	1:	dec r24
- 349 0032 01F4      		brne 1b
- 350 0034 00C0      		rjmp .
- 351               	.LBE41:
- 352               	.LBE40:
- 354               	.Ltext18:
- 114:TV_video_generator.c **** 		R2RPORT =LEVEL_BLACK; _delay_us(14);
- 356               	.LM27:
- 357 0036 02BB      		out 0x12,r16
- 358               	.LBB42:
- 359               	.LBB43:
- 361               	.Ltext19:
- 363               	.LM28:
- 364 0038 8AE4      		ldi r24,lo8(74)
- 365 003a 8A95      	1:	dec r24
- 366 003c 01F4      		brne 1b
- 367 003e 00C0      		rjmp .
- 368               	.LBE43:
- 369               	.LBE42:
- 371               	.Ltext20:
- 115:TV_video_generator.c **** 		R2RPORT =LEVEL_GRAY; _delay_us(8);
- 373               	.LM29:
- 374 0040 12BB      		out 0x12,r17
- 375               	.LBB44:
- 376               	.LBB45:
- 378               	.Ltext21:
- 380               	.LM30:
- 381 0042 8AE2      		ldi r24,lo8(42)
- 382 0044 8A95      	1:	dec r24
- 383 0046 01F4      		brne 1b
- 384 0048 00C0      		rjmp .
- 385 004a 2197      		sbiw r28,1
- 386               	.LBE45:
- 387               	.LBE44:
- 389               	.Ltext22:
- 108:TV_video_generator.c **** 	{
- 391               	.LM31:
- 392 004c 01F4      		brne .L5
- 393               	/* epilogue start */
- 116:TV_video_generator.c **** 	}
- 117:TV_video_generator.c **** }
- 395               	.LM32:
- 396 004e DF91      		pop r29
- 397 0050 CF91      		pop r28
- 398 0052 1F91      		pop r17
- 399 0054 0F91      		pop r16
- 400 0056 FF90      		pop r15
- 401 0058 0895      		ret
- 403               	.Lscope4:
- 404               		.section	.text.tv_gen,"ax",@progbits
- 407               	.global	tv_gen
- 409               	tv_gen:
- 118:TV_video_generator.c **** 
- 119:TV_video_generator.c **** 
- 120:TV_video_generator.c **** 
+  69:TV_video_generator.c **** 	i = 305;
+  70:TV_video_generator.c **** 	while( i--)
+ 432               	.LM34:
+ 433 0016 92E3      		ldi r25,lo8(50)
+ 434 0018 C92E      		mov r12,r25
+ 435 001a DD24      		clr r13
+ 436 001c D394      		inc r13
+  67:TV_video_generator.c **** 	
+ 438               	.LM35:
+ 439 001e 03E3      		ldi r16,lo8(51)
+  66:TV_video_generator.c **** 	c2 = LEVEL_WHITE;
+ 441               	.LM36:
+ 442 0020 10E0      		ldi r17,0
+  71:TV_video_generator.c **** 	{
+  72:TV_video_generator.c **** /*
+  73:TV_video_generator.c **** 		if(c == 0)
+  74:TV_video_generator.c **** 		{
+  75:TV_video_generator.c **** 			tmp = c1;
+  76:TV_video_generator.c **** 			c1 = c2;
+  77:TV_video_generator.c **** 			c2 = tmp;
+  78:TV_video_generator.c **** 			c = 305/4;
+  79:TV_video_generator.c **** 			l1 = LEVEL_BLACK;
+  80:TV_video_generator.c **** 			l2 = LEVEL_BLACK;
+  81:TV_video_generator.c **** 		}
+  82:TV_video_generator.c **** 		else
+  83:TV_video_generator.c **** 		{
+  84:TV_video_generator.c **** 			c--;
+  85:TV_video_generator.c **** 			l1 = c1;
+  86:TV_video_generator.c **** 			l2 = c2;
+  87:TV_video_generator.c **** 		}
+  88:TV_video_generator.c **** */
+  89:TV_video_generator.c **** 		asm volatile("tst %0		\n\t"
+  90:TV_video_generator.c **** 		"brne 1f				\n\t"
+  91:TV_video_generator.c **** 		"ldi %0, 305/4			\n\t"
+  92:TV_video_generator.c **** 		"mov __tmp_reg__, %3	\n\t"
+  93:TV_video_generator.c **** 		"mov %3, %4				\n\t"
+  94:TV_video_generator.c **** 		"mov %4, __tmp_reg__	\n\t"
+  95:TV_video_generator.c **** 		"ldi %1, 15				\n\t"
+  96:TV_video_generator.c **** 		"ldi %2, 15				\n\t"
+  97:TV_video_generator.c **** 		"rjmp 2f				\n\t"
+  98:TV_video_generator.c **** 		"1:						\n\t"
+  99:TV_video_generator.c **** 		"dec %0					\n\t"
+ 100:TV_video_generator.c **** 		"mov %1, %3				\n\t"
+ 101:TV_video_generator.c **** 		"mov %2, %4				\n\t"
+ 102:TV_video_generator.c **** 		"nop					\n\t"
+ 103:TV_video_generator.c **** 		"nop					\n\t"
+ 104:TV_video_generator.c **** 		"nop					\n\t"
+ 105:TV_video_generator.c **** 		"nop					\n\t"
+ 106:TV_video_generator.c **** 		"2:						\n\t"
+ 107:TV_video_generator.c **** 		:"+d"(c),"+d"(l1), "+d"(l2), "+d"(c1), "+d"(c2) );
+ 108:TV_video_generator.c **** 		
+ 109:TV_video_generator.c **** 		hsync_pulse();
+ 110:TV_video_generator.c **** 		R2RPORT = l1; _delay_us(12);
+ 111:TV_video_generator.c **** 		R2RPORT = LEVEL_BLACK; asm("nop");asm("nop");
+ 444               	.LM37:
+ 445 0022 4FE0      		ldi r20,lo8(15)
+ 446 0024 F42E      		mov r15,r20
+ 447               	.L9:
+ 448 0026 91E0      		ldi r25,1
+ 449 0028 C91A      		sub r12,r25
+ 450 002a D108      		sbc r13,__zero_reg__
+  70:TV_video_generator.c **** 	{
+ 452               	.LM38:
+ 453 002c 01F4      		brne .+2
+ 454 002e 00C0      		rjmp .L11
+  89:TV_video_generator.c **** 		"brne 1f				\n\t"
+ 456               	.LM39:
+ 457               	/* #APP */
+ 458               	 ;  89 "TV_video_generator.c" 1
+ 459 0030 1123      		tst r17		
+ 460 0032 01F4      		brne 1f				
+ 461 0034 1CE4      		ldi r17, 305/4			
+ 462 0036 082E      		mov __tmp_reg__, r24	
+ 463 0038 802F      		mov r24, r16				
+ 464 003a 002D      		mov r16, __tmp_reg__	
+ 465 003c 2FE0      		ldi r18, 15				
+ 466 003e 3FE0      		ldi r19, 15				
+ 467 0040 00C0      		rjmp 2f				
+ 468               		1:						
+ 469 0042 1A95      		dec r17					
+ 470 0044 282F      		mov r18, r24				
+ 471 0046 302F      		mov r19, r16				
+ 472 0048 0000      		nop					
+ 473 004a 0000      		nop					
+ 474 004c 0000      		nop					
+ 475 004e 0000      		nop					
+ 476               		2:						
+ 477               		
+ 478               	 ;  0 "" 2
+ 109:TV_video_generator.c **** 		R2RPORT = l1; _delay_us(12);
+ 480               	.LM40:
+ 481               	/* #NOAPP */
+ 482 0050 2983      		std Y+1,r18
+ 483 0052 3A83      		std Y+2,r19
+ 484 0054 8B83      		std Y+3,r24
+ 485 0056 00D0      		rcall hsync_pulse
+ 110:TV_video_generator.c **** 		R2RPORT = LEVEL_BLACK; asm("nop");asm("nop");
+ 487               	.LM41:
+ 488 0058 2981      		ldd r18,Y+1
+ 489 005a 22BB      		out 0x12,r18
+ 490               	.LBB56:
+ 491               	.LBB57:
+ 493               	.Ltext23:
+ 495               	.LM42:
+ 496 005c 90E4      		ldi r25,lo8(64)
+ 497 005e 9A95      	1:	dec r25
+ 498 0060 01F4      		brne 1b
+ 499               	.LBE57:
+ 500               	.LBE56:
+ 502               	.Ltext24:
+ 504               	.LM43:
+ 505 0062 F2BA      		out 0x12,r15
+ 506               	/* #APP */
+ 507               	 ;  111 "TV_video_generator.c" 1
+ 508 0064 0000      		nop
+ 509               	 ;  0 "" 2
+ 510               	 ;  111 "TV_video_generator.c" 1
+ 511 0066 0000      		nop
+ 512               	 ;  0 "" 2
+ 112:TV_video_generator.c **** 		R2RPORT = l2; _delay_us(12);
+ 514               	.LM44:
+ 515               	/* #NOAPP */
+ 516 0068 3A81      		ldd r19,Y+2
+ 517 006a 32BB      		out 0x12,r19
+ 518               	.LBB58:
+ 519               	.LBB59:
+ 521               	.Ltext25:
+ 523               	.LM45:
+ 524 006c 90E4      		ldi r25,lo8(64)
+ 525 006e 9A95      	1:	dec r25
+ 526 0070 01F4      		brne 1b
+ 527               	.LBE59:
+ 528               	.LBE58:
+ 530               	.Ltext26:
+ 113:TV_video_generator.c **** 		R2RPORT = LEVEL_BLACK; asm("nop");asm("nop");
+ 532               	.LM46:
+ 533 0072 F2BA      		out 0x12,r15
+ 534               	/* #APP */
+ 535               	 ;  113 "TV_video_generator.c" 1
+ 536 0074 0000      		nop
+ 537               	 ;  0 "" 2
+ 538               	 ;  113 "TV_video_generator.c" 1
+ 539 0076 0000      		nop
+ 540               	 ;  0 "" 2
+ 114:TV_video_generator.c **** 		R2RPORT = l1; _delay_us(12);
+ 542               	.LM47:
+ 543               	/* #NOAPP */
+ 544 0078 22BB      		out 0x12,r18
+ 545               	.LBB60:
+ 546               	.LBB61:
+ 548               	.Ltext27:
+ 550               	.LM48:
+ 551 007a 90E4      		ldi r25,lo8(64)
+ 552 007c 9A95      	1:	dec r25
+ 553 007e 01F4      		brne 1b
+ 554               	.LBE61:
+ 555               	.LBE60:
+ 557               	.Ltext28:
+ 115:TV_video_generator.c **** 		R2RPORT = LEVEL_BLACK; asm("nop");asm("nop");
+ 559               	.LM49:
+ 560 0080 F2BA      		out 0x12,r15
+ 561               	/* #APP */
+ 562               	 ;  115 "TV_video_generator.c" 1
+ 563 0082 0000      		nop
+ 564               	 ;  0 "" 2
+ 565               	 ;  115 "TV_video_generator.c" 1
+ 566 0084 0000      		nop
+ 567               	 ;  0 "" 2
+ 116:TV_video_generator.c **** 		R2RPORT = l2; _delay_us(12);
+ 569               	.LM50:
+ 570               	/* #NOAPP */
+ 571 0086 32BB      		out 0x12,r19
+ 572               	.LBB62:
+ 573               	.LBB63:
+ 575               	.Ltext29:
+ 577               	.LM51:
+ 578 0088 90E4      		ldi r25,lo8(64)
+ 579 008a 9A95      	1:	dec r25
+ 580 008c 01F4      		brne 1b
+ 581               	.LBE63:
+ 582               	.LBE62:
+ 584               	.Ltext30:
+ 117:TV_video_generator.c **** 		R2RPORT = LEVEL_BLACK; asm("nop");asm("nop");
+ 586               	.LM52:
+ 587 008e F2BA      		out 0x12,r15
+ 588               	/* #APP */
+ 589               	 ;  117 "TV_video_generator.c" 1
+ 590 0090 0000      		nop
+ 591               	 ;  0 "" 2
+ 592               	 ;  117 "TV_video_generator.c" 1
+ 593 0092 0000      		nop
+ 594               	 ;  0 "" 2
+ 118:TV_video_generator.c **** 		R2RPORT = l1; _delay_us(2);
+ 596               	.LM53:
+ 597               	/* #NOAPP */
+ 598 0094 22BB      		out 0x12,r18
+ 599               	.LBB64:
+ 600               	.LBB65:
+ 602               	.Ltext31:
+ 604               	.LM54:
+ 605 0096 9AE0      		ldi r25,lo8(10)
+ 606 0098 9A95      	1:	dec r25
+ 607 009a 01F4      		brne 1b
+ 608 009c 00C0      		rjmp .
+ 609 009e 8B81      		ldd r24,Y+3
+ 610 00a0 00C0      		rjmp .L9
+ 611               	.L11:
+ 612               	/* epilogue start */
+ 613               	.LBE65:
+ 614               	.LBE64:
+ 616               	.Ltext32:
+ 119:TV_video_generator.c **** 	}
+ 120:TV_video_generator.c **** }
+ 618               	.LM55:
+ 619 00a2 0F90      		pop __tmp_reg__
+ 620 00a4 0F90      		pop __tmp_reg__
+ 621 00a6 0F90      		pop __tmp_reg__
+ 622 00a8 DF91      		pop r29
+ 623 00aa CF91      		pop r28
+ 624 00ac 1F91      		pop r17
+ 625 00ae 0F91      		pop r16
+ 626 00b0 FF90      		pop r15
+ 627 00b2 DF90      		pop r13
+ 628 00b4 CF90      		pop r12
+ 629 00b6 0895      		ret
+ 637               	.Lscope5:
+ 638               		.section	.text.tv_lattice,"ax",@progbits
+ 640               	.global	tv_lattice
+ 642               	tv_lattice:
  121:TV_video_generator.c **** 
- 122:TV_video_generator.c **** void tv_gen(void(*f)(void))
+ 122:TV_video_generator.c **** void tv_lattice()
  123:TV_video_generator.c **** {
- 411               	.LM33:
- 412               	.LFBB5:
- 413 0000 CF93      		push r28
- 414 0002 DF93      		push r29
- 415               	/* prologue: function */
- 416               	/* frame size = 0 */
- 417               	/* stack size = 2 */
- 418               	.L__stack_usage = 2
- 419 0004 EC01      		movw r28,r24
- 124:TV_video_generator.c ****   
- 125:TV_video_generator.c ****       R2RPORT = 0;
- 421               	.LM34:
- 422 0006 12BA      		out 0x12,__zero_reg__
- 423               	.L9:
- 126:TV_video_generator.c ****       while(!btnCheck(BTN_START))
- 425               	.LM35:
- 426 0008 9C9B      		sbis 0x13,4
- 427 000a 00C0      		rjmp .L11
- 127:TV_video_generator.c ****       {
- 128:TV_video_generator.c **** 	      
- 129:TV_video_generator.c **** 	      // 1:
- 130:TV_video_generator.c **** 	      vsync_pulse(); vsync_pulse();
- 429               	.LM36:
- 430 000c 00D0      		rcall vsync_pulse
- 431 000e 00D0      		rcall vsync_pulse
- 131:TV_video_generator.c **** 	      // 2:
- 132:TV_video_generator.c **** 	      vsync_pulse(); vsync_pulse();
- 433               	.LM37:
- 434 0010 00D0      		rcall vsync_pulse
- 435 0012 00D0      		rcall vsync_pulse
- 133:TV_video_generator.c **** 	      // 3:
- 134:TV_video_generator.c **** 	      vsync_pulse(); equal_pulse();
- 437               	.LM38:
- 438 0014 00D0      		rcall vsync_pulse
- 439 0016 00D0      		rcall equal_pulse
- 135:TV_video_generator.c **** 	      // 4:
- 136:TV_video_generator.c **** 	      equal_pulse(); equal_pulse();
- 441               	.LM39:
- 442 0018 00D0      		rcall equal_pulse
- 443 001a 00D0      		rcall equal_pulse
- 137:TV_video_generator.c **** 	      // 5:
- 138:TV_video_generator.c **** 	      equal_pulse(); equal_pulse();
- 445               	.LM40:
- 446 001c 00D0      		rcall equal_pulse
- 447 001e 00D0      		rcall equal_pulse
- 139:TV_video_generator.c **** 	      
- 140:TV_video_generator.c **** 		  f();
- 449               	.LM41:
- 450 0020 FE01      		movw r30,r28
- 451 0022 0995      		icall
- 141:TV_video_generator.c **** 	      
- 142:TV_video_generator.c **** 	      // 311:
- 143:TV_video_generator.c **** 	      equal_pulse(); equal_pulse();
- 453               	.LM42:
- 454 0024 00D0      		rcall equal_pulse
- 455 0026 00D0      		rcall equal_pulse
- 144:TV_video_generator.c **** 	      // 312:
- 145:TV_video_generator.c **** 	      equal_pulse(); equal_pulse();
- 457               	.LM43:
- 458 0028 00D0      		rcall equal_pulse
- 459 002a 00D0      		rcall equal_pulse
- 146:TV_video_generator.c **** 	      // 313:
- 147:TV_video_generator.c **** 	      equal_pulse(); vsync_pulse();
- 461               	.LM44:
- 462 002c 00D0      		rcall equal_pulse
- 463 002e 00D0      		rcall vsync_pulse
- 148:TV_video_generator.c **** 	      // 314:
- 149:TV_video_generator.c **** 	      vsync_pulse(); vsync_pulse();
- 465               	.LM45:
- 466 0030 00D0      		rcall vsync_pulse
- 467 0032 00D0      		rcall vsync_pulse
- 150:TV_video_generator.c **** 	      // 315:
- 151:TV_video_generator.c **** 	      vsync_pulse(); vsync_pulse();
- 469               	.LM46:
- 470 0034 00D0      		rcall vsync_pulse
- 471 0036 00D0      		rcall vsync_pulse
- 152:TV_video_generator.c **** 	      // 316:
- 153:TV_video_generator.c **** 	      equal_pulse(); equal_pulse();
- 473               	.LM47:
- 474 0038 00D0      		rcall equal_pulse
- 475 003a 00D0      		rcall equal_pulse
- 154:TV_video_generator.c **** 	      // 317:
- 155:TV_video_generator.c **** 	      equal_pulse(); equal_pulse();
- 477               	.LM48:
- 478 003c 00D0      		rcall equal_pulse
- 479 003e 00D0      		rcall equal_pulse
- 156:TV_video_generator.c **** 	      
- 157:TV_video_generator.c **** 	      // 318-622 (305 lines):
- 158:TV_video_generator.c **** 	      f();
- 481               	.LM49:
- 482 0040 FE01      		movw r30,r28
- 483 0042 0995      		icall
- 159:TV_video_generator.c **** 	      
- 160:TV_video_generator.c **** 	      // 623:
- 161:TV_video_generator.c **** 	      equal_pulse(); equal_pulse();
- 485               	.LM50:
- 486 0044 00D0      		rcall equal_pulse
- 487 0046 00D0      		rcall equal_pulse
- 162:TV_video_generator.c **** 	      // 624:
- 163:TV_video_generator.c **** 	      equal_pulse(); equal_pulse();
- 489               	.LM51:
- 490 0048 00D0      		rcall equal_pulse
- 491 004a 00D0      		rcall equal_pulse
- 164:TV_video_generator.c **** 	      // 625:
- 165:TV_video_generator.c **** 	      equal_pulse(); equal_pulse();
- 493               	.LM52:
- 494 004c 00D0      		rcall equal_pulse
- 495 004e 00D0      		rcall equal_pulse
- 496 0050 00C0      		rjmp .L9
- 497               	.L11:
- 166:TV_video_generator.c ****       }
- 167:TV_video_generator.c **** 	R2RPORT = 0;
- 499               	.LM53:
- 500 0052 12BA      		out 0x12,__zero_reg__
- 501               	/* epilogue start */
- 168:TV_video_generator.c **** }...
- 503               	.LM54:
- 504 0054 DF91      		pop r29
- 505 0056 CF91      		pop r28
- 506 0058 0895      		ret
- 508               	.Lscope5:
- 509               		.text
- 511               	.Letext0:
- 512               		.ident	"GCC: (AVR_8_bit_GNU_Toolchain_3.5.0_1662) 4.9.2"
+ 644               	.LM56:
+ 645               	.LFBB6:
+ 646               	/* prologue: function */
+ 647               	/* frame size = 0 */
+ 648               	/* stack size = 0 */
+ 649               	.L__stack_usage = 0
+ 124:TV_video_generator.c **** 	tv_squares(LEVEL_WHITE);
+ 651               	.LM57:
+ 652 0000 83E3      		ldi r24,lo8(51)
+ 653 0002 00C0      		rjmp tv_squares
+ 655               	.Lscope6:
+ 656               		.section	.text.tv_chessboard,"ax",@progbits
+ 658               	.global	tv_chessboard
+ 660               	tv_chessboard:
+ 125:TV_video_generator.c **** }
+ 126:TV_video_generator.c **** 
+ 127:TV_video_generator.c **** void tv_chessboard()
+ 128:TV_video_generator.c **** {
+ 662               	.LM58:
+ 663               	.LFBB7:
+ 664               	/* prologue: function */
+ 665               	/* frame size = 0 */
+ 666               	/* stack size = 0 */
+ 667               	.L__stack_usage = 0
+ 129:TV_video_generator.c **** 	tv_squares(LEVEL_BLACK);
+ 669               	.LM59:
+ 670 0000 8FE0      		ldi r24,lo8(15)
+ 671 0002 00C0      		rjmp tv_squares
+ 673               	.Lscope7:
+ 674               		.section	.text.tv_gen,"ax",@progbits
+ 677               	.global	tv_gen
+ 679               	tv_gen:
+ 130:TV_video_generator.c **** }
+ 131:TV_video_generator.c **** 
+ 132:TV_video_generator.c **** 
+ 133:TV_video_generator.c **** void tv_gen(uint8_t t)
+ 134:TV_video_generator.c **** {
+ 681               	.LM60:
+ 682               	.LFBB8:
+ 683 0000 CF93      		push r28
+ 684 0002 DF93      		push r29
+ 685               	/* prologue: function */
+ 686               	/* frame size = 0 */
+ 687               	/* stack size = 2 */
+ 688               	.L__stack_usage = 2
+ 135:TV_video_generator.c **** 	void(*f)(void);
+ 136:TV_video_generator.c **** 	
+ 137:TV_video_generator.c **** 	switch(t)
+ 690               	.LM61:
+ 691 0004 8130      		cpi r24,lo8(1)
+ 692 0006 01F0      		breq .L16
+ 693 0008 00F0      		brlo .L21
+ 694 000a 8230      		cpi r24,lo8(2)
+ 695 000c 01F4      		brne .L14
+ 138:TV_video_generator.c **** 	{
+ 139:TV_video_generator.c **** 		case TV_VBARS:
+ 140:TV_video_generator.c **** 			f = &tv_vbars;
+ 141:TV_video_generator.c **** 			break;
+ 142:TV_video_generator.c **** 		case TV_LATTICE:
+ 143:TV_video_generator.c **** 			f = &tv_lattice;
+ 144:TV_video_generator.c **** 			break;
+ 145:TV_video_generator.c **** 		case TV_CHESSBOARD:
+ 146:TV_video_generator.c **** 			f = &tv_chessboard;
+ 697               	.LM62:
+ 698 000e C0E0      		ldi r28,lo8(gs(tv_chessboard))
+ 699 0010 D0E0      		ldi r29,hi8(gs(tv_chessboard))
+ 147:TV_video_generator.c **** 			break;
+ 701               	.LM63:
+ 702 0012 00C0      		rjmp .L17
+ 703               	.L16:
+ 143:TV_video_generator.c **** 			break;
+ 705               	.LM64:
+ 706 0014 C0E0      		ldi r28,lo8(gs(tv_lattice))
+ 707 0016 D0E0      		ldi r29,hi8(gs(tv_lattice))
+ 708 0018 00C0      		rjmp .L17
+ 709               	.L21:
+ 140:TV_video_generator.c **** 			break;
+ 711               	.LM65:
+ 712 001a C0E0      		ldi r28,lo8(gs(tv_vbars))
+ 713 001c D0E0      		ldi r29,hi8(gs(tv_vbars))
+ 714               	.L17:
+ 148:TV_video_generator.c **** 		default: 
+ 149:TV_video_generator.c **** 			return;
+ 150:TV_video_generator.c **** 	}
+ 151:TV_video_generator.c **** 	
+ 152:TV_video_generator.c **** 	R2RPORT = 0;
+ 716               	.LM66:
+ 717 001e 12BA      		out 0x12,__zero_reg__
+ 718               	.L19:
+ 153:TV_video_generator.c **** 	while(btnCheck(BTN_START) == 0)
+ 720               	.LM67:
+ 721 0020 9C9B      		sbis 0x13,4
+ 722 0022 00C0      		rjmp .L22
+ 154:TV_video_generator.c **** 	{
+ 155:TV_video_generator.c **** 		
+ 156:TV_video_generator.c **** 		// 1:
+ 157:TV_video_generator.c **** 		vsync_pulse(); vsync_pulse();
+ 724               	.LM68:
+ 725 0024 00D0      		rcall vsync_pulse
+ 726 0026 00D0      		rcall vsync_pulse
+ 158:TV_video_generator.c **** 		// 2:
+ 159:TV_video_generator.c **** 		vsync_pulse(); vsync_pulse();
+ 728               	.LM69:
+ 729 0028 00D0      		rcall vsync_pulse
+ 730 002a 00D0      		rcall vsync_pulse
+ 160:TV_video_generator.c **** 		// 3:
+ 161:TV_video_generator.c **** 		vsync_pulse(); equal_pulse();
+ 732               	.LM70:
+ 733 002c 00D0      		rcall vsync_pulse
+ 734 002e 00D0      		rcall equal_pulse
+ 162:TV_video_generator.c **** 		// 4:
+ 163:TV_video_generator.c **** 		equal_pulse(); equal_pulse();
+ 736               	.LM71:
+ 737 0030 00D0      		rcall equal_pulse
+ 738 0032 00D0      		rcall equal_pulse
+ 164:TV_video_generator.c **** 		// 5:
+ 165:TV_video_generator.c **** 		equal_pulse(); equal_pulse();
+ 740               	.LM72:
+ 741 0034 00D0      		rcall equal_pulse
+ 742 0036 00D0      		rcall equal_pulse
+ 166:TV_video_generator.c **** 		
+ 167:TV_video_generator.c **** 		f();
+ 744               	.LM73:
+ 745 0038 FE01      		movw r30,r28
+ 746 003a 0995      		icall
+ 168:TV_video_generator.c **** 		
+ 169:TV_video_generator.c **** 		// 311:
+ 170:TV_video_generator.c **** 		equal_pulse(); equal_pulse();
+ 748               	.LM74:
+ 749 003c 00D0      		rcall equal_pulse
+ 750 003e 00D0      		rcall equal_pulse
+ 171:TV_video_generator.c **** 		// 312:
+ 172:TV_video_generator.c **** 		equal_pulse(); equal_pulse();
+ 752               	.LM75:
+ 753 0040 00D0      		rcall equal_pulse
+ 754 0042 00D0      		rcall equal_pulse
+ 173:TV_video_generator.c **** 		// 313:
+ 174:TV_video_generator.c **** 		equal_pulse(); vsync_pulse();
+ 756               	.LM76:
+ 757 0044 00D0      		rcall equal_pulse
+ 758 0046 00D0      		rcall vsync_pulse
+ 175:TV_video_generator.c **** 		// 314:
+ 176:TV_video_generator.c **** 		vsync_pulse(); vsync_pulse();
+ 760               	.LM77:
+ 761 0048 00D0      		rcall vsync_pulse
+ 762 004a 00D0      		rcall vsync_pulse
+ 177:TV_video_generator.c **** 		// 315:
+ 178:TV_video_generator.c **** 		vsync_pulse(); vsync_pulse();
+ 764               	.LM78:
+ 765 004c 00D0      		rcall vsync_pulse
+ 766 004e 00D0      		rcall vsync_pulse
+ 179:TV_video_generator.c **** 		// 316:
+ 180:TV_video_generator.c **** 		equal_pulse(); equal_pulse();
+ 768               	.LM79:
+ 769 0050 00D0      		rcall equal_pulse
+ 770 0052 00D0      		rcall equal_pulse
+ 181:TV_video_generator.c **** 		// 317:
+ 182:TV_video_generator.c **** 		equal_pulse(); equal_pulse();
+ 772               	.LM80:
+ 773 0054 00D0      		rcall equal_pulse
+ 774 0056 00D0      		rcall equal_pulse
+ 183:TV_video_generator.c **** 		
+ 184:TV_video_generator.c **** 		// 318-622 (305 lines):
+ 185:TV_video_generator.c **** 		f();
+ 776               	.LM81:
+ 777 0058 FE01      		movw r30,r28
+ 778 005a 0995      		icall
+ 186:TV_video_generator.c **** 		
+ 187:TV_video_generator.c **** 		// 623:
+ 188:TV_video_generator.c **** 		equal_pulse(); equal_pulse();
+ 780               	.LM82:
+ 781 005c 00D0      		rcall equal_pulse
+ 782 005e 00D0      		rcall equal_pulse
+ 189:TV_video_generator.c **** 		// 624:
+ 190:TV_video_generator.c **** 		equal_pulse(); equal_pulse();
+ 784               	.LM83:
+ 785 0060 00D0      		rcall equal_pulse
+ 786 0062 00D0      		rcall equal_pulse
+ 191:TV_video_generator.c **** 		// 625:
+ 192:TV_video_generator.c **** 		equal_pulse(); equal_pulse();
+ 788               	.LM84:
+ 789 0064 00D0      		rcall equal_pulse
+ 790 0066 00D0      		rcall equal_pulse
+ 791 0068 00C0      		rjmp .L19
+ 792               	.L22:
+ 193:TV_video_generator.c **** 	}
+ 194:TV_video_generator.c **** 	R2RPORT = 0;
+ 794               	.LM85:
+ 795 006a 12BA      		out 0x12,__zero_reg__
+ 796               	.L14:
+ 797               	/* epilogue start */
+ 195:TV_video_generator.c **** }...
+ 799               	.LM86:
+ 800 006c DF91      		pop r29
+ 801 006e CF91      		pop r28
+ 802 0070 0895      		ret
+ 807               	.Lscope8:
+ 808               		.text
+ 810               	.Letext0:
+ 811               		.ident	"GCC: (AVR_8_bit_GNU_Toolchain_3.5.0_1662) 4.9.2"
 DEFINED SYMBOLS
                             *ABS*:00000000 TV_video_generator.c
-C:\Users\Magenta\AppData\Local\Temp\cciO7gex.s:2      *ABS*:0000003e __SP_H__
-C:\Users\Magenta\AppData\Local\Temp\cciO7gex.s:3      *ABS*:0000003d __SP_L__
-C:\Users\Magenta\AppData\Local\Temp\cciO7gex.s:4      *ABS*:0000003f __SREG__
-C:\Users\Magenta\AppData\Local\Temp\cciO7gex.s:5      *ABS*:00000000 __tmp_reg__
-C:\Users\Magenta\AppData\Local\Temp\cciO7gex.s:6      *ABS*:00000001 __zero_reg__
-C:\Users\Magenta\AppData\Local\Temp\cciO7gex.s:125    .text.vsync_pulse:00000000 vsync_pulse
-C:\Users\Magenta\AppData\Local\Temp\cciO7gex.s:172    .text.equal_pulse:00000000 equal_pulse
-C:\Users\Magenta\AppData\Local\Temp\cciO7gex.s:221    .text.hsync_pulse:00000000 hsync_pulse
-C:\Users\Magenta\AppData\Local\Temp\cciO7gex.s:271    .text.tv_vbars:00000000 tv_vbars
-C:\Users\Magenta\AppData\Local\Temp\cciO7gex.s:409    .text.tv_gen:00000000 tv_gen
+C:\Users\Magenta\AppData\Local\Temp\cce0ZoAf.s:2      *ABS*:0000003e __SP_H__
+C:\Users\Magenta\AppData\Local\Temp\cce0ZoAf.s:3      *ABS*:0000003d __SP_L__
+C:\Users\Magenta\AppData\Local\Temp\cce0ZoAf.s:4      *ABS*:0000003f __SREG__
+C:\Users\Magenta\AppData\Local\Temp\cce0ZoAf.s:5      *ABS*:00000000 __tmp_reg__
+C:\Users\Magenta\AppData\Local\Temp\cce0ZoAf.s:6      *ABS*:00000001 __zero_reg__
+C:\Users\Magenta\AppData\Local\Temp\cce0ZoAf.s:128    .text.vsync_pulse:00000000 vsync_pulse
+C:\Users\Magenta\AppData\Local\Temp\cce0ZoAf.s:175    .text.equal_pulse:00000000 equal_pulse
+C:\Users\Magenta\AppData\Local\Temp\cce0ZoAf.s:224    .text.hsync_pulse:00000000 hsync_pulse
+C:\Users\Magenta\AppData\Local\Temp\cce0ZoAf.s:274    .text.tv_vbars:00000000 tv_vbars
+C:\Users\Magenta\AppData\Local\Temp\cce0ZoAf.s:412    .text.tv_squares:00000000 tv_squares
+C:\Users\Magenta\AppData\Local\Temp\cce0ZoAf.s:642    .text.tv_lattice:00000000 tv_lattice
+C:\Users\Magenta\AppData\Local\Temp\cce0ZoAf.s:660    .text.tv_chessboard:00000000 tv_chessboard
+C:\Users\Magenta\AppData\Local\Temp\cce0ZoAf.s:679    .text.tv_gen:00000000 tv_gen
 
 NO UNDEFINED SYMBOLS

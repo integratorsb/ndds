@@ -81,8 +81,13 @@ uint8_t btn_wait()
 	
 	BTN_DDR &= ~(BTN_MASK);	
 	//_delay_ms(2);
-	//BTN_PORT &= ~(BTN_MASK);	
+	
+	#ifdef SYM
+	BTN_PORT &= ~(BTN_MASK);	
+	#else
 	BTN_PORT |= BTN_MASK;
+	#endif
+
 	_delay_ms(2);
 	while(1)
 	{
@@ -137,7 +142,7 @@ uint8_t btn_wait()
 					{
 						st = 0;
 					}
-					c = 5;
+					c = 2;
 					//_delay_ms(200);
 					BTN_PORT = p;
 					BTN_DDR = d;
@@ -258,7 +263,7 @@ void print_on_off( uint8_t st)
 		nnl_puts_P(PSTR("OFF\n"));
 }
 
-void input_fd(uint32_t* p)
+void input_fd(uint32_t* p, uint8_t is_run)
 {
 	uint8_t b;
 	uint16_t d;
@@ -308,55 +313,17 @@ void input_fd(uint32_t* p)
 			break;
 		}
 
+		if(generator.m == M_SQPWM && is_run)
+			pwm_start(f, generator.pwm_d, 0);
 	}
+	
 	*p = f;
-	
 }
 
-
-
-
-void input_hs(uint32_t* p)
+inline void input_dc(uint8_t is_run)
 {
-	uint8_t b, f;
-	
-	f = *p/1000000;
-	if(f > 8 || f == 0)
-		f = 1;
-	while(1)
-	{
-
-		nnl_puts_P(PSTR("\rF="));
-		print_u(f,0);
-		nnl_puts_P(PSTR("MHz\n(+/-)x2 "));
-		
-		b = btn_wait();
-		if(b == BTN_DOWN)
-		{
-			if(f > 1 )
-				f /= 2;
-
-
-		}
-		else if(b == BTN_UP)
-		{
-			if(f < 8 )
-				f *= 2;
-
-		}
-		else if(b == BTN_SET)
-		{
-			break;
-		}
-	}
-	*p = (uint32_t)(f * 1000000);
-}
-
-
-uint8_t input_dc(uint8_t dc)
-{
-	uint8_t b;
-	
+	uint8_t b, dc;
+	dc = generator.pwm_d;
 	while(1)
 	{
 		nnl_puts_P(PSTR("\rDC="));
@@ -368,25 +335,29 @@ uint8_t input_dc(uint8_t dc)
 		if(b == BTN_DOWN)
 		{
 			if(dc > 1 )
-				dc -= 1;
+			dc -= 1;
 		}
 		else if(b == BTN_UP)
 		{
 			if(dc < 99 )
-				dc += 1;
+			dc += 1;
 		}
 		else if(b == BTN_SET)
 		{
 			break;
 		}
+
+		if(is_run)
+			pwm_start(generator.pwm_f, dc, 0);
 	}
-	return dc;
+	generator.pwm_d = dc;	
 }
 
 void input_t(uint32_t* p, const char* title)
 {
 	uint8_t b;
 	uint32_t multipler, t;
+	
 	t = *p;
 	if(t > MAX_T)
 		t = MIN_T;
@@ -421,22 +392,24 @@ void input_t(uint32_t* p, const char* title)
 		{
 			break;
 		}
+
 	}
 	*p = t;
 }
 
-void input_n()
+inline void input_n()
 {
 	uint8_t b;
-	uint16_t multipler;
+	uint16_t multipler, n;
 
 
+	n = generator.pulse_n;
 	multipler = 1;
 	while(1)
 	{
 		nnl_puts_P(PSTR("\rN="));
-		if(generator.pulse_n != 0)
-			print_u(generator.pulse_n,0);
+		if(n != 0)
+			print_u(n,0);
 		else
 			nnl_puts_P(PSTR("ND"));
 		nnl_puts_P(PSTR("\n(+/-) "));
@@ -445,13 +418,13 @@ void input_n()
 		b = btn_wait();
 		if(b == BTN_DOWN)
 		{
-			if(generator.pulse_n >= multipler )
-				generator.pulse_n-= multipler;
+			if(n >= multipler )
+				n-= multipler;
 		}
 		else if(b == BTN_UP)
 		{
-			if(generator.pulse_n < 0xFFFF-multipler )
-			generator.pulse_n+= multipler;
+			if(n < 0xFFFF-multipler )
+			n += multipler;
 		}
 		else if(b == BTN_MODE)
 		{
@@ -464,7 +437,9 @@ void input_n()
 		{
 			break;
 		}
+
 	}
+	generator.pulse_n = n; 	
 }
 
 
@@ -498,7 +473,7 @@ uint8_t select_val(const char* t, const char* v[], uint8_t n)
 	return i;
 }
 
-uint8_t input_trig()
+inline uint8_t input_trig()
 {
 	const char* values[] = {
 		PSTR("NO"),
@@ -509,7 +484,7 @@ uint8_t input_trig()
 	return select_val(PSTR("\rTrigger: "), values, 3);
 }
 
-uint8_t input_ext_sync()
+inline uint8_t input_ext_sync()
 {
 	const char* values[] = {
 		PSTR("NO"),
@@ -520,3 +495,18 @@ uint8_t input_ext_sync()
 	return select_val(PSTR("\rEXT SYNC: "), values, 3);
 }
 
+void input_hs()
+{
+	const char* values[] = {
+		PSTR("1MHz"),
+		PSTR("2MHz"),
+		PSTR("4MHz"),
+		PSTR("8MHz")
+	};	
+
+	uint8_t  f;
+	
+	f = 1<<select_val(PSTR("\rF="), values, 4);
+	generator.hs_f = (uint32_t)(1000000 * f);
+
+}
