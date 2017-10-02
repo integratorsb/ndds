@@ -36,7 +36,7 @@ http://www.javiervalcarce.eu/html/arduino-tv-signal-generator-en.html
  void hsync_pulse()
 {
       R2RPORT = LEVEL_SYNC; 
-      _delay_us(4); //4.7us
+      _delay_us(5); //4.7us
       R2RPORT = LEVEL_BLACK; 
       _delay_us(7); //7.3us
 }
@@ -96,12 +96,13 @@ void tv_squares(uint8_t c1)
 		"ldi %2, 15				\n\t"
 		"rjmp 2f				\n\t"
 		"1:						\n\t"
+
+		"nop					\n\t"	
 		"dec %0					\n\t"
+		"nop					\n\t"			
 		"mov %1, %3				\n\t"
+		"nop					\n\t"		
 		"mov %2, %4				\n\t"
-		"nop					\n\t"
-		"nop					\n\t"
-		"nop					\n\t"
 		"nop					\n\t"
 		"2:						\n\t"
 		:"+d"(c),"+d"(l1), "+d"(l2), "+d"(c1), "+d"(c2) );
@@ -114,8 +115,8 @@ void tv_squares(uint8_t c1)
 		R2RPORT = l1; _delay_us(12);
 		R2RPORT = LEVEL_BLACK; asm("nop");asm("nop");
 		R2RPORT = l2; _delay_us(12);
-		R2RPORT = LEVEL_BLACK; asm("nop");asm("nop");
-		R2RPORT = l1; _delay_us(2);
+		R2RPORT = LEVEL_BLACK; _delay_us(2);
+		//R2RPORT = l1; _delay_us(2);
 	}
 }
 

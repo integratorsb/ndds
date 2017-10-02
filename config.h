@@ -9,7 +9,7 @@
 #ifndef CONFIG_H_
 #define CONFIG_H_
 
-//#define SYM 1
+//#define SIM 1
 
 #define FW_VER "0.13"
 

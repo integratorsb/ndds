@@ -82,7 +82,7 @@ uint8_t btn_wait()
 	BTN_DDR &= ~(BTN_MASK);	
 	//_delay_ms(2);
 	
-	#ifdef SYM
+	#ifdef SIM
 	BTN_PORT &= ~(BTN_MASK);	
 	#else
 	BTN_PORT |= BTN_MASK;
