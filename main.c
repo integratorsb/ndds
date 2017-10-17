@@ -221,7 +221,9 @@ void pwm_start(uint32_t freq, uint8_t d, uint8_t e )
 	HSDDR |= 1<<HSPIN;
 	
 	period = (F_CPU/freq) - 1;
-	TCCR1A = (1<<COM1B1) |(1<<WGM11);
+	
+	TCCR1A |= (1<<WGM11);
+	TCCR1B |= (1<<WGM13)  | (1<<WGM12);
 	//fast PWM
 	
 	if(freq > 300)
@@ -235,8 +237,9 @@ void pwm_start(uint32_t freq, uint8_t d, uint8_t e )
 		}
 		else
 			OCR1B =  (uint16_t)(period * d / 100);
-
-		TCCR1B =(1<<WGM13)  | (1<<WGM12) |(1<<CS10);//без делителя
+		
+		TCCR1B = (TCCR1B & 0b11111000) | (1<<CS10);
+		//TCCR1B |= (1<<CS10);//без делителя
 
 		
 		
@@ -246,13 +249,17 @@ void pwm_start(uint32_t freq, uint8_t d, uint8_t e )
 		period /= 256;
 		ICR1 = (uint16_t)period;	
 		OCR1B =  (uint16_t)(period * d / 100);	
-		TCCR1B =(1<<WGM13)  | (1<<WGM12) | (1<<CS12);// делитель 256
+		TCCR1B = (TCCR1B & 0b11111000) | (1<<CS12);
+		//TCCR1B |=  (1<<CS12);// делитель 256
 
 	}	
 	
+	TCCR1A |= (1<<COM1B1);
 	
 
-	if(e == EXT_HIGHT)
+	if(e == EXT_NO)
+		return;
+	else if(e == EXT_HIGHT)
 	{
 		while(!btnCheck(BTN_START))
 		{
@@ -272,6 +279,7 @@ void pwm_start(uint32_t freq, uint8_t d, uint8_t e )
 				TCCR1A &= ~(1<<COM1B1);
 		}
 	}
+	pwm_stop();	
 }
 
 inline void dds_start(uint32_t f)
@@ -356,6 +364,20 @@ void save_mode()
 	eeprom_update_byte(&setting.m, generator.m);
 }
 
+void mode_select(uint8_t btn)
+{
+	if(btn == BTN_MODE || btn == BTN_UP)
+		generator.m++;
+	else if(btn == BTN_DOWN)
+	{
+		if(generator.m == 0)
+			generator.m = M_VER;
+		else
+			generator.m--;
+	}
+}
+
+
 void dds_main(const char* t, const uint8_t* raw, uint32_t* f, uint32_t* f_save)
 {
 	uint8_t btn;
@@ -374,14 +396,11 @@ void dds_main(const char* t, const uint8_t* raw, uint32_t* f, uint32_t* f_save)
 		dds_start(*f);
 		btn_wait_up(BTN_START);
 	}
-	else if(btn == BTN_MODE)
-	{
-		generator.m++;
-	}
 	else if(btn == BTN_SET)
 	{
 		input_fd(f, 0);
 	}
+	mode_select(btn);
 }
 
 
@@ -453,10 +472,7 @@ void main()
 						noise_start();
 						btn_wait_up(BTN_START);
 					}
-					else if(btn == BTN_MODE)
-					{
-						generator.m++;
-					}
+					mode_select(btn);
 					break;
 					
 				}
@@ -478,15 +494,11 @@ void main()
 						ddssq_start(generator.f_sqw);
 						btn_wait_up(BTN_START);
 					}
-					else if(btn == BTN_MODE)
-					{
-						
-						generator.m++;
-					}
 					else if(btn == BTN_SET)
 					{
 						input_fd(&generator.f_sqw, 0);
 					}
+					mode_select(btn);
 					break;
 				}
 			case M_SQPWM:
@@ -530,11 +542,9 @@ void main()
 					//btn_wait_up(BTN_SET);
 					//generator.pwm_sync = input_ext_sync();
 				}
-				else if(btn == BTN_MODE)
-				{
-					if(!is_run)
-						generator.m++;
-				}
+				if(!is_run)
+						mode_select(btn);
+
 				break;
 			}
 			
@@ -555,16 +565,12 @@ void main()
 					pwm_stop();
 					btn_wait_up(BTN_START);
 				}
-				else if(btn == BTN_MODE)
-				{
-					
-					generator.m++;
-				}
 				else if(btn == BTN_SET)
 				{
 					//input_hs(&generator.hs_f);
 					input_hs();
 				}
+				mode_select(btn);
 				break;
 			}
 				
@@ -613,10 +619,6 @@ void main()
 						p_cancel:
 						btn_wait_up(BTN_START);
 					}
-					else if(btn == BTN_MODE)
-					{
-						generator.m++;
-					}
 					else if(btn == BTN_SET)
 					{
 						input_t(&generator.pulse_t_rise,PSTR("\rTrise="));
@@ -626,6 +628,7 @@ void main()
 						input_n();
 						generator.pulse_trig = input_trig();
 					}
+					mode_select(btn);
 					break;
 					
 				}
@@ -659,18 +662,14 @@ void main()
 					{
 						generator.tv_type++;
 					}
-					else if(btn == BTN_MODE)
-					{
-						generator.m++;
-					}
+					mode_select(btn);
 					break;
 				
 				}
 			case M_VER:
 				nnl_puts_P(PSTR("\rNDDS VER"FW_VER"\nSIGNAL GENERATOR"));
-				btn_wait_up(btn_wait());
-				//generator.m= M_SINW;
-				//break;
+				mode_select(btn_wait());
+				break;
 			default:
 				generator.m = M_SINW;
 				break;

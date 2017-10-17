@@ -11,7 +11,7 @@
 
 //#define SIM 1
 
-#define FW_VER "0.13"
+#define FW_VER "0.14"
 
 #ifndef F_CPU
 #define F_CPU 16000000ul
