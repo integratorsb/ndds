@@ -9,6 +9,7 @@
  .global dds
  .global dds_sq
  .global pulse
+ .global dtmf
 
 
  dds:
@@ -45,6 +46,7 @@
 	pop r19
 	pop r19
 	ret
+
 
 dds_sq:
 	push r18
@@ -189,6 +191,86 @@ pulse:
 	pop r21
 	pop r22
 	pop r23
+	pop xh
+	pop xl
+	ret
+
+;===================
+
+#define x_a r25
+#define x_b r21
+
+dtmf:
+	push xl
+	push xh
+
+	;push r23
+	;push r22
+
+	;push r21
+	;push r20
+	;push r19
+	;push r18
+
+	push r17
+	push r16
+	push r15
+	push r14
+	;push r8
+	;push r7
+
+	out _SFR_IO_ADDR(R2RPORT),r1
+	;загрузка указателей для s1,s2
+	ldi zh, 0x01
+	ldi zl, 0
+	mov xh, zh
+	mov xl, zl
+
+	mov r17,r1
+	mov r16,r1
+	mov r15,r1
+	mov r14,r1
+
+
+
+	1:
+	add r16, r22 ;сложение аккумулятор со значением приращения фазы
+	adc r17, r23 ;сложение аккумулятор со значением приращения фазы
+	adc zl, r24 ;сложение аккумулятор со значением приращения фазы
+	ld r0, z	;загрузка значения из таблицы по адресу zl
+	;в регистр z загружаем sw2
+	lsr r0
+	mov x_a, r0
+	lsr r0
+	lsr r0
+	sub x_a, r0
+
+
+	;в регистр z загружаем sw1
+	add r14, r18 ;сложение аккумулятор со значением приращения фазы
+	adc r15, r19 ;сложение аккумулятор со значением приращения фазы
+	adc xl, r20 ;сложение аккумулятор со значением приращения фазы
+	ld x_b, x	;загрузка значения из таблицы по адресу zl
+	lsr x_b
+	add x_b, x_a
+
+	out _SFR_IO_ADDR(R2RPORT),x_b
+	sbic _SFR_IO_ADDR(BTN_PIN), START
+	rjmp 1b
+	out _SFR_IO_ADDR(R2RPORT),r1
+
+	;pop r7
+	;pop r8
+	pop r14
+	pop r15
+	pop r16
+	pop r17
+	;pop r18
+	;pop r19
+	;pop r20
+	;pop r21
+	;pop r22
+	;pop r23
 	pop xh
 	pop xl
 	ret

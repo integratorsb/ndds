@@ -26,6 +26,7 @@ const gen_t PROGMEM def_setting = DEF_SETTING;
 gen_t EEMEM setting = DEF_SETTING;
 
 uint8_t __attribute__ ((section (".buffer"))) buf[256]; 
+uint8_t is_run = 0;
 
 const uint8_t  sinewave[] PROGMEM= 
 {
@@ -165,6 +166,7 @@ const uint8_t PROGMEM fexp2[] = {
 
 */
 
+#ifdef VGEN_ENABLE
 
 inline void vgen_on()
 {
@@ -174,7 +176,7 @@ inline void vgen_on()
 }
 
 #define vgen_off() (TCCR2 = 0)
-
+#endif 
 	
 /*
 inline void adc_init()
@@ -187,8 +189,30 @@ inline void adc_init()
 
 inline void io_init()
 {
-	DDRB =  1<<HSPORT | 0<<UART_RX | 1<<UART_TX| 1<<VGEN_PIN;
-	PORTB = 0<<HSPORT | 1<<UART_RX | 1<<UART_TX| 0<<VGEN_PIN;
+	DDRB |=  (1<<HSPORT);
+	
+	#ifdef USE_OMUX
+	DDRB |= (1<<OMUX_PIN);
+	#endif
+	
+	#ifdef VGEN_ENABLE
+	DDRB |= (1<<VGEN_PIN);
+	#endif
+	
+	#ifdef USE_SWUART
+	DDRB |= (0<<UART_RX) | (1<<UART_TX);
+	#endif
+	
+	PORTB = 0<<HSPORT;
+/*
+	#ifdef VGEN_ENABLE
+	PORTB &= ~(1<<VGEN_PIN);
+	#endif*/
+	
+	#ifdef USE_SWUART
+	PORTB |= 1<<UART_RX | 1<<UART_TX	
+	#endif
+	
 	DDRC =  0<<EXT_PIN;
 	PORTC = BTN_MASK | 0<<EXT_PIN;
 	R2RPORT = 0;
@@ -232,9 +256,7 @@ void pwm_start(uint32_t freq, uint8_t d, uint8_t e )
 		ICR1 = (uint16_t)period;	
 
 		if(generator.m == M_HSSQW)
-		{
 			OCR1B =  (uint16_t)(period/2);
-		}
 		else
 			OCR1B =  (uint16_t)(period * d / 100);
 		
@@ -257,9 +279,9 @@ void pwm_start(uint32_t freq, uint8_t d, uint8_t e )
 	TCCR1A |= (1<<COM1B1);
 	
 
-	if(e == EXT_NO)
-		return;
-	else if(e == EXT_HIGHT)
+//	if(e == EXT_NO)
+//		return;
+	if(e == EXT_HIGHT)
 	{
 		while(!btnCheck(BTN_START))
 		{
@@ -279,8 +301,10 @@ void pwm_start(uint32_t freq, uint8_t d, uint8_t e )
 				TCCR1A &= ~(1<<COM1B1);
 		}
 	}
+	else return;
 	pwm_stop();	
 }
+
 
 inline void dds_start(uint32_t f)
 {
@@ -377,24 +401,40 @@ void mode_select(uint8_t btn)
 	}
 }
 
+inline void dtmf_start()
+{
+	uint32_t s1, s2;
+
+	memcpy_P(&buf, sinewave, sizeof(buf));
+
+	s1 = (uint32_t)(generator.dtmf_f1<<16) /(F_CPU/21/0x100);
+	s2 = (uint32_t)(generator.dtmf_f2<<16) /(F_CPU/21/0x100);
+
+	dtmf(s1, s2);
+}
+
+
 
 void dds_main(const char* t, const uint8_t* raw, uint32_t* f, uint32_t* f_save)
 {
 	uint8_t btn;
 	
+	#ifdef USE_OMUX
+		omux_clr();
+	#endif
 	nnl_puts_P(t);
 	print_on_off(0);			
 	print_fq(*f);
 	btn = btn_wait();
 	if(btn == BTN_START)
 	{
-		btn_wait_up(BTN_START);
+		btn_wait_up_start();
 		eeprom_update_dword(f_save, *f);
 		save_mode();
 		print_on_off(1);
 		memcpy_P(&buf, raw, sizeof(buf));
 		dds_start(*f);
-		btn_wait_up(BTN_START);
+		btn_wait_up_start();
 	}
 	else if(btn == BTN_SET)
 	{
@@ -403,12 +443,276 @@ void dds_main(const char* t, const uint8_t* raw, uint32_t* f, uint32_t* f_save)
 	mode_select(btn);
 }
 
+inline void noise_main()
+{
+	uint8_t btn;
+	
+	#ifdef USE_OMUX
+		omux_clr();
+	#endif
+	nnl_puts_P(PSTR("\rNOISE "));
+	print_on_off(0);
+	
+	btn = btn_wait();
+	if(btn == BTN_START)
+	{
+		btn_wait_up_start();
+		save_mode();
+		print_on_off(1);
+		noise_start();
+		btn_wait_up_start();
+	}
+	mode_select(btn);
+}
+
+inline void sqw_main()
+{
+	uint8_t btn;
+	
+	#ifdef USE_OMUX
+	omux_set();
+	#endif
+	nnl_puts_P(PSTR("\rSQUARE WAVE "));
+	print_on_off(0);
+	print_fq(generator.f_sqw);
+						
+	btn = btn_wait();
+	if(btn == BTN_START)
+	{
+		btn_wait_up_start();
+		save_mode();
+		eeprom_update_dword(&setting.f_sqw, generator.f_sqw);
+
+		print_on_off(1);
+		ddssq_start(generator.f_sqw);
+		btn_wait_up_start();
+	}
+	else if(btn == BTN_SET)
+	{
+		input_fd(&generator.f_sqw, 0);
+	}
+	mode_select(btn);
+}
+
+inline void pwm_main()
+{
+	uint8_t btn;
+	
+	#ifdef USE_OMUX
+	omux_set();
+	#endif
+	nnl_puts_P(PSTR("\rPWM "));
+	print_on_off(is_run);
+	print_fq(generator.pwm_f);
+	nnl_puts_P(PSTR(" D="));
+	print_u(generator.pwm_d,0);
+	if(generator.pwm_sync == EXT_HIGHT)
+	nnl_puts_P(PSTR(" E=H"));
+	else if(generator.pwm_sync == EXT_LOW)
+	nnl_puts_P(PSTR(" E=L"));
+					
+	btn = btn_wait();
+	if(btn == BTN_START)
+	{
+		btn_wait_up_start();
+						
+		if(is_run)
+		{
+			pwm_stop();
+			is_run = 0;
+		}
+		else
+		{
+			is_run = 1;
+			print_on_off(is_run);
+			pwm_start(generator.pwm_f, generator.pwm_d, generator.pwm_sync );
+			save_mode();
+			eeprom_update_block(&generator.pwm_f,&setting.pwm_f, 1+4+1);
+		}
+	}
+	else if(btn == BTN_SET)
+	{
+		input_fd(&generator.pwm_f, is_run);
+		input_dc(is_run);
+		if(!is_run)
+		generator.pwm_sync = input_ext_sync();
+		//btn_wait_up(BTN_SET);
+		//generator.pwm_sync = input_ext_sync();
+	}
+	if(!is_run)
+	mode_select(btn);
+
+}
+
+inline void hs_main()
+{
+	uint8_t btn;
+	
+	#ifdef USE_OMUX
+	omux_set();
+	#endif
+	nnl_puts_P(PSTR("\rHIGH SPEED "));
+	print_on_off(0);
+	print_fq(generator.hs_f);
+	btn = btn_wait();
+	if(btn == BTN_START)
+	{
+		btn_wait_up_start();
+		save_mode();
+		eeprom_update_dword(&setting.hs_f, generator.hs_f);
+		print_on_off(1);
+		pwm_start(generator.hs_f, 50, 0);
+		while(!btnCheck(BTN_START)){};
+		pwm_stop();
+		btn_wait_up_start();
+	}
+	else if(btn == BTN_SET)
+	{
+		//input_hs(&generator.hs_f);
+		input_hs();
+	}
+	mode_select(btn);
+}
+
+inline void pulse_main()
+{
+	uint8_t btn;
+	
+	#ifdef USE_OMUX
+	omux_clr();
+	#endif
+	nnl_puts_P(PSTR("\rPULSE "));
+	print_on_off(0);
+	nnl_puts_P(PSTR("T="));
+	print_u((generator.pulse_t_rise + generator.pulse_t_fall + generator.pulse_t_on + generator.pulse_t_off), 0);
+	nnl_puts_P(PSTR("us "));
+	if(generator.pulse_trig == TR_RISE)
+		nnl_puts_P(PSTR("T:R"));
+	else if(generator.pulse_trig == TR_FALL)
+		nnl_puts_P(PSTR("T:F"));
+	//else
+	//	nnl_puts_P(PSTR("NO"));
+
+
+	btn = btn_wait();
+	if(btn == BTN_START)
+	{
+		btn_wait_up_start();
+		save_mode();
+		eeprom_update_block(&generator.pulse_t_rise, &setting.pulse_t_rise,
+		4 * sizeof(generator.pulse_t_rise) + sizeof(generator.pulse_n) + sizeof(generator.pulse_trig));
+	
+
+		lcd_goto(13);
+		if(generator.pulse_trig == TR_RISE)
+		{
+			nnl_puts_P(PSTR("W:R"));
+			if(trig_wait_rise() == 0)
+			goto p_cancel;
+			//break;
+		}
+		else if(generator.pulse_trig == TR_FALL)
+		{
+			nnl_puts_P(PSTR("W:F"));
+			if(trig_wait_fall() == 0)
+			goto p_cancel;
+			//break;
+		}
+		print_on_off(1);
+		pulse_start();
+		p_cancel:
+		btn_wait_up_start();
+	}
+	else if(btn == BTN_SET)
+	{
+		input_t(&generator.pulse_t_rise,PSTR("\rTrise="));
+		input_t(&generator.pulse_t_on,PSTR("\rTon="));
+		input_t(&generator.pulse_t_fall,PSTR("\rTfall="));
+		input_t(&generator.pulse_t_off,PSTR("\rToff="));
+		input_n();
+		generator.pulse_trig = input_trig();
+	}
+	mode_select(btn);	
+}
+
+inline void tv_main()
+{
+	const char* tv_type[] = {
+		PSTR("VERTICAL BARS"),
+		PSTR("LATTICE"),
+		PSTR("CHESSBOARD")
+	};
+	uint8_t btn;
+	
+	#ifdef USE_OMUX
+	omux_clr();
+	#endif
+	if(generator.tv_type > TV_CHESSBOARD)
+		generator.tv_type = 0;
+	
+	nnl_puts_P(PSTR("\rTV VIDEO\n"));
+	nnl_puts_P(tv_type[generator.tv_type]);
+	print_on_off(0);
+	btn = btn_wait();
+	if(btn == BTN_START)
+	{
+		btn_wait_up_start();
+		save_mode();
+		eeprom_update_byte(&setting.tv_type, generator.tv_type);
+		
+		print_on_off(1);
+		tv_gen(generator.tv_type);
+
+		btn_wait_up_start();
+	}
+	else if(btn == BTN_SET)
+	{
+		generator.tv_type++;
+	}
+	mode_select(btn);
+}
+
+inline void dtmf_main()
+{
+	uint8_t btn;
+	
+	#ifdef USE_OMUX
+	omux_clr();
+	#endif
+	nnl_puts_P(PSTR("\rDTMF"));
+	print_on_off(0);
+	print_fq(generator.dtmf_f1);
+	n_putchar(' ');
+	print_fq(generator.dtmf_f2);
+	
+	btn = btn_wait();
+	if(btn == BTN_START)
+	{
+		btn_wait_up_start();
+		save_mode();
+		
+		eeprom_update_block(&generator.dtmf_f1, &setting.dtmf_f1, sizeof(generator.dtmf_f1)*2);
+		
+		print_on_off(1);
+		dtmf_start();
+
+		btn_wait_up_start();
+	}
+	else if(btn == BTN_SET)
+	{
+		input_fd(&generator.dtmf_f1, 0);
+		input_fd(&generator.dtmf_f2, 0);
+	}
+	mode_select(btn);
+	
+}
+
 
 
 void main()
 {
-	uint8_t btn;
-	uint8_t is_run = 0; 	
+	//uint8_t btn;
+	//uint8_t is_run = 0; 	
 	
 	io_init();	
 
@@ -459,217 +763,38 @@ void main()
 				break;
 				
 			case M_NOISE:
-				{
-					nnl_puts_P(PSTR("\rNOISE "));
-					print_on_off(0);
+				noise_main();
+				break;
 				
-					btn = btn_wait();
-					if(btn == BTN_START)
-					{
-						btn_wait_up(BTN_START);
-						save_mode();
-						print_on_off(1);
-						noise_start();
-						btn_wait_up(BTN_START);
-					}
-					mode_select(btn);
-					break;
-					
-				}
-			case M_SQW:
-				{
-					
-					nnl_puts_P(PSTR("\rSQUARE WAVE "));
-					print_on_off(0);
-					print_fq(generator.f_sqw);
-					
-					btn = btn_wait();
-					if(btn == BTN_START)
-					{
-						btn_wait_up(BTN_START);
-						save_mode();
-						eeprom_update_dword(&setting.f_sqw, generator.f_sqw);
-
-						print_on_off(1);
-						ddssq_start(generator.f_sqw);
-						btn_wait_up(BTN_START);
-					}
-					else if(btn == BTN_SET)
-					{
-						input_fd(&generator.f_sqw, 0);
-					}
-					mode_select(btn);
-					break;
-				}
+			case M_SQW:	
+				sqw_main();
+				break;
+				
 			case M_SQPWM:
-			{
-
-				nnl_puts_P(PSTR("\rPWM "));
-				print_on_off(is_run);
-				print_fq(generator.pwm_f);
-				nnl_puts_P(PSTR(" D="));
-				print_u(generator.pwm_d,0);
-				if(generator.pwm_sync == EXT_HIGHT)
-					nnl_puts_P(PSTR(" E=H"));
-				else if(generator.pwm_sync == EXT_LOW)
-					nnl_puts_P(PSTR(" E=L"));
+				pwm_main();
+				break;
 				
-				btn = btn_wait();	
-				if(btn == BTN_START)
-				{
-					btn_wait_up(BTN_START);
-						
-					if(is_run)
-					{
-						pwm_stop();
-						is_run = 0;
-					}
-					else
-					{
-						is_run = 1;
-						print_on_off(is_run);
-						pwm_start(generator.pwm_f, generator.pwm_d, generator.pwm_sync );
-						save_mode();
-						eeprom_update_block(&generator.pwm_f,&setting.pwm_f, 1+4+1);						
-					}
-				}			
-				else if(btn == BTN_SET)
-				{
-					input_fd(&generator.pwm_f, is_run);
-					input_dc(is_run);
-					if(!is_run)
-						generator.pwm_sync = input_ext_sync();
-					//btn_wait_up(BTN_SET);
-					//generator.pwm_sync = input_ext_sync();
-				}
-				if(!is_run)
-						mode_select(btn);
-
-				break;
-			}
-			
 			case M_HSSQW:
-			{
-				nnl_puts_P(PSTR("\rHIGH SPEED "));
-				print_on_off(0);
-				print_fq(generator.hs_f);
-				btn = btn_wait();
-				if(btn == BTN_START)
-				{
-					btn_wait_up(BTN_START);
-					save_mode();
-					eeprom_update_dword(&setting.hs_f, generator.hs_f);
-					print_on_off(1);
-					pwm_start(generator.hs_f, 50, 0);
-					while(!btnCheck(BTN_START)){};
-					pwm_stop();
-					btn_wait_up(BTN_START);
-				}
-				else if(btn == BTN_SET)
-				{
-					//input_hs(&generator.hs_f);
-					input_hs();
-				}
-				mode_select(btn);
+				hs_main();
 				break;
-			}
 				
 			case M_PULSE:
-				{
-
-					nnl_puts_P(PSTR("\rPULSE "));
-					print_on_off(0);
-					nnl_puts_P(PSTR("T="));
-					print_u((generator.pulse_t_rise + generator.pulse_t_fall + generator.pulse_t_on + generator.pulse_t_off), 0);
-					nnl_puts_P(PSTR("us "));
-					if(generator.pulse_trig == TR_RISE)
-						nnl_puts_P(PSTR("T:R"));
-					else if(generator.pulse_trig == TR_FALL)
-						nnl_puts_P(PSTR("T:F"));
-					//else
-					//	nnl_puts_P(PSTR("NO"));
-
-
-					btn = btn_wait();
-					if(btn == BTN_START)
-					{
-						btn_wait_up(BTN_START);
-						save_mode();
-						eeprom_update_block(&generator.pulse_t_rise, &setting.pulse_t_rise,
-						4 * sizeof(generator.pulse_t_rise) + sizeof(generator.pulse_n) + sizeof(generator.pulse_trig));
-						
-
-						lcd_goto(13);
-						if(generator.pulse_trig == TR_RISE)
-						{
-							nnl_puts_P(PSTR("W:R"));
-							if(trig_wait_rise() == 0)
-								goto p_cancel;
-								//break;
-						}
-						else if(generator.pulse_trig == TR_FALL)
-						{
-							nnl_puts_P(PSTR("W:F"));
-							if(trig_wait_fall() == 0)
-								goto p_cancel;
-								//break;
-						}
-						print_on_off(1);
-						pulse_start();
-						p_cancel:
-						btn_wait_up(BTN_START);
-					}
-					else if(btn == BTN_SET)
-					{
-						input_t(&generator.pulse_t_rise,PSTR("\rTrise="));
-						input_t(&generator.pulse_t_on,PSTR("\rTon="));
-						input_t(&generator.pulse_t_fall,PSTR("\rTfall="));
-						input_t(&generator.pulse_t_off,PSTR("\rToff="));
-						input_n();
-						generator.pulse_trig = input_trig();
-					}
-					mode_select(btn);
-					break;
-					
-				}
-			case M_TV:
-				{
-					const char* tv_type[] = {
-						PSTR("VERTICAL BARS"),
-						PSTR("LATTICE"),
-						PSTR("CHESSBOARD")
-					};
-					
-					if(generator.tv_type > TV_CHESSBOARD)
-						generator.tv_type = 0;
-										
-					nnl_puts_P(PSTR("\rTV VIDEO\n"));
-					nnl_puts_P(tv_type[generator.tv_type]);
-					print_on_off(0);
-					btn = btn_wait();
-					if(btn == BTN_START)
-					{
-						btn_wait_up(BTN_START);
-						save_mode();
-						eeprom_update_byte(&setting.tv_type, generator.tv_type);
-						
-						print_on_off(1);
-						tv_gen(generator.tv_type);
-
-						btn_wait_up(BTN_START);
-					}
-					else if(btn == BTN_SET)
-					{
-						generator.tv_type++;
-					}
-					mode_select(btn);
-					break;
+				pulse_main();
+				break;
 				
-				}
+			case M_TV:
+				tv_main();
+				break;
+				
+			case M_DTMF:
+				dtmf_main();
+				break;
+				
 			case M_VER:
 				nnl_puts_P(PSTR("\rNDDS VER"FW_VER"\nSIGNAL GENERATOR"));
 				mode_select(btn_wait());
 				break;
+				
 			default:
 				generator.m = M_SINW;
 				break;

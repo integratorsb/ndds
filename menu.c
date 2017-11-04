@@ -69,7 +69,64 @@ uint8_t btnCheckAll()
 	return 0;
 }
 
+#ifndef USE_ENCODER
+uint8_t btn_wait()
+{
+	static uint8_t msk=0;
+	uint8_t d, p, n, r;
+	
+	p = BTN_PORT;
+	d = BTN_DDR;
+	
+	BTN_DDR &= ~(BTN_MASK);
+	//_delay_ms(2);
+	
+	#ifdef SIM
+	BTN_PORT &= ~(BTN_MASK);
+	#else
+	BTN_PORT |= BTN_MASK;
+	#endif
 
+	while(1)
+	{
+		if(msk != 0)
+		{
+			r = msk;
+			if(btnCheck(msk) == 0)
+				msk = 0;
+			else
+				_delay_ms(200);
+			break;
+		}
+		else
+		{
+			if((msk = btnCheckAll()) != 0)
+			{
+				for(n = 5; n > 0; n--)
+				{
+					_delay_ms(100);
+					if(btnCheck(msk) == 0)
+						break;
+				}
+				r = msk;	
+				if(n == 0)
+					break;// долгое нажатие 
+				msk = 0;
+				if(n < 5)
+					break;// обычное нажатие
+		
+			}
+		}
+	}
+	BTN_PORT = p;
+	BTN_DDR = d;
+	return r;
+}
+
+	
+		
+
+/*
 uint8_t btn_wait()
 {
 	
@@ -142,7 +199,7 @@ uint8_t btn_wait()
 					{
 						st = 0;
 					}
-					c = 2;
+					c = 5;
 					//_delay_ms(200);
 					BTN_PORT = p;
 					BTN_DDR = d;
@@ -155,12 +212,79 @@ uint8_t btn_wait()
 		}
 
 	}
+}*/
+#else
+//uint8_t enc_wait()
+uint8_t btn_wait()
+{
+	uint8_t i;
+	uint8_t d, p, r;
+	
+	p = BTN_PORT;
+	d = BTN_DDR;
+	
+	BTN_DDR &= ~(BTN_MASK);
+	//_delay_ms(2);
+	
+	#ifdef SYM
+	BTN_PORT &= ~(BTN_MASK);
+	#else
+	BTN_PORT |= BTN_MASK;
+	#endif
+	
+	while(btnCheck(BTN_UP) == 0)
+	{
+		if(btnCheck(BTN_START))
+			break;
+	}
+	
+	_delay_ms(5);	
+	
+	while(btnCheck(BTN_UP) != 0)
+	{
+		if(btnCheck(BTN_START))
+			break;
+	}
+	
+
+	if(btnCheck(BTN_START))
+	{
+		r = BTN_SET;// долгое нажатие	
+		
+		for(i = 5; i > 0; i--)
+		{	
+			_delay_ms(100);
+			if(btnCheck(BTN_START) == 0)
+			{
+				r = BTN_START;//обычное нажатие
+				break;
+			}
+		}
+		btn_wait_up_start();
+
+	}
+	else
+	{
+		if(btnCheck(BTN_DOWN))
+			r = BTN_DOWN;
+		else
+			r = BTN_UP;
+	}
+	BTN_PORT = p;
+	BTN_DDR = d;
+	return r;
 }
+#endif
 
 void btn_wait_up(uint8_t b)
 {
 	while(btnCheck(b))
 	_delay_ms(20);
+}
+
+void btn_wait_up_start()
+{
+	btn_wait_up(BTN_START);
 }
 
 
@@ -275,6 +399,8 @@ void input_fd(uint32_t* p, uint8_t is_run)
 		max = MAXFREQ_PWM;
 	else if(generator.m == M_SQW)
 		max = MAXFREQ_SQW;
+	else if(generator.m == M_DTMF)
+		max = 10000;
 	else
 		max = MAXFREQ_DDS;
 
@@ -301,9 +427,13 @@ void input_fd(uint32_t* p, uint8_t is_run)
 			if(f < max-multipler )
 			f += multipler;
 		}
+		#ifndef USE_ENCODER
 		else if(b == BTN_MODE)
+		#else
+		else if(b == BTN_START)
+		#endif
 		{
-			if(multipler < 100000)
+			if(multipler < max/10)
 			multipler *= 10;
 			else
 			multipler = d;
@@ -381,7 +511,11 @@ void input_t(uint32_t* p, const char* title)
 			if(t < MAX_T-multipler )
 			t+= multipler;
 		}
+		#ifndef USE_ENCODER
 		else if(b == BTN_MODE)
+		#else
+		else if(b == BTN_START)
+		#endif
 		{
 			if(multipler < 1000000)
 				multipler *= 10;
@@ -426,7 +560,11 @@ inline void input_n()
 			if(n < 0xFFFF-multipler )
 			n += multipler;
 		}
+		#ifndef USE_ENCODER
 		else if(b == BTN_MODE)
+		#else
+		else if(b == BTN_START)
+		#endif
 		{
 			if(multipler < 10000)
 			multipler *= 10;

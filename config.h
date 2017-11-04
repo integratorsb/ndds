@@ -9,13 +9,55 @@
 #ifndef CONFIG_H_
 #define CONFIG_H_
 
-//#define SIM 1
-
-#define FW_VER "0.14"
-
 #ifndef F_CPU
 #define F_CPU 16000000ul
 #endif
+#include <avr/io.h>
+#ifndef __ASSEMBLER__
+#include "menu.h"
+#endif
+
+//#define SIM 1
+#define FW_VER "0.15"
+
+/*вывод информации в последовательный порт*/
+//#define USE_SW_UART 1
+
+/*вкл. генератор отрицательного напряжения*/
+#define VGEN_ENABLE 1
+
+/*использовать энкодер вместо кнопок*/
+//#define USE_ENCODER 1
+
+/*Вкл. вывод для комутатора выхода,
+при генерации аналогового сигнала на выводе будет 0,
+цифрового - 1
+*/
+#define USE_OMUX 1
+
+//настройки по умолчанию
+#define DEF_SETTING {\
+	M_SINW,\
+	1000,\
+	1000,\
+	1000,\
+	1000,\
+	1000,\
+	1000,\
+	1000,\
+	50,\
+	0,\
+	1000000,\
+	100,\
+	100,\
+	100,\
+	100,\
+	0,\
+	0,\
+	TV_VBARS,\
+	697,\
+	1209}
+
 
 #define R2RPORT PORTD
 #define R2RDDR DDRD
@@ -40,19 +82,23 @@
 
 #define BTN_MASK (BTN_SET | BTN_START | BTN_UP | BTN_DOWN | BTN_MODE)
 
-/*вывод информации в последовательный порт*/
-#define USE_SW_UART 1
-/*вкл. генератор отрицательного напряжения*/
-#define VGEN_ENABLE 1
-
 
 #ifdef USE_SW_UART
 	#define BR 135//19200bps 16MHz; see AVR305 appnote 
-#endif
 	#define  UART_PORT PORTB
 	#define  UART_PIN PINB
 	#define  UART_RX PORTB5
-	#define  UART_TX PORTB4
+	#define  UART_TX PORTB4	
+#endif
+
+#ifdef USE_OMUX
+	#define OMUX_PORT PORTB
+	#define OMUX_PIN PORTB5
+	#define	OMUX_DDR DDRB
+#endif
+
+#define omux_set() (OMUX_PORT |= 1<<OMUX_PIN)
+#define omux_clr() (OMUX_PORT &= ~(1<<OMUX_PIN))
 
 
 /*вход E*/
@@ -125,26 +171,6 @@
 #define LCD_E_PORT               PORTB       // Port for E line
 #define LCD_E_PIN                1           // Pin for E line
 
-//настройки по умолчанию
-#define DEF_SETTING {\
-	M_SINW,\
-	1000,\
-	1000,\
-	1000,\
-	1000,\
-	1000,\
-	1000,\
-	1000,\
-	50,\
-	0,\
-	1000000,\
-	100,\
-	100,\
-	100,\
-	100,\
-	0,\
-	0,\
-	TV_VBARS}
 
 
 #endif /* CONFIG_H_ */

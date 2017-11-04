@@ -7,3 +7,5 @@
 *.lst
 *.s
 *.d
+*.xml
+*.cproj

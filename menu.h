@@ -12,7 +12,6 @@
 #include <avr/io.h>
 #include <avr/pgmspace.h>
 #include <avr/eeprom.h>
-#include <avr/interrupt.h>
 #include <util/delay.h>
 #include <inttypes.h>
 #include "dds_rout.h"
@@ -26,11 +25,12 @@
 	 M_TRW,		//генератор треугольника
 	 M_ECG,		//генератор сигнала ЭКГ
 	 M_NOISE,	//генератор шума
-	 M_TV,		//генератор ТВ сигнала
 	 M_SQW,		//генератор прямоугольника(меандр)
 	 M_SQPWM,	//генератор прямоугольника с регулируемой скважностью и частотой
 	 M_HSSQW,	//генератор прямоугольника(меандр) 1-8 МГц
 	 M_PULSE,	//генератор импульсов заданной формы
+	 M_TV,		//генератор ТВ сигнала	 
+	 M_DTMF,	//DTMF
 	 M_VER		//версия прошивки	 
  };
  
@@ -67,7 +67,11 @@ typedef struct  {
 	uint16_t pulse_n;
 	uint8_t pulse_trig;
 	uint8_t tv_type;
+	uint32_t dtmf_f1;
+	uint32_t dtmf_f2;
  }gen_t;
+ 
+ 
  
 //структура с настройками
 extern gen_t generator;
@@ -91,6 +95,8 @@ void nnl_puts_P(const char* s);
 
 //возвращает маску нажатой кнопки или 0 если ни одна не нажата
 uint8_t btnCheckAll();
+
+void btn_wait_up_start();
 
 //ожидает нажатие кнопки и возвращает её маску
 uint8_t btn_wait();
