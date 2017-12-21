@@ -330,7 +330,7 @@ inline void ddssq_start(uint32_t f)
 
 	HSPORT &= ~(1<<HSPIN);
 	HSDDR |= 1<<HSPIN;
-	dds_sq(get_phase_f(f) / 2);
+	dds_sq(get_phase_f(f) * 2);
 	HSPORT &= ~(1<<HSPIN);
 	HSDDR &= ~(1<<HSPIN);
 
@@ -421,11 +421,12 @@ void load_table(const uint8_t* src)
 	memcpy_P(&buf, src, sizeof(buf));
 }
 
+
 inline void dtmf_start()
 {
 	load_table(sinewave);
 	
-	dtmf(get_phase_f(generator.dtmf_f1), get_phase_f(generator.dtmf_f2));
+	dtmf((uint64_t)(generator.dtmf_f1<<16) /(F_CPU/21/0x100), (uint64_t)(generator.dtmf_f2<<16) /(F_CPU/21/0x100));
 }
 
 
