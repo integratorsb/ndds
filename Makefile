@@ -40,7 +40,7 @@ MCU = atmega8
 FORMAT = ihex
 
 # Target file name (without extension).
-TARGET = hex/ndds
+TARGET = ndds
 
 
 # List C source files here. (C dependencies are automatically generated.)

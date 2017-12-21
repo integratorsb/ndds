@@ -46,28 +46,42 @@ http://www.javiervalcarce.eu/html/arduino-tv-signal-generator-en.html
 void tv_vbars()
 {
 	uint16_t i;
+	uint8_t cl;
 	// 6-310 (305 lines):
 	for( i = 0; i < 305; i++)
 	{
 		hsync_pulse();
+/*
+
 		R2RPORT = LEVEL_GRAY; _delay_us(8);
 		R2RPORT =LEVEL_BLACK; _delay_us(14);
 		R2RPORT =LEVEL_WHITE; _delay_us(8);
 		R2RPORT =LEVEL_BLACK; _delay_us(14);
 		R2RPORT =LEVEL_GRAY; _delay_us(8);
+
+*/
+		cl = LEVEL_WHITE;
+		for(uint8_t k = 8; k > 0; k--)
+		{
+			R2RPORT =  cl;
+			cl -= (LEVEL_WHITE - LEVEL_BLACK)/7;
+			_delay_us(6);
+		}
+		//R2RPORT = LEVEL_BLACK;
+		_delay_us(1);
 	}
 }
 
 void tv_squares(uint8_t c1)
 {
 	uint16_t i;
-	uint8_t l1, l2, c, c2;//, tmp;
+	uint8_t l1, l2 , c = 0, c2;//, tmp;
 	
-	c = 0;
+
 	c2 = LEVEL_WHITE;
 	
-	i = 305;
-	while( i--)
+	//i = 305;
+	for( i = 305; i > 0; i--)
 	{
 /*
 		if(c == 0)
@@ -86,9 +100,10 @@ void tv_squares(uint8_t c1)
 			l2 = c2;
 		}
 */
+
 		asm volatile("tst %0		\n\t"
 		"brne 1f				\n\t"
-		"ldi %0, 305/4			\n\t"
+		"ldi %0, 305/8			\n\t"
 		"mov __tmp_reg__, %3	\n\t"
 		"mov %3, %4				\n\t"
 		"mov %4, __tmp_reg__	\n\t"
@@ -105,9 +120,10 @@ void tv_squares(uint8_t c1)
 		"mov %2, %4				\n\t"
 		"nop					\n\t"
 		"2:						\n\t"
-		:"+d"(c),"+d"(l1), "+d"(l2), "+d"(c1), "+d"(c2) );
-		
+		:"+d"(c),"+d"(l1), "+d"(l2), "+r"(c1), "+r"(c2) );
+
 		hsync_pulse();
+/*
 		R2RPORT = l1; _delay_us(12);
 		R2RPORT = LEVEL_BLACK; asm("nop");asm("nop");
 		R2RPORT = l2; _delay_us(12);
@@ -115,8 +131,22 @@ void tv_squares(uint8_t c1)
 		R2RPORT = l1; _delay_us(12);
 		R2RPORT = LEVEL_BLACK; asm("nop");asm("nop");
 		R2RPORT = l2; _delay_us(12);
-		R2RPORT = LEVEL_BLACK; _delay_us(2);
-		//R2RPORT = l1; _delay_us(2);
+		R2RPORT = LEVEL_BLACK; _delay_us(2);*/
+		for(uint8_t k = 4; k > 0; k--)
+		{
+			R2RPORT = LEVEL_BLACK; asm("nop");asm("nop");
+			R2RPORT = l1;
+			_delay_us(6);
+			R2RPORT = LEVEL_BLACK; asm("nop");asm("nop");
+			R2RPORT = l2;
+			_delay_us(6);
+			//R2RPORT = LEVEL_BLACK; asm("nop");asm("nop");
+			//R2RPORT = l2; 
+			//_delay_us(3);
+			
+		}
+		R2RPORT = LEVEL_BLACK;
+			//_delay_us(6);
 	}
 }
 

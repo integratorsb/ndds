@@ -47,6 +47,7 @@ const uint8_t  sinewave[] PROGMEM=
 	0x25,0x27,0x2a,0x2c,0x2e,0x31,0x33,0x36,0x38,0x3b,0x3e,0x40,0x43,0x46,0x49,0x4c,
 	0x4f,0x51,0x54,0x57,0x5a,0x5d,0x60,0x63,0x67,0x6a,0x6d,0x70,0x73,0x76,0x79,0x7c
 };
+/*
 
 const uint8_t sawtoothwave[] PROGMEM= 
 {
@@ -105,7 +106,7 @@ const uint8_t trianglewave[] PROGMEM=
 	0x5f,0x5d,0x5b,0x59,0x57,0x55,0x53,0x51,0x4f,0x4f,0x4b,0x49,0x47,0x45,0x43,0x41,
 	0x3f,0x3d,0x3b,0x39,0x37,0x35,0x33,0x31,0x2f,0x2f,0x2b,0x29,0x27,0x25,0x23,0x21,
 	0x1f,0x1d,0x1b,0x19,0x17,0x15,0x13,0x11,0x0f,0x0f,0x0b,0x09,0x07,0x05,0x03,0x01
-};
+};*/
 const uint8_t ECG[] PROGMEM= 
 {
 	73,74,75,75,74,73,73,73,73,72,71,69,68,67,67,67,
@@ -213,8 +214,9 @@ inline void io_init()
 	PORTB |= 1<<UART_RX | 1<<UART_TX	
 	#endif
 	
-	DDRC =  0<<EXT_PIN;
+	//DDRC =  0<<EXT_PIN;
 	PORTC = BTN_MASK | 0<<EXT_PIN;
+	
 	R2RPORT = 0;
 	R2RDDR = 0xff;
 }
@@ -226,6 +228,7 @@ inline void noise_start()
 	{
 		R2RPORT = rand();
 	}
+	R2RPORT = 0;
 }
 
 inline void pwm_stop()
@@ -264,7 +267,6 @@ void pwm_start(uint32_t freq, uint8_t d, uint8_t e )
 		//TCCR1B |= (1<<CS10);//без делителя
 
 		
-		
 	}
 	else
 	{
@@ -277,7 +279,8 @@ void pwm_start(uint32_t freq, uint8_t d, uint8_t e )
 	}	
 	
 	TCCR1A |= (1<<COM1B1);
-	
+
+
 
 //	if(e == EXT_NO)
 //		return;
@@ -306,40 +309,34 @@ void pwm_start(uint32_t freq, uint8_t d, uint8_t e )
 }
 
 
+
+uint32_t get_phase_f(uint32_t f)
+{
+	return ((uint64_t)f << 16) / (F_CPU/NUM_CYCLES/0x100);
+}
+//#define get_phase_f(f) (uint32_t)(((uint64_t)f << 16) / (F_CPU/NUM_CYCLES/0x100))
+
+
 inline void dds_start(uint32_t f)
 {
-	uint32_t phase;
-	
-	//#define RES  ((16000000/9/0x1000000)*0x10000)
-	#define RES (F_CPU/NUM_CYCLES/0x100)
-	
-	phase = ((uint64_t)f << 16) / RES;
-	
-
+	//R2RPORT = 0;
+	dds(get_phase_f(f));
 	R2RPORT = 0;
-	//R2RDDR = 0xFF;
-	dds(phase);
-	R2RPORT = 0;
-	//R2RDDR = 0xFF;
 
 }
 
 inline void ddssq_start(uint32_t f)
 {
-	uint32_t phase;
-	
-	#define RES1 (F_CPU/NUM_CYCLES/2/0x100)
-	
-	phase = ((uint64_t)f << 16) / RES1;
-	
+
 	HSPORT &= ~(1<<HSPIN);
 	HSDDR |= 1<<HSPIN;
-	dds_sq(phase);
+	dds_sq(get_phase_f(f) / 2);
 	HSPORT &= ~(1<<HSPIN);
 	HSDDR &= ~(1<<HSPIN);
 
 }
 
+/*
 uint32_t get_phase(uint32_t T)
 {
 	return 0x1000000/(((uint64_t)T<<16)/36864);
@@ -353,6 +350,23 @@ inline void pulse_start()
 	pulse_s.t_on = get_phase(generator.pulse_t_on);
 	pulse_s.t_fall = get_phase(generator.pulse_t_fall);
 	pulse_s.t_off = get_phase(generator.pulse_t_off);
+	pulse_s.n = generator.pulse_n;
+	pulse(&pulse_s);
+}*/
+
+void get_phase_t( uint32_t *p, uint32_t *T)
+{
+	*p =  0x1000000/(((uint64_t)*T<<16)/36864);
+}
+
+inline void pulse_start()
+{
+	pulse_t pulse_s;
+	
+	get_phase_t(&pulse_s.t_rise, &generator.pulse_t_rise);
+	get_phase_t(&pulse_s.t_on,&generator.pulse_t_on);
+	get_phase_t(&pulse_s.t_fall,&generator.pulse_t_fall);
+	get_phase_t(&pulse_s.t_off,&generator.pulse_t_off);
 	pulse_s.n = generator.pulse_n;
 	pulse(&pulse_s);
 }
@@ -390,6 +404,7 @@ void save_mode()
 
 void mode_select(uint8_t btn)
 {
+
 	if(btn == BTN_MODE || btn == BTN_UP)
 		generator.m++;
 	else if(btn == BTN_DOWN)
@@ -401,21 +416,21 @@ void mode_select(uint8_t btn)
 	}
 }
 
+void load_table(const uint8_t* src)
+{
+	memcpy_P(&buf, src, sizeof(buf));
+}
+
 inline void dtmf_start()
 {
-	uint32_t s1, s2;
-
-	memcpy_P(&buf, sinewave, sizeof(buf));
-
-	s1 = (uint32_t)(generator.dtmf_f1<<16) /(F_CPU/21/0x100);
-	s2 = (uint32_t)(generator.dtmf_f2<<16) /(F_CPU/21/0x100);
-
-	dtmf(s1, s2);
+	load_table(sinewave);
+	
+	dtmf(get_phase_f(generator.dtmf_f1), get_phase_f(generator.dtmf_f2));
 }
 
 
 
-void dds_main(const char* t, const uint8_t* raw, uint32_t* f, uint32_t* f_save)
+void dds_main(const char* t, uint32_t* f, uint32_t* f_save)
 {
 	uint8_t btn;
 	
@@ -432,13 +447,12 @@ void dds_main(const char* t, const uint8_t* raw, uint32_t* f, uint32_t* f_save)
 		eeprom_update_dword(f_save, *f);
 		save_mode();
 		print_on_off(1);
-		memcpy_P(&buf, raw, sizeof(buf));
 		dds_start(*f);
 		btn_wait_up_start();
 	}
 	else if(btn == BTN_SET)
 	{
-		input_fd(f, 0);
+		input_f(f, 0);
 	}
 	mode_select(btn);
 }
@@ -489,7 +503,7 @@ inline void sqw_main()
 	}
 	else if(btn == BTN_SET)
 	{
-		input_fd(&generator.f_sqw, 0);
+		input_f(&generator.f_sqw, 0);
 	}
 	mode_select(btn);
 }
@@ -532,10 +546,10 @@ inline void pwm_main()
 	}
 	else if(btn == BTN_SET)
 	{
-		input_fd(&generator.pwm_f, is_run);
+		input_f(&generator.pwm_f, is_run);
 		input_dc(is_run);
 		if(!is_run)
-		generator.pwm_sync = input_ext_sync();
+			generator.pwm_sync = input_ext_sync();
 		//btn_wait_up(BTN_SET);
 		//generator.pwm_sync = input_ext_sync();
 	}
@@ -700,14 +714,88 @@ inline void dtmf_main()
 	}
 	else if(btn == BTN_SET)
 	{
-		input_fd(&generator.dtmf_f1, 0);
-		input_fd(&generator.dtmf_f2, 0);
+		input_fd(PSTR("\rF1="), &generator.dtmf_f1, 0);
+		input_fd(PSTR("\rF2="), &generator.dtmf_f2, 0);
 	}
 	mode_select(btn);
 	
 }
 
+inline void sweep_main()
+{
+	uint8_t btn;
+	
+	#ifdef USE_OMUX
+	omux_clr();
+	#endif
+	HSDDR |= 1<<HSPIN;
+	nnl_puts_P(PSTR("\rSWEEP "));
+	print_on_off(0);
+	print_fq(generator.sweep_fs);
+	n_putchar('>');
+	print_fq(generator.sweep_fe);
 
+	btn = btn_wait();
+	if(btn == BTN_START)
+	{
+		btn_wait_up_start();
+		save_mode();
+		load_table(sinewave);
+		eeprom_update_block(&generator.sweep_fs, &setting.sweep_fs,
+		3 * sizeof(generator.sweep_fs));
+		print_on_off(1);		
+
+		do
+		{
+			sweep(get_phase_f(generator.sweep_fs),\
+				get_phase_f(generator.sweep_fe),\
+				get_phase_f(generator.sweep_fi));
+		} while (!btnCheck(BTN_START));
+		R2RPORT = 0;
+		print_on_off(0);
+		btn_wait_up_start();
+	}
+	else if(btn == BTN_SET)
+	{
+		input_fd(PSTR("\rFstart="),&generator.sweep_fs,0);
+		input_fd(PSTR("\rFend="), &generator.sweep_fe,0);
+		input_fd(PSTR("\rFinc="), &generator.sweep_fi,0);
+	}
+	mode_select(btn);
+}
+
+
+// заполняет таблицу для пилы
+// значение аргумента 1 - прямая пила, -1 обратная
+void load_sawtooth_wf(int8_t a)
+{
+
+	uint8_t i = 0, b = 0;
+
+	do 
+	{
+		buf[i] = b;
+		b += a;
+		i++;
+	} while (i);
+}
+
+inline void load_triangle_wf()
+{
+	uint8_t i = 1,  b = 1;
+
+	while(i)
+	{
+		buf[i] = b;
+		if(i<128)
+			b += 2;
+		else
+			b -= 2;	
+			
+		i++;	
+	}
+	buf[i] = 0;
+}
 
 void main()
 {
@@ -717,49 +805,94 @@ void main()
 	io_init();	
 
 	_delay_ms(20);
+	
 
-	if(btnCheck(BTN_SET))// сброс настроек при включении с зажатой кнопкой BTN_SET
+
+#ifndef USE_ENCODER
+	// сброс настроек при включении с зажатой кнопкой BTN_SET
+	
+	uint8_t  c = 50;
+	while(btnCheck(BTN_SET))
 	{
-		//db_puts("reset to default");
-		_delay_ms(5000);
-		if(btnCheck(BTN_SET))
+
+		_delay_ms(100);
+		c--;
+		if(c == 0)
 		{
+			//db_puts("reset to default");
 			btn_wait_up(BTN_SET);
 			memcpy_P(&generator, &def_setting, sizeof(generator));
 			eeprom_update_block(&generator, &setting, sizeof(generator));
+			break;
+		}
+/*
+		_delay_ms(5000);
+		if(btnCheck(BTN_SET))
+		{
+			//db_puts("reset to default");
+			btn_wait_up(BTN_SET);
+			memcpy_P(&generator, &def_setting, sizeof(generator));
+			eeprom_update_block(&generator, &setting, sizeof(generator));
+			break;
+		}*/
+	}
+#else
+	//сброс настроек при включении с зажатой кнопкой BTN_START
+		
+	uint8_t  c = 50;
+	while(btnCheck(BTN_START))
+	{
+		c--;
+		_delay_ms(100);
+		if(c == 0)
+		{
+			//db_puts("reset to default");
+			btn_wait_up(BTN_START);
+			memcpy_P(&generator, &def_setting, sizeof(generator));
+			eeprom_update_block(&generator, &setting, sizeof(generator));
+			break;
 		}
 	}
-
-	#ifdef VGEN_ENABLE
-		vgen_on();
-		_delay_ms(100);
-	#endif
+#endif	
+	//while(1);
+#ifdef VGEN_ENABLE
+	vgen_on();
+	_delay_ms(100);
+#endif
 	lcd_init();
 	lcd_clrscr();
 	eeprom_read_block(&generator, &setting, sizeof(generator));
-
+	
 	while(1)
 	{
 		switch(generator.m)
 		{
 			case M_SINW:
-				dds_main(PSTR("\rSINE "),sinewave,&generator.f_sine, &setting.f_sine);
+				load_table(sinewave);
+				dds_main(PSTR("\rSINE "),&generator.f_sine, &setting.f_sine);
 				break;
 				
 			case M_STW:
-				dds_main(PSTR("\rSAWTOTH "),sawtoothwave,&generator.f_stw, &setting.f_stw);
+				//memcpy_P(&buf, sawtoothwave, sizeof(buf));
+				load_sawtooth_wf(1);
+				dds_main(PSTR("\rSAWTOOTH "),&generator.f_stw, &setting.f_stw);
 				break;
 				
 			case M_RSTW:
-				dds_main(PSTR("\rRSAWTOTH "),rsawtoothwave,&generator.f_rstw, &setting.f_rstw);
+				//memcpy_P(&buf, rsawtoothwave, sizeof(buf));
+				load_sawtooth_wf(-1);
+				dds_main(PSTR("\rRSAWTOOTH "),&generator.f_rstw, &setting.f_rstw);
 				break;
 				
 			case M_TRW:
-				dds_main(PSTR("\rTRIANGLE "),trianglewave,&generator.f_trw, &setting.f_trw);
+				//memcpy_P(&buf, trianglewave, sizeof(buf));
+				load_triangle_wf();
+				dds_main(PSTR("\rTRIANGLE "),&generator.f_trw, &setting.f_trw);
 				break;
 				
 			case M_ECG:
-				dds_main(PSTR("\rECG "),ECG,&generator.f_ecg, &setting.f_ecg);
+				load_table(ECG);
+				dds_main(PSTR("\rECG "),&generator.f_ecg, &setting.f_ecg);
 				break;
 				
 			case M_NOISE:
@@ -790,6 +923,10 @@ void main()
 				dtmf_main();
 				break;
 				
+			case M_SWEEP:
+				sweep_main();
+				break;
+			
 			case M_VER:
 				nnl_puts_P(PSTR("\rNDDS VER"FW_VER"\nSIGNAL GENERATOR"));
 				mode_select(btn_wait());

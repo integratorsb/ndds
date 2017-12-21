@@ -8,6 +8,7 @@
 
 #ifndef MENU_H_
 #define MENU_H_
+#ifndef __ASSEMBLER__
 #include "config.h"
 #include <avr/io.h>
 #include <avr/pgmspace.h>
@@ -31,6 +32,7 @@
 	 M_PULSE,	//генератор импульсов заданной формы
 	 M_TV,		//генератор ТВ сигнала	 
 	 M_DTMF,	//DTMF
+	 M_SWEEP,	//ГКЧ
 	 M_VER		//версия прошивки	 
  };
  
@@ -69,6 +71,10 @@ typedef struct  {
 	uint8_t tv_type;
 	uint32_t dtmf_f1;
 	uint32_t dtmf_f2;
+	uint32_t sweep_fs;
+	uint32_t sweep_fe;
+	uint32_t sweep_fi;
+	uint8_t sweep_rep;
  }gen_t;
  
  
@@ -115,8 +121,12 @@ void input_dc(uint8_t is_run);
 void input_hs();
 
 //запускает режим ввода частоты 
+void input_fd(const char* t, uint32_t* p, uint8_t is_run);
 //void input_fd(uint32_t* p);
-void input_fd(uint32_t* p, uint8_t is_run);
+//void input_fd(uint32_t* p, uint8_t is_run);
+
+//запускает режим ввода частоты
+void input_f( uint32_t* p, uint8_t is_run);
 
 //запускает режим ввода числа импульсов
 void input_n();
@@ -170,5 +180,6 @@ void print_on_off( uint8_t st);
 uint8_t select_val(const char* t, const char* v[], uint8_t n);
 
 
+#endif 
 
 #endif /* MENU_H_ */

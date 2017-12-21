@@ -10,7 +10,9 @@
  .global dds_sq
  .global pulse
  .global dtmf
+ .global sweep
 
+ 
 
  dds:
 	push r18
@@ -231,8 +233,6 @@ dtmf:
 	mov r15,r1
 	mov r14,r1
 
-
-
 	1:
 	add r16, r22 ;сложение аккумулятор со значением приращения фазы
 	adc r17, r23 ;сложение аккумулятор со значением приращения фазы
@@ -245,8 +245,6 @@ dtmf:
 	lsr r0
 	sub x_a, r0
 
-
-	;в регистр z загружаем sw1
 	add r14, r18 ;сложение аккумулятор со значением приращения фазы
 	adc r15, r19 ;сложение аккумулятор со значением приращения фазы
 	adc xl, r20 ;сложение аккумулятор со значением приращения фазы
@@ -273,4 +271,96 @@ dtmf:
 	;pop r23
 	pop xh
 	pop xl
+	ret
+
+
+;====================================================
+;на основе кода https://github.com/dev26th/avr_dds_20
+sweep:	
+
+	ldi zl, 0
+	ldi zh, BUF_BASE
+
+	;clr a
+	mov r25, r1
+	mov r21,r1
+	;D=1
+	sbi  _SFR_IO_ADDR(HSPORT), HSPIN	
+	2:
+	add r25, r22
+	adc r21, r23 
+	adc zl, r24
+	brcs 3f 
+	ld r0, z	
+	out _SFR_IO_ADDR(R2RPORT), r0 
+	rjmp 2b
+	3:
+	ld r0, z	
+	out _SFR_IO_ADDR(R2RPORT), r0 
+
+	;a + incr
+	add r22, r14
+	adc r23, r15
+	adc r24, r16
+
+	; end reached? any continue branch takes 10 cycles
+	cp r20, r24	
+	;brlo 10f			; a2 > e2 : exit
+	brlo 10f
+	brne 4f			;  a2 == e2 
+	cp r19, r23		
+	;brlo 10f			;  a1 > e1 : exit
+	brlo 10f
+	brne 5f			; a1 == e1 : check e0/a0
+	cp r18, r22		
+	;brlo 10f			; // a0 > e0 : exit
+	brlo 10f
+	rjmp 6f	
+	4:            
+	nop 
+	nop
+	nop
+	5: 
+	nop  
+	nop  
+	nop 
+
+	add r25, r22
+	adc r21, r23 
+	adc zl, r24
+	add r25, r22
+	adc r21, r23 
+	adc zl, r24
+	add r25, r22
+	adc r21, r23 
+	adc zl, r24
+	add r25, r22
+	adc r21, r23 
+	adc zl, r24
+	add r25, r22
+	adc r21, r23 
+	adc zl, r24
+	nop
+	6:
+
+	brne 7f			
+	add r25, r22
+	adc r21, r23 
+	adc zl, r24
+	nop  
+	nop
+	nop
+	rjmp 6b			
+	7: 
+	; output the new value
+	ld r0, Z	
+	out _SFR_IO_ADDR(R2RPORT), r0 ; output
+
+	; check exit condition
+	sbic _SFR_IO_ADDR(BTN_PIN), START
+	rjmp 2b		
+	10:
+	;D=0
+	cbi  _SFR_IO_ADDR(HSPORT), HSPIN	
+
 	ret

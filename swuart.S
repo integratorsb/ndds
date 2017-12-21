@@ -2,6 +2,7 @@
 #include <avr/io.h>
 #include "suart.h"
             
+#ifdef USE_SW_UART
 UARTDelay:
         ldi  r17, BR
 UARTDelay1:
@@ -64,3 +65,4 @@ getchar3:
         pop   r17
         pop   r16
         ret
+#endif

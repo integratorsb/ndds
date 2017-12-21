@@ -14,7 +14,7 @@
 
 gen_t generator;
 
-void n_putchar(char c)
+void n_putchar(const char c)
 {
 	
 	if(c == '\r')
@@ -325,14 +325,13 @@ uint16_t print_fq(uint32_t f)
 
 	if(f < 10000)
 	{
-		if(generator.m == M_SQPWM)
+		if(generator.m == M_SQPWM && f > 1000)
 		{
-			if(f > 1000)
-			{
+
 				d = 100;
 				p = 2;
 				pr ='K';
-			}
+
 		}
 
 	}
@@ -375,19 +374,16 @@ void print_on_off( uint8_t st)
 {
 
 	lcd_goto(13);
-
+	#ifdef USE_SW_UART
+		SerialPutChar('\r');
+	#endif
 	if(st)
-	{
-		#ifdef USE_SW_UART
-			SerialPutChar('\r');
-		#endif
 		nnl_puts_P(PSTR("ON \n"));
-	}
 	else
 		nnl_puts_P(PSTR("OFF\n"));
 }
 
-void input_fd(uint32_t* p, uint8_t is_run)
+void input_fd(const char* t, uint32_t* p, uint8_t is_run)
 {
 	uint8_t b;
 	uint16_t d;
@@ -395,22 +391,38 @@ void input_fd(uint32_t* p, uint8_t is_run)
 	uint32_t max, f;
 	
 	f = *p;
+/*
 	if(generator.m == M_SQPWM)
 		max = MAXFREQ_PWM;
 	else if(generator.m == M_SQW)
 		max = MAXFREQ_SQW;
 	else if(generator.m == M_DTMF)
-		max = 10000;
+		max = MAXFREQ_DTMF;
 	else
-		max = MAXFREQ_DDS;
+		max = MAXFREQ_DDS;*/
+	switch(generator.m)
+	{
+		case M_SQW:
+			max = MAXFREQ_SQW;
+			break;
+		case M_SQPWM:
+			max = MAXFREQ_PWM;
+			break;			
+		case M_DTMF:
+			max = MAXFREQ_DTMF;
+			break;
+		default:
+			max = MAXFREQ_DDS;
+	}
 
 	multipler = 0;
 	while(1)
 	{
 
-		nnl_puts_P(PSTR("\rF="));
+		nnl_puts_P(t);
 		d = print_fq(f);
 		f -= f % d;
+
 		if(multipler == 0)
 			multipler = d;
 		
@@ -419,13 +431,17 @@ void input_fd(uint32_t* p, uint8_t is_run)
 		b = btn_wait();
 		if(b == BTN_DOWN)
 		{
+			if(f > multipler )
+				f-= multipler;
+/*
 			if(f > 1 + multipler )
-			f-= multipler;
+			f-= multipler;*/
 		}
 		else if(b == BTN_UP)
 		{
+			
 			if(f < max-multipler )
-			f += multipler;
+				f += multipler;
 		}
 		#ifndef USE_ENCODER
 		else if(b == BTN_MODE)
@@ -433,10 +449,14 @@ void input_fd(uint32_t* p, uint8_t is_run)
 		else if(b == BTN_START)
 		#endif
 		{
+			multipler *= 10;
+			if(multipler > max)
+				multipler = d;
+/*
 			if(multipler < max/10)
 			multipler *= 10;
 			else
-			multipler = d;
+			multipler = d;*/
 		}
 		else if(b == BTN_SET)
 		{
@@ -450,6 +470,11 @@ void input_fd(uint32_t* p, uint8_t is_run)
 	*p = f;
 }
 
+void input_f(uint32_t* p, uint8_t is_run)
+{
+	input_fd(PSTR("\rF="), p, is_run);
+}
+
 inline void input_dc(uint8_t is_run)
 {
 	uint8_t b, dc;
@@ -461,6 +486,7 @@ inline void input_dc(uint8_t is_run)
 		//putchar('%');
 		nnl_puts_P(PSTR("%\n(+/-) 1% "));
 		
+
 		b = btn_wait();
 		if(b == BTN_DOWN)
 		{
@@ -476,7 +502,6 @@ inline void input_dc(uint8_t is_run)
 		{
 			break;
 		}
-
 		if(is_run)
 			pwm_start(generator.pwm_f, dc, 0);
 	}
@@ -508,6 +533,7 @@ void input_t(uint32_t* p, const char* title)
 		}
 		else if(b == BTN_UP)
 		{
+			
 			if(t < MAX_T-multipler )
 			t+= multipler;
 		}
@@ -517,10 +543,14 @@ void input_t(uint32_t* p, const char* title)
 		else if(b == BTN_START)
 		#endif
 		{
+			multipler *= 10;
+			if(multipler > 1000000)
+				multipler = 1;
+/*
 			if(multipler < 1000000)
 				multipler *= 10;
 			else
-				multipler = 1;
+				multipler = 1;*/
 		}
 		else if(b == BTN_SET)
 		{
@@ -648,3 +678,33 @@ void input_hs()
 	generator.hs_f = (uint32_t)(1000000 * f);
 
 }
+
+/*
+
+
+void input_pattern()
+{
+	eeprom_read_block(&buf, &e_pattern, sizeof(e_pattern))
+	
+	while(1)
+	{
+		nnl_puts_P(t);
+		nnl_puts_P(v[i]);
+		b = btn_wait();
+		if(b == BTN_DOWN)
+		{
+			if(i > 0)
+			i--;
+		}
+		else if(b == BTN_UP)
+		{
+			if(i < n-1)
+			i++;
+		}
+		else if(b == BTN_SET)
+		{
+			break;
+		}
+
+	}
+}*/

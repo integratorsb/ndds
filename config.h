@@ -13,12 +13,11 @@
 #define F_CPU 16000000ul
 #endif
 #include <avr/io.h>
-#ifndef __ASSEMBLER__
 #include "menu.h"
-#endif
+
 
 //#define SIM 1
-#define FW_VER "0.15"
+#define FW_VER "0.16"
 
 /*вывод информации в последовательный порт*/
 //#define USE_SW_UART 1
@@ -27,7 +26,7 @@
 #define VGEN_ENABLE 1
 
 /*использовать энкодер вместо кнопок*/
-//#define USE_ENCODER 1
+#define USE_ENCODER 1
 
 /*¬кл. вывод дл€ комутатора выхода,
 при генерации аналогового сигнала на выводе будет 0,
@@ -56,7 +55,11 @@
 	0,\
 	TV_VBARS,\
 	697,\
-	1209}
+	1209,\
+	20,\
+	20000,\
+	10,\
+	0}\
 
 
 #define R2RPORT PORTD
@@ -125,7 +128,7 @@
 #define MAXFREQ_DDS 111111
 #define MAXFREQ_PWM 100000
 #define MAXFREQ_SQW 500000
-
+#define MAXFREQ_DTMF 10000
 #define MIN_T 2
 #define MAX_T 1000000
 

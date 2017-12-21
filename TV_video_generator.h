@@ -10,11 +10,11 @@
 #define TV_VIDEO_GENERATOR_H_
 
 #define LEVEL_SYNC 0;
-#define LEVEL_BLACK 256*0.3/5
-#define LEVEL_WHITE 256*1/5
-#define LEVEL_GRAY 256*0.6/5
-#define LEVEL_GRAY1 256*0.4/5
-#define LEVEL_GRAY2 256*0.8/5
+#define LEVEL_BLACK (uint8_t)(256*0.3/5)
+#define LEVEL_WHITE (uint8_t)(256*1/5)
+#define LEVEL_GRAY (uint8_t)(256*0.6/5)
+#define LEVEL_GRAY1 (uint8_t)(256*0.4/5)
+#define LEVEL_GRAY2 (uint8_t)(256*0.8/5)
 
 enum{
 	TV_VBARS,
