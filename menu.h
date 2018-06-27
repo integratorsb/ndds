@@ -33,6 +33,7 @@
 	 M_TV,		//генератор ТВ сигнала	 
 	 M_DTMF,	//DTMF
 	 M_SWEEP,	//ГКЧ
+	 M_DPATTERN,//имп. последовательность
 	 M_VER		//версия прошивки	 
  };
  
@@ -44,9 +45,12 @@
 
   enum{
 	  EXT_NO,
-	  EXT_HIGHT,
+	  EXT_HIGH,
 	  EXT_LOW
   };
+
+#define CMD_BRK (int8_t)0
+#define CMD_REP (int8_t)-128
 
 
  
@@ -74,7 +78,8 @@ typedef struct  {
 	uint32_t sweep_fs;
 	uint32_t sweep_fe;
 	uint32_t sweep_fi;
-	uint8_t sweep_rep;
+	uint32_t dpattern_t;
+	uint8_t dpattern_mode;
  }gen_t;
  
  
@@ -84,9 +89,14 @@ extern gen_t generator;
 //буфер 
 extern uint8_t buf[256];
 
+extern EEMEM uint8_t e_pattern[256];
+
 extern void pwm_start(uint32_t freq, uint8_t d, uint8_t e);
 
-void n_putchar(char c);
+extern uint8_t pwm_is_run();
+
+void n_putchar(const char c);
+
 /*
 выводит текстовую строку из флэш без перевода строки
 символ \r выполняет команду clr_lcd
@@ -102,31 +112,29 @@ void nnl_puts_P(const char* s);
 //возвращает маску нажатой кнопки или 0 если ни одна не нажата
 uint8_t btnCheckAll();
 
-void btn_wait_up_start();
-
 //ожидает нажатие кнопки и возвращает её маску
 uint8_t btn_wait();
 
 //ожидает отпускание кнопки
 void btn_wait_up(uint8_t b);
 
+void btn_wait_up_start();
+
 //запускает режим ввода периода
 void input_t(uint32_t* p, const char* t);
 
 //запускает режим ввода коэф. заполнения
-void input_dc(uint8_t is_run);
+void input_dc();
 
 //запускает режим ввода высокой частоты 
 //void input_hs(uint32_t* p);
 void input_hs();
 
 //запускает режим ввода частоты 
-void input_fd(const char* t, uint32_t* p, uint8_t is_run);
-//void input_fd(uint32_t* p);
-//void input_fd(uint32_t* p, uint8_t is_run);
+void input_fd(const char* t, uint32_t* p);
 
 //запускает режим ввода частоты
-void input_f( uint32_t* p, uint8_t is_run);
+void input_f(uint32_t* p);
 
 //запускает режим ввода числа импульсов
 void input_n();
@@ -137,35 +145,24 @@ uint8_t input_trig();
 //запускает режим ввода типа внешней синхр.
 uint8_t input_ext_sync();
 
-//выводит десятичное число
-/**
- * \brief выводит десятичное число
- * 
- * \param a число
- * \param p номер разряда, после которого будет выведена дес. точка, 0 - нет
- * 
- * \return void
- */
-void print_u(uint32_t a, uint8_t p);
+//uint8_t input_io_mode();
+
+//выводит десятичное число 0...255
+void print_u8(uint8_t a);
+
+//выводит десятичное число 
+void print_u(uint32_t a);
+
+//выводит значение периода
+uint8_t print_t(uint32_t t);
+
+//выводит значение частоты
+uint32_t print_fq(uint32_t f);
 
 
-/**
- * \brief Выводит значение частоты
- * 
- * \param f частота
- * 
- * \return uint16_t множитель f 
- */
-uint16_t print_fq(uint32_t f);
 
-
-/**
- * \brief Выводит строку вкл.выкл на дисплей
- * 
- * \param st 0 - выкл, 1 - вкл.
- * 
- * \return void
- */
+//brief Выводит строку вкл.выкл на дисплей
+//st: 0 - выкл, 1 - вкл.
 void print_on_off( uint8_t st);
 
 /**
@@ -178,6 +175,9 @@ void print_on_off( uint8_t st);
  * \return uint8_t номер выбранного элемента v
  */
 uint8_t select_val(const char* t, const char* v[], uint8_t n);
+
+//запускает режим ввода цифр. последовательности
+void input_dpattern(void);
 
 
 #endif 

@@ -24,9 +24,10 @@
 
 const gen_t PROGMEM def_setting = DEF_SETTING;
 gen_t EEMEM setting = DEF_SETTING;
+EEMEM uint8_t e_pattern[256] = DEF_DPATTERN;
 
 uint8_t __attribute__ ((section (".buffer"))) buf[256]; 
-uint8_t is_run = 0;
+
 
 const uint8_t  sinewave[] PROGMEM= 
 {
@@ -171,7 +172,7 @@ const uint8_t PROGMEM fexp2[] = {
 
 inline void vgen_on()
 {
-	DDRB |= 1<<PORTB3;
+	//DDRB |= 1<<PORTB3;
 	OCR2 = F_CPU/8/2/VGEN_FREQ;
 	TCCR2 =  (0<<WGM20)|(1<<WGM21)| (1<<COM20)|  (0<<CS22)|(1<<CS21)|(0<<CS20);
 }
@@ -188,9 +189,20 @@ inline void adc_init()
 }
 */
 
+void io_to_default()
+{
+	EXT_DDR &= ~(1<<EXT_PIN);
+	EXT_PORT |= (1<<EXT_PIN);
+	HSPORT &= ~(1<<HSPIN);
+	HSDDR |= 1<<HSPIN;
+	R2RPORT = 0;
+	R2RDDR = 0xff;
+}
+
 inline void io_init()
 {
-	DDRB |=  (1<<HSPORT);
+	io_to_default();
+	//DDRB |=  (1<<HSPORT);
 	
 	#ifdef USE_OMUX
 	DDRB |= (1<<OMUX_PIN);
@@ -204,7 +216,7 @@ inline void io_init()
 	DDRB |= (0<<UART_RX) | (1<<UART_TX);
 	#endif
 	
-	PORTB = 0<<HSPORT;
+	//PORTB = 0<<HSPORT;
 /*
 	#ifdef VGEN_ENABLE
 	PORTB &= ~(1<<VGEN_PIN);
@@ -217,8 +229,8 @@ inline void io_init()
 	//DDRC =  0<<EXT_PIN;
 	PORTC = BTN_MASK | 0<<EXT_PIN;
 	
-	R2RPORT = 0;
-	R2RDDR = 0xff;
+	//R2RPORT = 0;
+	//R2RDDR = 0xff;
 }
 
 
@@ -228,63 +240,54 @@ inline void noise_start()
 	{
 		R2RPORT = rand();
 	}
-	R2RPORT = 0;
+	io_to_default();
 }
 
-inline void pwm_stop()
+void pwm_stop()
 {
 	TCCR1A = 0;
 	TCCR1B = 0;
-	HSPORT &= ~(1<<HSPIN);
-	HSDDR &= ~(1<<HSPIN);
+	io_to_default();
 }
 
 
 void pwm_start(uint32_t freq, uint8_t d, uint8_t e )
 {
 	uint32_t period;
+	uint8_t cntr;
 	
-	HSPORT &= ~(1<<HSPIN);
-	HSDDR |= 1<<HSPIN;
 	
-	period = (F_CPU/freq) - 1;
-	
+	//fast PWM	
 	TCCR1A |= (1<<WGM11);
 	TCCR1B |= (1<<WGM13)  | (1<<WGM12);
-	//fast PWM
+
+	period = (F_CPU/freq) - 1;	
 	
-	if(freq > 300)
+	cntr = (TCCR1B & 0b11111000);
+
+	if(period < 0xffff)
 	{
-				
-		ICR1 = (uint16_t)period;	
-
-		if(generator.m == M_HSSQW)
-			OCR1B =  (uint16_t)(period/2);
-		else
-			OCR1B =  (uint16_t)(period * d / 100);
 		
-		TCCR1B = (TCCR1B & 0b11111000) | (1<<CS10);
-		//TCCR1B |= (1<<CS10);//без делителя
-
-		
+		//cntr = (TCCR1B & 0b11111000) | (1<<CS10);//без делителя
+		cntr |= (1<<CS10);//без делителя
 	}
 	else
 	{
 		period /= 256;
-		ICR1 = (uint16_t)period;	
-		OCR1B =  (uint16_t)(period * d / 100);	
-		TCCR1B = (TCCR1B & 0b11111000) | (1<<CS12);
-		//TCCR1B |=  (1<<CS12);// делитель 256
-
-	}	
+		//cntr = (TCCR1B & 0b11111000) | (1<<CS12);//делитель 256
+		cntr |= (1<<CS12);//делитель 256
+		
+	}
+	
+	ICR1 = (uint16_t)period;
+	OCR1B =  (uint16_t)(period * d / 100);	
+	TCCR1B = cntr;
 	
 	TCCR1A |= (1<<COM1B1);
 
-
-
-//	if(e == EXT_NO)
-//		return;
-	if(e == EXT_HIGHT)
+	//	if(e == EXT_NO)
+	//		return;
+	if(e == EXT_HIGH)
 	{
 		while(!btnCheck(BTN_START))
 		{
@@ -304,59 +307,53 @@ void pwm_start(uint32_t freq, uint8_t d, uint8_t e )
 				TCCR1A &= ~(1<<COM1B1);
 		}
 	}
-	else return;
-	pwm_stop();	
+	//else return;
+	//pwm_stop();
 }
 
-
+uint8_t pwm_is_run() 
+{
+	return (TCCR1B != 0);
+}
 
 uint32_t get_phase_f(uint32_t f)
 {
-	return ((uint64_t)f << 16) / (F_CPU/NUM_CYCLES/0x100);
-}
-//#define get_phase_f(f) (uint32_t)(((uint64_t)f << 16) / (F_CPU/NUM_CYCLES/0x100))
+	//return ((uint64_t)f << 16) / (F_CPU/NUM_CYCLES/0x100);
+	//return (((uint64_t)f<<24 )/(F_CPU/NUM_CYCLES));	
+	return (((uint64_t)f * (0x1000000*NUM_CYCLES) )/F_CPU);
 
+}
 
 inline void dds_start(uint32_t f)
 {
-	//R2RPORT = 0;
-	dds(get_phase_f(f));
-	R2RPORT = 0;
 
+	dds(get_phase_f(f));
+	io_to_default();
 }
 
 inline void ddssq_start(uint32_t f)
 {
 
-	HSPORT &= ~(1<<HSPIN);
-	HSDDR |= 1<<HSPIN;
+	//HSPORT &= ~(1<<HSPIN);
+	//HSDDR |= 1<<HSPIN;
 	dds_sq(get_phase_f(f) * 2);
-	HSPORT &= ~(1<<HSPIN);
-	HSDDR &= ~(1<<HSPIN);
+	//HSPORT &= ~(1<<HSPIN);
+	//HSDDR &= ~(1<<HSPIN);
+	io_to_default();
 
 }
 
+
+void get_phase_t( uint32_t *p, uint32_t *t)
+{
 /*
-uint32_t get_phase(uint32_t T)
-{
-	return 0x1000000/(((uint64_t)T<<16)/36864);
-}
-
-inline void pulse_start()
-{
-	pulse_t pulse_s;	
+	 T0 = 1000000<<16 / (F_CPU / NUM_CYCLES)
+	 P = 1<<24 / (T<<16 / T0)*/
+	//*p =  0x1000000/(((uint64_t)*t<<16)/((uint64_t)(1000000<<16) / (F_CPU / NUM_CYCLES)));
+	//*p =  0x1000000/(((uint64_t)*t<<16)/36864);	
+	//*p = ((1000000 * (uint64_t)NUM_CYCLES * 0x1000000) / F_CPU) / *t;
+	*p = ((1000000 * (uint64_t)NUM_CYCLES * 0x100000000) / F_CPU) / *t;
 	
-	pulse_s.t_rise = get_phase(generator.pulse_t_rise);
-	pulse_s.t_on = get_phase(generator.pulse_t_on);
-	pulse_s.t_fall = get_phase(generator.pulse_t_fall);
-	pulse_s.t_off = get_phase(generator.pulse_t_off);
-	pulse_s.n = generator.pulse_n;
-	pulse(&pulse_s);
-}*/
-
-void get_phase_t( uint32_t *p, uint32_t *T)
-{
-	*p =  0x1000000/(((uint64_t)*T<<16)/36864);
 }
 
 inline void pulse_start()
@@ -369,6 +366,8 @@ inline void pulse_start()
 	get_phase_t(&pulse_s.t_off,&generator.pulse_t_off);
 	pulse_s.n = generator.pulse_n;
 	pulse(&pulse_s);
+	io_to_default();
+
 }
 
 inline uint8_t trig_wait_rise()
@@ -426,7 +425,9 @@ inline void dtmf_start()
 {
 	load_table(sinewave);
 	
-	dtmf((uint64_t)(generator.dtmf_f1<<16) /(F_CPU/21/0x100), (uint64_t)(generator.dtmf_f2<<16) /(F_CPU/21/0x100));
+	dtmf((uint64_t)(generator.dtmf_f1<<16) /(F_CPU/21/0x100), \
+	(uint64_t)(generator.dtmf_f2<<16) /(F_CPU/21/0x100));
+	io_to_default();
 }
 
 
@@ -453,7 +454,7 @@ void dds_main(const char* t, uint32_t* f, uint32_t* f_save)
 	}
 	else if(btn == BTN_SET)
 	{
-		input_f(f, 0);
+		input_f(f);
 	}
 	mode_select(btn);
 }
@@ -487,7 +488,7 @@ inline void sqw_main()
 	#ifdef USE_OMUX
 	omux_set();
 	#endif
-	nnl_puts_P(PSTR("\rSQUARE WAVE "));
+	nnl_puts_P(PSTR("\rSQUARE WAVE"));
 	print_on_off(0);
 	print_fq(generator.f_sqw);
 						
@@ -504,7 +505,7 @@ inline void sqw_main()
 	}
 	else if(btn == BTN_SET)
 	{
-		input_f(&generator.f_sqw, 0);
+		input_f(&generator.f_sqw);
 	}
 	mode_select(btn);
 }
@@ -516,30 +517,32 @@ inline void pwm_main()
 	#ifdef USE_OMUX
 	omux_set();
 	#endif
-	nnl_puts_P(PSTR("\rPWM "));
-	print_on_off(is_run);
+	io_to_default();
+	//st = pwm_is_run();
+	
+	nnl_puts_P(PSTR("\rPWM"));
+	print_on_off(pwm_is_run());
 	print_fq(generator.pwm_f);
 	nnl_puts_P(PSTR(" D="));
-	print_u(generator.pwm_d,0);
-	if(generator.pwm_sync == EXT_HIGHT)
-	nnl_puts_P(PSTR(" E=H"));
+	print_u8(generator.pwm_d);
+	if(generator.pwm_sync == EXT_HIGH)
+		nnl_puts_P(PSTR(" E=H"));
 	else if(generator.pwm_sync == EXT_LOW)
-	nnl_puts_P(PSTR(" E=L"));
+		nnl_puts_P(PSTR(" E=L"));
 					
 	btn = btn_wait();
 	if(btn == BTN_START)
 	{
 		btn_wait_up_start();
 						
-		if(is_run)
+		if( pwm_is_run())
 		{
 			pwm_stop();
-			is_run = 0;
 		}
 		else
 		{
-			is_run = 1;
-			print_on_off(is_run);
+
+			print_on_off(1);
 			pwm_start(generator.pwm_f, generator.pwm_d, generator.pwm_sync );
 			save_mode();
 			eeprom_update_block(&generator.pwm_f,&setting.pwm_f, 1+4+1);
@@ -547,15 +550,13 @@ inline void pwm_main()
 	}
 	else if(btn == BTN_SET)
 	{
-		input_f(&generator.pwm_f, is_run);
-		input_dc(is_run);
-		if(!is_run)
+		input_f(&generator.pwm_f);
+		input_dc();
+		if(!pwm_is_run())
 			generator.pwm_sync = input_ext_sync();
-		//btn_wait_up(BTN_SET);
-		//generator.pwm_sync = input_ext_sync();
 	}
-	if(!is_run)
-	mode_select(btn);
+	if(!pwm_is_run())
+		mode_select(btn);
 
 }
 
@@ -566,7 +567,7 @@ inline void hs_main()
 	#ifdef USE_OMUX
 	omux_set();
 	#endif
-	nnl_puts_P(PSTR("\rHIGH SPEED "));
+	nnl_puts_P(PSTR("\rHIGH SPEED"));
 	print_on_off(0);
 	print_fq(generator.hs_f);
 	btn = btn_wait();
@@ -583,7 +584,6 @@ inline void hs_main()
 	}
 	else if(btn == BTN_SET)
 	{
-		//input_hs(&generator.hs_f);
 		input_hs();
 	}
 	mode_select(btn);
@@ -596,19 +596,27 @@ inline void pulse_main()
 	#ifdef USE_OMUX
 	omux_clr();
 	#endif
+	
 	nnl_puts_P(PSTR("\rPULSE "));
-	print_on_off(0);
-	nnl_puts_P(PSTR("T="));
-	print_u((generator.pulse_t_rise + generator.pulse_t_fall + generator.pulse_t_on + generator.pulse_t_off), 0);
-	nnl_puts_P(PSTR("us "));
 	if(generator.pulse_trig == TR_RISE)
 		nnl_puts_P(PSTR("T:R"));
 	else if(generator.pulse_trig == TR_FALL)
 		nnl_puts_P(PSTR("T:F"));
-	//else
-	//	nnl_puts_P(PSTR("NO"));
+	print_on_off(0);		
+	print_t(generator.pulse_t_rise + generator.pulse_t_fall\
+	+ generator.pulse_t_on + generator.pulse_t_off);
 
+	
+/*
+	nnl_puts_P(PSTR("\rPULSE\nT="));
+	print_t(generator.pulse_t_rise + generator.pulse_t_fall\
+		 + generator.pulse_t_on + generator.pulse_t_off);
+	if(generator.pulse_trig == TR_RISE)
+		nnl_puts_P(PSTR(" T:R"));
+	else if(generator.pulse_trig == TR_FALL)
+		nnl_puts_P(PSTR(" T:F"));*/
 
+	
 	btn = btn_wait();
 	if(btn == BTN_START)
 	{
@@ -623,14 +631,14 @@ inline void pulse_main()
 		{
 			nnl_puts_P(PSTR("W:R"));
 			if(trig_wait_rise() == 0)
-			goto p_cancel;
+				goto p_cancel;
 			//break;
 		}
 		else if(generator.pulse_trig == TR_FALL)
 		{
 			nnl_puts_P(PSTR("W:F"));
 			if(trig_wait_fall() == 0)
-			goto p_cancel;
+				goto p_cancel;
 			//break;
 		}
 		print_on_off(1);
@@ -715,8 +723,8 @@ inline void dtmf_main()
 	}
 	else if(btn == BTN_SET)
 	{
-		input_fd(PSTR("\rF1="), &generator.dtmf_f1, 0);
-		input_fd(PSTR("\rF2="), &generator.dtmf_f2, 0);
+		input_fd(PSTR("\rF1="), &generator.dtmf_f1);
+		input_fd(PSTR("\rF2="), &generator.dtmf_f2);
 	}
 	mode_select(btn);
 	
@@ -729,8 +737,8 @@ inline void sweep_main()
 	#ifdef USE_OMUX
 	omux_clr();
 	#endif
-	HSDDR |= 1<<HSPIN;
-	nnl_puts_P(PSTR("\rSWEEP "));
+	//HSDDR |= 1<<HSPIN;
+	nnl_puts_P(PSTR("\rSWEEP"));
 	print_on_off(0);
 	print_fq(generator.sweep_fs);
 	n_putchar('>');
@@ -752,15 +760,15 @@ inline void sweep_main()
 				get_phase_f(generator.sweep_fe),\
 				get_phase_f(generator.sweep_fi));
 		} while (!btnCheck(BTN_START));
-		R2RPORT = 0;
+		io_to_default();
 		print_on_off(0);
 		btn_wait_up_start();
 	}
 	else if(btn == BTN_SET)
 	{
-		input_fd(PSTR("\rFstart="),&generator.sweep_fs,0);
-		input_fd(PSTR("\rFend="), &generator.sweep_fe,0);
-		input_fd(PSTR("\rFinc="), &generator.sweep_fi,0);
+		input_fd(PSTR("\rFstart="),&generator.sweep_fs);
+		input_fd(PSTR("\rFend="), &generator.sweep_fe);
+		input_fd(PSTR("\rFinc="), &generator.sweep_fi);
 	}
 	mode_select(btn);
 }
@@ -798,15 +806,127 @@ inline void load_triangle_wf()
 	buf[i] = 0;
 }
 
-void main()
+
+inline void dpattern_d(uint32_t t0)
 {
-	//uint8_t btn;
-	//uint8_t is_run = 0; 	
+	uint8_t  i = 0;
+	int8_t p;
+	uint32_t t;
+	
+
+	
+	TCCR1A = 0;
+	//вычисляем число циклов таймера для t0	
+	t = t0 * (F_CPU/1000000) - 1;
+
+	if(t < 0xFFFF)
+	{
+		TCCR1B = 1<<WGM12 | 0<<CS12 | 0<<CS11 | 1<<CS10; // CTC без делителя	
+	}
+	else 
+	{
+		TCCR1B = 1<<WGM12 | 1<<CS12 | 0<<CS11 | 0<<CS10; // CTC делитель 256
+		t /= 256;
+	}	
+	OCR1A = t;	
+
+	while(1)
+	{
+		p = buf[i++];
+		if(p == CMD_REP)
+		{
+			if(i == 0)//выход, если команда повтора идет первой
+				p = CMD_BRK;
+			i = 0;
+			continue;
+		}	
+		else if (p == CMD_BRK)
+			break;
+		else if(p > 0)
+		{
+			HSDDR &= ~(1<<HSPIN);			
+		}
+		else
+		{
+			HSDDR |= (1<<HSPIN);
+			p = -p;
+		}
+		
+		//TIFR |= (1<<OCF1A);
+		//_delay_us(5);	
+			
+		while(p != 0)
+		{
+			TIFR |= (1<<OCF1A);			
+			while(!(TIFR & (1<<OCF1A)))
+			{
+				if(btnCheck(BTN_START))	goto dpattern_stop;
+			}
+			p--;
+		}
+		
+	}
+dpattern_stop:
+	HSDDR &= ~(1<<HSPIN);
+	TCCR1B = 0;
+}
+
+inline void dpattern_main()
+{
+
+	uint8_t btn;
+	
+	#ifdef USE_OMUX
+	omux_set();
+	#endif
+	
+	HSDDR &= ~(1<<HSPIN);
+	HSPORT &= ~(1<<HSPIN);
+	
+	nnl_puts_P(PSTR("\rDPATTERN\nT0="));	
+	print_t(generator.dpattern_t);
+	print_on_off(0);	
+	
+	btn = btn_wait();
+	if(btn == BTN_START)
+	{
+		btn_wait_up_start();
+		
+		eeprom_read_block(buf, e_pattern, sizeof(buf));
+		save_mode();
+		eeprom_update_dword(&setting.dpattern_t, generator.dpattern_t);
+		
+		print_on_off(1);
+		
+		dpattern_d(generator.dpattern_t);
+
+		btn_wait_up_start();
+	}
+	else if(btn == BTN_SET)
+	{
+		input_t(&generator.dpattern_t,PSTR("\rT0="));
+		//generator.dpattern_mode = input_io_mode();
+		input_dpattern();
+		
+	}
+	mode_select(btn);
+	if(generator.m  != M_DPATTERN)
+	{
+		io_to_default();
+	}
+}
+
+
+
+int main()
+{
+
 	
 	io_init();	
-
 	_delay_ms(20);
-	
+
+
+
 
 
 #ifndef USE_ENCODER
@@ -855,7 +975,7 @@ void main()
 		}
 	}
 #endif	
-	//while(1);
+
 #ifdef VGEN_ENABLE
 	vgen_on();
 	_delay_ms(100);
@@ -863,7 +983,7 @@ void main()
 	lcd_init();
 	lcd_clrscr();
 	eeprom_read_block(&generator, &setting, sizeof(generator));
-	
+
 	while(1)
 	{
 		switch(generator.m)
@@ -927,7 +1047,11 @@ void main()
 			case M_SWEEP:
 				sweep_main();
 				break;
-			
+
+			case M_DPATTERN:
+				dpattern_main();
+				break;
+
 			case M_VER:
 				nnl_puts_P(PSTR("\rNDDS VER"FW_VER"\nSIGNAL GENERATOR"));
 				mode_select(btn_wait());
@@ -938,5 +1062,6 @@ void main()
 				break;
 		}
 	}
-
+	
+	return 0;
 }

@@ -33,7 +33,6 @@ void dds_sq(uint32_t p);
 void pulse(pulse_t* p);
 void dtmf(uint32_t p1, uint32_t p2 );
 void sweep(uint32_t f_start, uint32_t f_end, uint32_t f_inc);
-//void sweep(uint32_t p[]);
 
 #endif
 

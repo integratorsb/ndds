@@ -80,7 +80,7 @@ uint8_t btn_wait()
 	
 	BTN_DDR &= ~(BTN_MASK);
 	//_delay_ms(2);
-	
+
 	#ifdef SIM
 	BTN_PORT &= ~(BTN_MASK);
 	#else
@@ -279,7 +279,9 @@ uint8_t btn_wait()
 void btn_wait_up(uint8_t b)
 {
 	while(btnCheck(b))
-	_delay_ms(20);
+	{
+		_delay_ms(20);
+	}
 }
 
 void btn_wait_up_start()
@@ -287,32 +289,141 @@ void btn_wait_up_start()
 	btn_wait_up(BTN_START);
 }
 
-
-void print_u(uint32_t a, uint8_t p)
+void print_u_ex(unsigned long a, char p, char n)
 {
-	char s[9];//, c;
-	uint8_t i;
-	
-	i = 8;
+	char buf[12];
+	unsigned char i;
+
+
+	i = 0;
+
 	do
 	{
-		s[i] = (a % 10) + '0';
+		i++;
+		buf[i] = '0' + a % 10;
 		a /= 10;
-		i--;
-	}
-	while(i > 0);
-	
-	i = 0;
-	while(s[++i] == '0' && i < 8){};
-	for(; i<9; i++)
+	}while(a != 0);
+
+	while(i > n)
 	{
-		n_putchar(s[i]);
-		if(9 - i == p)
-		n_putchar(',');
+
+		n_putchar(buf[i]);
+		if(i == p)
+			n_putchar('.');
+		i--;
+
 	}
 
 }
 
+void print_u(uint32_t a)
+{
+	print_u_ex(a, 0, 0);
+}
+
+
+void print_u8(uint8_t a)
+{
+	print_u(a);
+}
+
+
+inline uint32_t pow_10u(uint8_t p)
+{
+	uint32_t r = 1;
+
+	while(p > 0)
+	{
+		r *= 10;
+		p--;
+	}
+	return r;
+
+}
+
+
+
+uint32_t print_fq(uint32_t f)
+{
+	uint8_t p, d;
+	char pr = '\0';
+
+	
+	d = 0;// сколько младших разрядов пропустить
+	//pr = 0;// префикс
+	p = 0;// после какого разряда стоит дес. точка
+
+
+	if(f < 10000)
+	{
+		// xxxxHz
+		if(generator.m == M_SQPWM && f > 1000)
+		{
+			// x.xKHz
+			d = 2;
+			p = 4;
+			pr ='K';
+
+		}
+
+	}
+	else if (f < 100000)
+	{
+		pr ='K';
+		if(generator.m == M_SQPWM)
+		{
+			// xxKHz
+			d = 3;
+
+		}
+		else
+		{
+			// xx.xxKHz
+			d = 1;
+			p = 4;
+
+		}
+	}
+	else if (f < 1000000)
+	{
+		// xxx.xKHz
+		pr ='K';
+		d = 2;
+		p = 4;
+
+	}
+	else
+	{
+		// x.xxMHz
+		d = 4;
+		p = 7;
+		pr ='M';
+
+	}
+	print_u_ex(f, p, d);
+	if(pr)
+		n_putchar(pr);
+	nnl_puts_P(PSTR("Hz"));
+	return pow_10u(d);
+}
+
+
+/*
+
+uint8_t get_range_u32(uint32_t a)
+{
+	uint8_t r = 0;
+	
+	while(a)
+	{
+		a /= 10;
+		r++;
+	}
+	return r;
+}
+*/
+
+/*
 uint16_t print_fq(uint32_t f)
 {
 	char p, pr;
@@ -368,6 +479,50 @@ uint16_t print_fq(uint32_t f)
 		n_putchar(pr);
 	nnl_puts_P(PSTR("Hz"));
 	return d;
+}*/
+
+
+/*
+
+void print_t(uint32_t t)
+{
+/ *
+	if(t > 10000)
+		t /= 1000* /
+	print_u(t);
+	nnl_puts_P(PSTR("us"));
+}*/
+
+uint8_t print_t(uint32_t t)
+{
+	uint8_t p, d, r;
+	char pr;
+
+	p = 4;
+	d = 0;
+	pr = 'm';
+	if(t < 1000)
+	{
+		p = 0;
+		pr = 'u';
+		r = 1;
+	}
+	else if(t < 10000)
+	{
+		d = 1;
+		r = 10;
+	}
+	else
+	{
+		d = 2;
+		r = 100;
+	}
+	
+	print_u_ex(t, p, d);
+	n_putchar(pr);
+	n_putchar('s');
+	//nnl_puts_P(PSTR("us"));
+	return r;
 }
 
 void print_on_off( uint8_t st)
@@ -383,65 +538,64 @@ void print_on_off( uint8_t st)
 		nnl_puts_P(PSTR("OFF\n"));
 }
 
-void input_fd(const char* t, uint32_t* p, uint8_t is_run)
+void input_fd(const char* t, uint32_t* p)
 {
 	uint8_t b;
-	uint16_t d;
+	//uint16_t d;
 	uint32_t multipler;
-	uint32_t max, f;
+	uint32_t max, f, d;
 	
 	f = *p;
-/*
-	if(generator.m == M_SQPWM)
-		max = MAXFREQ_PWM;
-	else if(generator.m == M_SQW)
-		max = MAXFREQ_SQW;
-	else if(generator.m == M_DTMF)
-		max = MAXFREQ_DTMF;
-	else
-		max = MAXFREQ_DDS;*/
-	switch(generator.m)
-	{
-		case M_SQW:
-			max = MAXFREQ_SQW;
-			break;
-		case M_SQPWM:
-			max = MAXFREQ_PWM;
-			break;			
-		case M_DTMF:
-			max = MAXFREQ_DTMF;
-			break;
-		default:
-			max = MAXFREQ_DDS;
-	}
+
+
 
 	multipler = 0;
 	while(1)
 	{
+		
+		switch(generator.m)
+		{
+			case M_SQW:
+				max = MAXFREQ_SQW;
+				break;
+			case M_SQPWM:
+				max = MAXFREQ_PWM;
+				break;			
+			case M_DTMF:
+				max = MAXFREQ_DTMF;
+				break;
+			default:
+				max = MAXFREQ_DDS;
+		}		
+		
+
 
 		nnl_puts_P(t);
 		d = print_fq(f);
 		f -= f % d;
 
-		if(multipler == 0)
+		if(multipler < d)
 			multipler = d;
-		
+			
+		max -= multipler;		
+
 		nnl_puts_P(PSTR("\n(+/-) "));
 		print_fq(multipler);
+
 		b = btn_wait();
 		if(b == BTN_DOWN)
 		{
 			if(f > multipler )
-				f-= multipler;
-/*
-			if(f > 1 + multipler )
-			f-= multipler;*/
+				f -= multipler;
 		}
 		else if(b == BTN_UP)
 		{
-			
-			if(f < max-multipler )
+			if(f < max )
 				f += multipler;
+/*
+			f += multipler;
+			if(f >= max )
+				f -= multipler;*/
 		}
 		#ifndef USE_ENCODER
 		else if(b == BTN_MODE)
@@ -451,91 +605,96 @@ void input_fd(const char* t, uint32_t* p, uint8_t is_run)
 		{
 			multipler *= 10;
 			if(multipler > max)
-				multipler = d;
-/*
-			if(multipler < max/10)
-			multipler *= 10;
-			else
-			multipler = d;*/
+				multipler = 0;
 		}
 		else if(b == BTN_SET)
 		{
 			break;
 		}
 
-		if(generator.m == M_SQPWM && is_run)
+		if(generator.m == M_SQPWM && pwm_is_run() )
 			pwm_start(f, generator.pwm_d, 0);
 	}
 	
 	*p = f;
 }
 
-void input_f(uint32_t* p, uint8_t is_run)
+void input_f(uint32_t* p)
 {
-	input_fd(PSTR("\rF="), p, is_run);
+	input_fd(PSTR("\rF="), p);
 }
 
-inline void input_dc(uint8_t is_run)
+
+inline void input_dc()
 {
 	uint8_t b, dc;
 	dc = generator.pwm_d;
 	while(1)
 	{
 		nnl_puts_P(PSTR("\rDC="));
-		print_u(dc, 0);
+		//print_u(dc, 0);
+		print_u8(dc);
 		//putchar('%');
 		nnl_puts_P(PSTR("%\n(+/-) 1% "));
 		
+
 
 		b = btn_wait();
 		if(b == BTN_DOWN)
 		{
 			if(dc > 1 )
-			dc -= 1;
+				dc -= 1;
 		}
 		else if(b == BTN_UP)
 		{
 			if(dc < 99 )
-			dc += 1;
+				dc += 1;
 		}
 		else if(b == BTN_SET)
 		{
 			break;
 		}
-		if(is_run)
+		
+		if(pwm_is_run())
 			pwm_start(generator.pwm_f, dc, 0);
 	}
 	generator.pwm_d = dc;	
 }
 
+
 void input_t(uint32_t* p, const char* title)
 {
-	uint8_t b;
+	uint8_t b, d;
 	uint32_t multipler, t;
 	
 	t = *p;
+/*
 	if(t > MAX_T)
 		t = MIN_T;
-	
+	*/
 	multipler = 1;
 	while(1)
 	{
 		nnl_puts_P(title);
-		print_u(t,0);
-		nnl_puts_P(PSTR("us\n(+/-) "));
-		print_u(multipler,0);
-		nnl_puts_P(PSTR("us"));
+		d = print_t(t);
+		t -= t % d;
+
+		if(multipler < d)
+			multipler = d;
+		nnl_puts_P(PSTR("\n(+/-) "));
+		print_t(multipler);	
+		
 		b = btn_wait();
 		if(b == BTN_DOWN)
 		{
-			if(t > MIN_T+multipler )
+			if(t >= MIN_T+multipler )
 			t-= multipler;
 		}
 		else if(b == BTN_UP)
 		{
-			
-			if(t < MAX_T-multipler )
-			t+= multipler;
+			t += multipler;
+			if(t > MAX_T )
+				t = MAX_T;
 		}
 		#ifndef USE_ENCODER
 		else if(b == BTN_MODE)
@@ -544,7 +703,7 @@ void input_t(uint32_t* p, const char* title)
 		#endif
 		{
 			multipler *= 10;
-			if(multipler > 1000000)
+			if(multipler > MAX_T/10)
 				multipler = 1;
 /*
 			if(multipler < 1000000)
@@ -573,11 +732,11 @@ inline void input_n()
 	{
 		nnl_puts_P(PSTR("\rN="));
 		if(n != 0)
-			print_u(n,0);
+			print_u(n);
 		else
 			nnl_puts_P(PSTR("ND"));
 		nnl_puts_P(PSTR("\n(+/-) "));
-		print_u(multipler,0);
+		print_u(multipler);
 
 		b = btn_wait();
 		if(b == BTN_DOWN)
@@ -597,9 +756,9 @@ inline void input_n()
 		#endif
 		{
 			if(multipler < 10000)
-			multipler *= 10;
+				multipler *= 10;
 			else
-			multipler = 1;
+				multipler = 1;
 		}
 		else if(b == BTN_SET)
 		{
@@ -629,8 +788,9 @@ uint8_t select_val(const char* t, const char* v[], uint8_t n)
 		}
 		else if(b == BTN_UP)
 		{
+
 			if(i < n-1)
-			i++;
+				i++;
 		}
 		else if(b == BTN_SET)
 		{
@@ -663,6 +823,7 @@ inline uint8_t input_ext_sync()
 	return select_val(PSTR("\rEXT SYNC: "), values, 3);
 }
 
+/*
 void input_hs()
 {
 	const char* values[] = {
@@ -677,34 +838,212 @@ void input_hs()
 	f = 1<<select_val(PSTR("\rF="), values, 4);
 	generator.hs_f = (uint32_t)(1000000 * f);
 
-}
+}*/
 
-/*
-
-
-void input_pattern()
+void input_hs()
 {
-	eeprom_read_block(&buf, &e_pattern, sizeof(e_pattern))
+	
+	uint32_t f = generator.hs_f;
+	uint8_t b;
 	
 	while(1)
 	{
-		nnl_puts_P(t);
-		nnl_puts_P(v[i]);
+		//nnl_puts_P(t);
+		nnl_puts_P(PSTR("\rF="));
+		print_fq(f);
+		nnl_puts_P(PSTR("\n(+/-) x2"));
 		b = btn_wait();
 		if(b == BTN_DOWN)
 		{
-			if(i > 0)
-			i--;
+			if(f > 125000)
+				f /= 2;
 		}
 		else if(b == BTN_UP)
 		{
-			if(i < n-1)
-			i++;
+
+			if(f < 8000000)
+				f *= 2;
 		}
 		else if(b == BTN_SET)
 		{
 			break;
 		}
+	}
+	generator.hs_f = f;
+}
 
+/*
+inline uint8_t input_io_mode()
+{
+	const char* values[] = {
+		PSTR("PULL-UP"),
+		PSTR("PUSH-PULL"),
+	};
+	
+	return select_val(PSTR("\rOUT: "), values, 2) - 1;
+}*/
+
+
+
+void print_pattern(int8_t d)
+{
+	if(d == CMD_BRK)
+		nnl_puts_P(PSTR("BRK"));
+	else if(d == CMD_REP)
+		nnl_puts_P(PSTR("REP"));
+	else if(d < 0)
+	{
+		print_u8(-d);
+		n_putchar('L');
+	}
+	else
+	{
+		print_u8(d);
+		n_putchar('H');
+	}
+
+}
+
+
+
+uint8_t abs_u8(int8_t d)
+{
+	if(d == CMD_REP)
+		d = 0;
+	return (d >= 0 ? d : -d);
+}
+
+
+
+
+/*
+inline void print_dpattern_t(uint8_t i)
+{
+	nnl_puts_P(PSTR("T="));
+	print_t(generator.dpattern_t * (abs_u8(buf[i]) + abs_u8(buf[i+1])));
+}
+*/
+
+/*
+inline void input_dpattern_t(uint8_t i)
+{
+	uint8_t  k;
+
+	
+	k = i;
+	while(1)
+	{
+		
+		print_dpattern_t(i);
+		
+		n_putchar('\n');
+		print_pattern(buf[i]);
+		if(k == i)
+			n_putchar('<');
+		else
+			n_putchar('>');
+		print_pattern(buf[i+1]);	
+		
+		uint8_t b = btn_wait();
+		if(b == BTN_DOWN)
+		{
+			buf[k]--;
+		}
+		else if(b == BTN_UP)
+		{
+			buf[k]++;
+		}
+		#ifndef USE_ENCODER
+		else if(b == BTN_MODE)
+		#else
+		else if(b == BTN_START)
+		#endif
+		{
+			if(k == i)
+				k++;
+			else
+				k = i;
+		}
+		else if(b == BTN_SET)
+		{
+			break;
+		}
 	}
 }*/
+
+inline void input_dpattern()
+{
+	uint8_t i = 0, s = 2;
+	
+	eeprom_read_block(buf, e_pattern, sizeof(buf));
+	while(1)
+	{
+
+		//print_dpattern_t(i);
+
+		//lcd_goto(12);		
+		//n_putchar(':');
+		//print_u8(i/2);
+		//n_putchar('\n');
+		
+		n_putchar('\r');
+		print_pattern(buf[i]);
+		if(s == 0)
+			n_putchar('<');
+		else if(s == 1)
+			n_putchar('>');
+		print_pattern(buf[i+1]);
+		n_putchar(',');	
+		print_pattern(buf[i+2]);
+		print_pattern(buf[i+3]);	
+		nnl_puts_P(PSTR("...\n:"));
+		print_u8(i/2);
+		nnl_puts_P(PSTR(" T="));
+		print_t(generator.dpattern_t * (abs_u8(buf[i]) + abs_u8(buf[i+1])));
+		//print_dpattern_t(i);
+/*
+		uint8_t v, k;
+		k = i + 2;
+		for(v = 3; v > 0; v--)
+		{
+
+			print_pattern(buf[k]);
+			print_pattern(buf[k+1]);	
+			n_putchar(',');		
+			k += 2;	
+		}*/
+
+		uint8_t b = btn_wait();
+		if(b == BTN_DOWN)
+		{
+			if(s == 2)
+				i -= 2;
+			else
+				buf[i + s]--;
+		}
+		else if(b == BTN_UP)
+		{
+			if(s == 2)
+				i+=2;
+			else
+				buf[i + s]++;
+		}
+		#ifndef USE_ENCODER
+		else if(b == BTN_MODE)
+		#else
+		else if(b == BTN_START)
+		#endif
+		{
+			if(s > 0)
+				s--;
+			else
+				s = 2;
+		}
+		else if(b == BTN_SET)
+		{
+			eeprom_update_block(buf, e_pattern, sizeof(e_pattern));
+			break;
+		}
+	}
+
+}
