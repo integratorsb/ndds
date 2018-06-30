@@ -10,3 +10,5 @@
 *.xml
 *.cproj
 *.bak
+*.bin
+*.zip
